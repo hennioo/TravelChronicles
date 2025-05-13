@@ -10,12 +10,16 @@ if (!SUPABASE_URL) {
   throw new Error("SUPABASE_URL Umgebungsvariable nicht gesetzt!");
 }
 
-// Pool erstellen mit der Supabase-Verbindung
-export const pool = new Pool({ 
+// Pool erstellen mit der Supabase-Verbindung und erweiterter Konfiguration
+export const pool = new Pool({
   connectionString: SUPABASE_URL,
   ssl: {
     rejectUnauthorized: false // Wichtig für Verbindungen von Plattformen wie Replit
-  }
+  },
+  // Zusätzliche Parameter für bessere Kompatibilität
+  max: 5, // Kleinere Connection Pool Size für bessere Stabilität
+  idleTimeoutMillis: 30000, // Connection timeout
+  connectionTimeoutMillis: 5000, // Verbindungstimeout
 });
 
 // Test der Datenbankverbindung

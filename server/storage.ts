@@ -230,5 +230,5 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Datenbank Storage für Produktion mit Supabase
+// Supabase Datenbankverbindung für die Produktion verwenden
 export const storage = new DatabaseStorage();
