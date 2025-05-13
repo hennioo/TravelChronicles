@@ -1,0 +1,50 @@
+2025-05-13T10:13:59.719315768Z 
+2025-05-13T10:13:59.719319948Z To address all issues (including breaking changes), run:
+2025-05-13T10:13:59.719324328Z   npm audit fix --force
+2025-05-13T10:13:59.719327749Z 
+2025-05-13T10:13:59.719331639Z Run `npm audit` for details.
+2025-05-13T10:13:59.751610678Z Building the application...
+2025-05-13T10:13:59.847198805Z 
+2025-05-13T10:13:59.847218205Z > rest-express@1.0.0 build
+2025-05-13T10:13:59.847222766Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-05-13T10:13:59.847228366Z 
+2025-05-13T10:14:00.013950895Z failed to load config from /opt/render/project/src/vite.config.ts
+2025-05-13T10:14:00.014245312Z error during build:
+2025-05-13T10:14:00.014254173Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /opt/render/project/src/vite.config.ts.timestamp-1747131240011-7eb03ce696dc2.mjs
+2025-05-13T10:14:00.014258893Z     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:268:9)
+2025-05-13T10:14:00.014262823Z     at packageResolve (node:internal/modules/esm/resolve:768:81)
+2025-05-13T10:14:00.014266433Z     at moduleResolve (node:internal/modules/esm/resolve:854:18)
+2025-05-13T10:14:00.014292604Z     at defaultResolve (node:internal/modules/esm/resolve:984:11)
+2025-05-13T10:14:00.014299944Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:685:12)
+2025-05-13T10:14:00.014304224Z     at #cachedDefaultResolve (node:internal/modules/esm/loader:634:25)
+2025-05-13T10:14:00.014308414Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:617:38)
+2025-05-13T10:14:00.014312464Z     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:273:38)
+2025-05-13T10:14:00.014329675Z     at ModuleJob._link (node:internal/modules/esm/module_job:135:49)
+2025-05-13T10:14:00.030833709Z Build completed!
+2025-05-13T10:14:06.981677712Z ==> Uploading build...
+2025-05-13T10:14:15.775076404Z ==> Uploaded in 6.3s. Compression took 2.5s
+2025-05-13T10:14:15.815029206Z ==> Build successful 🎉
+2025-05-13T10:14:18.214523324Z ==> Deploying...
+2025-05-13T10:14:39.841278693Z ==> Running 'npm start'
+2025-05-13T10:14:41.038692953Z 
+2025-05-13T10:14:41.038719924Z > rest-express@1.0.0 start
+2025-05-13T10:14:41.038724215Z > NODE_ENV=production node dist/index.js
+2025-05-13T10:14:41.038726035Z 
+2025-05-13T10:14:41.242712086Z node:internal/modules/cjs/loader:1228
+2025-05-13T10:14:41.242734098Z   throw err;
+2025-05-13T10:14:41.242736818Z   ^
+2025-05-13T10:14:41.242738808Z 
+2025-05-13T10:14:41.242741458Z Error: Cannot find module '/opt/render/project/src/dist/index.js'
+2025-05-13T10:14:41.242743718Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-13T10:14:41.242746278Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-13T10:14:41.242748288Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-13T10:14:41.242750488Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-13T10:14:41.242753019Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-13T10:14:41.242756599Z     at node:internal/main/run_main_module:36:49 {
+2025-05-13T10:14:41.242759209Z   code: 'MODULE_NOT_FOUND',
+2025-05-13T10:14:41.242761679Z   requireStack: []
+2025-05-13T10:14:41.242763659Z }
+2025-05-13T10:14:41.24277119Z 
+2025-05-13T10:14:41.24277339Z Node.js v22.14.0
+2025-05-13T10:14:43.326818899Z ==> Exited with status 1
+2025-05-13T10:14:43.342095249Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
