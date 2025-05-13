@@ -210,42 +210,137 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLocation(id: number): Promise<Location | undefined> {
-    const [location] = await db.select().from(locations).where(eq(locations.id, id));
-    return location || undefined;
+    try {
+      // Direkter Datenbankzugriff statt Drizzle ORM
+      const result = await pool.query('SELECT * FROM locations WHERE id = $1', [id]);
+      
+      if (result.rows.length === 0) {
+        return undefined;
+      }
+      
+      const row = result.rows[0];
+      // Konvertiere die Datenbankergebnisse in das richtige Format
+      return {
+        id: row.id,
+        name: row.name,
+        date: row.date,
+        description: row.description,
+        highlight: row.highlight,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        countryCode: row.country_code, // Konvertiere country_code zu countryCode
+        image: row.image
+      };
+    } catch (error) {
+      console.error("Database query error in getLocation:", error);
+      throw error;
+    }
   }
 
   async createLocation(insertLocation: InsertLocation): Promise<Location> {
-    const [location] = await db
-      .insert(locations)
-      .values(insertLocation)
-      .returning();
-    return location;
+    try {
+      // Direkter Datenbankzugriff für das Einfügen von Daten
+      const result = await pool.query(
+        `INSERT INTO locations 
+        (name, date, description, highlight, latitude, longitude, country_code, image) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+        RETURNING *`,
+        [
+          insertLocation.name,
+          insertLocation.date,
+          insertLocation.description,
+          insertLocation.highlight,
+          insertLocation.latitude,
+          insertLocation.longitude,
+          insertLocation.countryCode, // Wird als country_code in der Datenbank gespeichert
+          insertLocation.image
+        ]
+      );
+      
+      const row = result.rows[0];
+      
+      // Konvertiere die Datenbankergebnisse in das richtige Format
+      return {
+        id: row.id,
+        name: row.name,
+        date: row.date,
+        description: row.description,
+        highlight: row.highlight,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        countryCode: row.country_code, // Konvertiere country_code zu countryCode
+        image: row.image
+      };
+    } catch (error) {
+      console.error("Database query error in createLocation:", error);
+      throw error;
+    }
   }
 
   async deleteLocation(id: number): Promise<boolean> {
-    const result = await db
-      .delete(locations)
-      .where(eq(locations.id, id))
-      .returning({ id: locations.id });
-    
-    return result.length > 0;
+    try {
+      // Direkter Datenbankzugriff für das Löschen von Daten
+      const result = await pool.query(
+        'DELETE FROM locations WHERE id = $1 RETURNING id',
+        [id]
+      );
+      
+      return result.rows.length > 0;
+    } catch (error) {
+      console.error("Database query error in deleteLocation:", error);
+      throw error;
+    }
   }
 
   async getAccessCodes(): Promise<AccessCode[]> {
-    return await db.select().from(accessCodes);
+    try {
+      const result = await pool.query('SELECT * FROM access_codes');
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        code: row.code,
+        active: row.active
+      }));
+    } catch (error) {
+      console.error("Database query error in getAccessCodes:", error);
+      throw error;
+    }
   }
 
   async validateAccessCode(code: string): Promise<boolean> {
-    const codes = await db.select().from(accessCodes);
-    return codes.some(accessCode => accessCode.code === code);
+    try {
+      // Direkter Datenbankzugriff für die Validierung des Zugangscodes
+      const result = await pool.query(
+        'SELECT * FROM access_codes WHERE code = $1',
+        [code]
+      );
+      
+      return result.rows.length > 0;
+    } catch (error) {
+      console.error("Database query error in validateAccessCode:", error);
+      throw error;
+    }
   }
 
   async createAccessCode(insertAccessCode: InsertAccessCode): Promise<AccessCode> {
-    const [accessCode] = await db
-      .insert(accessCodes)
-      .values(insertAccessCode)
-      .returning();
-    return accessCode;
+    try {
+      // Direkter Datenbankzugriff für das Einfügen von Zugangscodes
+      const result = await pool.query(
+        'INSERT INTO access_codes (code, active) VALUES ($1, $2) RETURNING *',
+        [insertAccessCode.code, insertAccessCode.active]
+      );
+      
+      const row = result.rows[0];
+      
+      return {
+        id: row.id,
+        code: row.code,
+        active: row.active
+      };
+    } catch (error) {
+      console.error("Database query error in createAccessCode:", error);
+      throw error;
+    }
   }
 }
 
