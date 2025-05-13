@@ -189,26 +189,26 @@ export const getImageUrl = (imagePath: string): string => {
    - **Start Command**: `npm start`
    - **Plan**: Wähle den Free-Tier für Tests
 
-3. **Konfiguriere den persistenten Speicher:**
-   - Scrolle zum Abschnitt "Disk"
-   - Aktiviere "Enable Disk"
-   - Setze den Mounting Path auf `/var/data`  ← WICHTIG für die Bild-Uploads
-   - Wähle 1GB Speicher (kann später angepasst werden)
+3. **Kein persistenter Speicher benötigt:**
+   - Diese Version verwendet temporären Speicher, daher ist kein persistenter Speicher erforderlich
+   - Aktiviere NICHT "Enable Disk", da dies kostenpflichtig ist
+   - Hinweis: Hochgeladene Bilder gehen bei Neustarts/Deployments verloren (siehe nächster Abschnitt für Details)
 
-## 5. Persistenten Speicher für Uploads konfigurieren
+## 5. Temporärer Speicher für Uploads
 
-1. **Beachte die Speicherpfade:**
-   - Render hat einen anderen Dateisystem-Aufbau als Replit
-   - Bilder werden in `/var/data/uploads` gespeichert statt in `/uploads`
-   - Die `fileStorage.ts` Datei behandelt diese Unterschiede automatisch
+1. **Temporärer Speicher statt persistentem Speicher:**
+   - Um die Kosten zu sparen, verwendet diese Version temporären Speicher für Uploads
+   - Es ist kein kostenpflichtiger Disk-Zugang erforderlich
+   - Hinweis: Hochgeladene Bilder gehen bei jedem Neustart oder Deployment verloren!
 
-2. **Nach dem ersten Deployment:**
-   - Prüfe, ob der `/var/data/uploads` Ordner automatisch erstellt wurde
-   - Falls nicht, führe im Render-Shell den Befehl aus: `mkdir -p /var/data/uploads`
+2. **Konsequenzen für die Nutzung:**
+   - Neu hochgeladene Bilder werden nur bis zum nächsten Neustart/Deployment gespeichert
+   - Bilder in der Datenbank bleiben mit ihren Pfaden erhalten, aber die Dateien selbst sind weg
+   - Betrachte diese Lösung als vorübergehend, bis du bereit bist, für persistenten Speicher zu bezahlen
 
-3. **Bestehende Bilder migrieren:**
-   - Bestehende Bild-Uploads in Replit bleiben dort und sind nicht automatisch in Render verfügbar
-   - Für wichtige Bilder: Lade sie von Replit herunter und lade sie manuell in den persistenten Speicher von Render hoch
+3. **Empfehlung für wichtige Bilder:**
+   - Speichere wichtige Bilder besser auf einem externen Dienst wie Cloudinary, Imgur, etc.
+   - Oder aktualisiere das Schema, um Base64-kodierte Bilder direkt in der Datenbank zu speichern
 
 ## 6. Umgebungsvariablen einrichten
 

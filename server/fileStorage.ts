@@ -5,9 +5,10 @@ import multer from 'multer';
 
 // Bestimme den Speicherort für Uploads basierend auf der Umgebung
 export const getUploadDir = () => {
-  // Render verwendet einen speziellen Pfad für persistente Daten
+  // In Render verwenden wir temporären Speicher im tmp-Verzeichnis
   if (process.env.RENDER) {
-    return path.join('/var/data/uploads');
+    const tempDir = path.join('/tmp/uploads');
+    return tempDir;
   }
   
   // Standard Upload-Verzeichnis für lokale Entwicklung oder andere Hosts
@@ -46,7 +47,9 @@ export const getImageUrl = (imagePath: string): string => {
     return imagePath;
   }
   
-  // Relativen Pfad für lokale Bilder zurückgeben
+  // Für Render-Umgebung: Füge Cache-Busting-Parameter hinzu, da Bilder bei Neustarts
+  // verschwinden werden (temporärer Speicher)
   const filename = path.basename(imagePath);
-  return `/uploads/${filename}`;
+  const timestamp = new Date().getTime();
+  return `/uploads/${filename}?t=${timestamp}`;
 };
