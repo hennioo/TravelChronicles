@@ -1,5 +1,5 @@
 // Skript zum Initialisieren der Datenbank
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 // Supabase URL für DATABASE_URL setzen
 const supabasePassword = process.env.SUPABASE_PASSWORD;
