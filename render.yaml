@@ -2,7 +2,7 @@ services:
   - type: web
     name: susibert
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: ./build-render.sh
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -11,3 +11,5 @@ services:
         sync: false
       - key: ACCESS_CODE
         sync: false
+      - key: RENDER
+        value: "true"

@@ -57,7 +57,7 @@ services:
   - type: web
     name: susibert
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: ./build-render.sh
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -66,7 +66,15 @@ services:
         sync: false
       - key: ACCESS_CODE
         sync: false
+      - key: RENDER
+        value: "true"
 ```
+
+### Angepasste Build-Konfiguration
+Es wurden zwei zusätzliche Dateien erstellt, um die Build-Probleme mit Replit-spezifischen Abhängigkeiten zu beheben:
+
+1. **build-render.sh**: Ein Skript, das alle notwendigen Abhängigkeiten installiert und den Build-Prozess steuert
+2. **vite.config.render.ts**: Eine vereinfachte Version der Vite-Konfiguration, die ohne Replit-spezifische Plugins funktioniert
 
 ### Procfile
 Definiert den Startbefehl für den Webdienst:

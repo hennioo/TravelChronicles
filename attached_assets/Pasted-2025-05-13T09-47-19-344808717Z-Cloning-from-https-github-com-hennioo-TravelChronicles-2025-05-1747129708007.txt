@@ -1,0 +1,40 @@
+2025-05-13T09:47:19.344808717Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-13T09:47:20.526240924Z ==> Checking out commit b6647f72de295d3ebe5f5c10950e152c2e277721 in branch main
+2025-05-13T09:47:22.406269531Z ==> Using Node.js version 22.14.0 (default)
+2025-05-13T09:47:22.431507311Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-13T09:47:24.279593024Z ==> Using Bun version 1.1.0 (default)
+2025-05-13T09:47:24.279610234Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-13T09:47:24.325805127Z ==> Running build command 'npm install; npm run build'...
+2025-05-13T09:47:31.51092334Z 
+2025-05-13T09:47:31.510949511Z added 606 packages, and audited 607 packages in 7s
+2025-05-13T09:47:31.510964391Z 
+2025-05-13T09:47:31.510970351Z 174 packages are looking for funding
+2025-05-13T09:47:31.510979691Z   run `npm fund` for details
+2025-05-13T09:47:31.522748012Z 
+2025-05-13T09:47:31.522763852Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-13T09:47:31.522767492Z 
+2025-05-13T09:47:31.522771312Z To address issues that do not require attention, run:
+2025-05-13T09:47:31.522774863Z   npm audit fix
+2025-05-13T09:47:31.522778023Z 
+2025-05-13T09:47:31.522781413Z To address all issues (including breaking changes), run:
+2025-05-13T09:47:31.522785443Z   npm audit fix --force
+2025-05-13T09:47:31.522788633Z 
+2025-05-13T09:47:31.522793023Z Run `npm audit` for details.
+2025-05-13T09:47:31.691877342Z 
+2025-05-13T09:47:31.691893603Z > rest-express@1.0.0 build
+2025-05-13T09:47:31.691897613Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-05-13T09:47:31.691900843Z 
+2025-05-13T09:47:31.842442346Z failed to load config from /opt/render/project/src/vite.config.ts
+2025-05-13T09:47:31.842819085Z error during build:
+2025-05-13T09:47:31.842830355Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /opt/render/project/src/vite.config.ts.timestamp-1747129651840-99f9a65a35345.mjs
+2025-05-13T09:47:31.842835605Z     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:268:9)
+2025-05-13T09:47:31.842840225Z     at packageResolve (node:internal/modules/esm/resolve:768:81)
+2025-05-13T09:47:31.842844135Z     at moduleResolve (node:internal/modules/esm/resolve:854:18)
+2025-05-13T09:47:31.842848175Z     at defaultResolve (node:internal/modules/esm/resolve:984:11)
+2025-05-13T09:47:31.842854435Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:685:12)
+2025-05-13T09:47:31.842857446Z     at #cachedDefaultResolve (node:internal/modules/esm/loader:634:25)
+2025-05-13T09:47:31.842860286Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:617:38)
+2025-05-13T09:47:31.842862976Z     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:273:38)
+2025-05-13T09:47:31.842865646Z     at ModuleJob._link (node:internal/modules/esm/module_job:135:49)
+2025-05-13T09:47:31.85739275Z ==> Build failed 😞
+2025-05-13T09:47:31.857411841Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
