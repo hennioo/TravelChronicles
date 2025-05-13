@@ -1,8 +1,19 @@
 import { 
-  users, type User, type InsertUser, 
   locations, type Location, type InsertLocation,
   accessCodes, type AccessCode, type InsertAccessCode
 } from "@shared/schema";
+
+// Define User interface since we've removed it from schema but still need it for compatibility
+interface User {
+  id: number;
+  username: string;
+  password: string;
+}
+
+interface InsertUser {
+  username: string;
+  password: string;
+}
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -161,22 +172,17 @@ export class MemStorage implements IStorage {
 
 // Datenbankbasierte Speicherimplementierung
 export class DatabaseStorage implements IStorage {
+  // User methods - Stub implementations since users are not needed
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    return undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
+    throw new Error("User creation not implemented - not needed for this application");
   }
 
   async getLocations(): Promise<Location[]> {

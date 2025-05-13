@@ -2,17 +2,7 @@ import { pgTable, text, serial, integer, boolean, date } from "drizzle-orm/pg-co
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User schema (for authentication)
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
+// NOTE: User schema has been removed as it's not needed for this application
 
 // Location schema (for travel map)
 export const locations = pgTable("locations", {
@@ -43,8 +33,6 @@ export const insertAccessCodeSchema = createInsertSchema(accessCodes).omit({
 });
 
 // Define types
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
 
 export type InsertLocation = z.infer<typeof insertLocationSchema>;
 export type Location = typeof locations.$inferSelect;
