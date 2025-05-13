@@ -3,16 +3,16 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
 // Supabase Datenbankverbindung über die konfigurierte URL
-const SUPABASE_URL = process.env.SUPABASE_URL;
+const DATABASE_URL = process.env.DATABASE_URL;
 
 // Überprüfen, ob die URL gesetzt ist
-if (!SUPABASE_URL) {
-  throw new Error("SUPABASE_URL Umgebungsvariable nicht gesetzt!");
+if (!DATABASE_URL) {
+  throw new Error("DATABASE_URL Umgebungsvariable nicht gesetzt!");
 }
 
 // Pool erstellen mit der Supabase-Verbindung und erweiterter Konfiguration
 export const pool = new Pool({
-  connectionString: SUPABASE_URL,
+  connectionString: DATABASE_URL,
   ssl: {
     rejectUnauthorized: false // Wichtig für Verbindungen von Plattformen wie Replit
   },
@@ -39,6 +39,15 @@ pool.query('SELECT NOW()', [])
     if (err.errno) console.error('Fehlernummer:', err.errno);
     if (err.syscall) console.error('Systemaufruf:', err.syscall);
     if (err.hostname) console.error('Hostname:', err.hostname);
+  });
+
+// Überprüfe ob die Tabellen existieren
+pool.query('SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = \'public\' AND table_name = \'locations\')')
+  .then(res => {
+    console.log('Tabelle locations existiert:', res.rows[0].exists);
+  })
+  .catch(err => {
+    console.error('Fehler beim Prüfen der Tabellen:', err.message);
   });
 
 // Drizzle ORM initialisieren

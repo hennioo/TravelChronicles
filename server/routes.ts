@@ -110,8 +110,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all locations
   app.get("/api/locations", async (req, res) => {
     try {
-      const locations = await storage.getLocations();
-      return res.status(200).json(locations);
+      // Direkter Zugriff auf die Datenbank ohne Drizzle-ORM
+      const result = await pool.query('SELECT * FROM locations ORDER BY id DESC');
+      console.log("Direct database query result:", result.rows);
+      return res.status(200).json(result.rows);
     } catch (error) {
       console.error("Error getting locations:", error);
       return res.status(500).json({ 
