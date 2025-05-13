@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
   
   // Validate access code
-  app.post("/api/validate-code", async (req, res) => {
+  app.post("/api/access-codes/validate", async (req, res) => {
     try {
       const result = validateAccessCodeSchema.safeParse(req.body);
       

@@ -37,7 +37,7 @@ export default function AccessGate() {
     setIsLoading(true);
     
     try {
-      const response = await fetch("/api/validate-code", {
+      const response = await fetch("/api/access-codes/validate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
