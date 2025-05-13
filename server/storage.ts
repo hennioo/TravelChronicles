@@ -230,7 +230,5 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Datenbank Storage für Produktion 
-// Da wir momentan Probleme mit der Datenbankverbindung haben,
-// verwenden wir vorübergehend die In-Memory-Speicherlösung
-export const storage = new MemStorage();
+// Datenbank Storage für Produktion mit Supabase
+export const storage = new DatabaseStorage();

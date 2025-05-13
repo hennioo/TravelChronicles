@@ -2,18 +2,17 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-// Supabase Datenbankverbindung mit Passwort aus Umgebungsvariable
-const SUPABASE_PASSWORD = process.env.SUPABASE_PASSWORD;
-const DATABASE_URL = `postgresql://postgres:${SUPABASE_PASSWORD}@db.oooxcbiqljntazjylipt.supabase.co:5432/postgres`;
+// Supabase Datenbankverbindung über die konfigurierte URL
+const SUPABASE_URL = process.env.SUPABASE_URL;
 
-// Überprüfen, ob das Passwort gesetzt ist
-if (!SUPABASE_PASSWORD) {
-  throw new Error("SUPABASE_PASSWORD Umgebungsvariable nicht gesetzt!");
+// Überprüfen, ob die URL gesetzt ist
+if (!SUPABASE_URL) {
+  throw new Error("SUPABASE_URL Umgebungsvariable nicht gesetzt!");
 }
 
 // Pool erstellen mit der Supabase-Verbindung
 export const pool = new Pool({ 
-  connectionString: DATABASE_URL,
+  connectionString: SUPABASE_URL,
   ssl: {
     rejectUnauthorized: false // Wichtig für Verbindungen von Plattformen wie Replit
   }
