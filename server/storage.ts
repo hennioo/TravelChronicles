@@ -231,4 +231,6 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Datenbank Storage für Produktion 
-export const storage = new DatabaseStorage();
+// Da wir momentan Probleme mit der Datenbankverbindung haben,
+// verwenden wir vorübergehend die In-Memory-Speicherlösung
+export const storage = new MemStorage();

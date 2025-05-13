@@ -14,8 +14,29 @@ if (!SUPABASE_PASSWORD) {
 // Pool erstellen mit der Supabase-Verbindung
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
-  ssl: false // Ändere zu true, falls SSL erforderlich ist
+  ssl: {
+    rejectUnauthorized: false // Wichtig für Verbindungen von Plattformen wie Replit
+  }
 });
+
+// Test der Datenbankverbindung
+pool.on('error', (err) => {
+  console.error('Unerwarteter Datenbankfehler:', err.message);
+});
+
+// Test der Verbindung
+pool.query('SELECT NOW()', [])
+  .then(res => {
+    console.log('Datenbankverbindung erfolgreich hergestellt:', res.rows[0]);
+  })
+  .catch(err => {
+    console.error('Fehler beim Verbinden zur Datenbank:', err.message);
+    // Weitere Details ausgeben, wenn verfügbar
+    if (err.code) console.error('Fehlercode:', err.code);
+    if (err.errno) console.error('Fehlernummer:', err.errno);
+    if (err.syscall) console.error('Systemaufruf:', err.syscall);
+    if (err.hostname) console.error('Hostname:', err.hostname);
+  });
 
 // Drizzle ORM initialisieren
 export const db = drizzle(pool, { schema });
