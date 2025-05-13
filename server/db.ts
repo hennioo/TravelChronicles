@@ -1,15 +1,21 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+// Supabase Datenbankverbindung mit Passwort aus Umgebungsvariable
+const SUPABASE_PASSWORD = process.env.SUPABASE_PASSWORD;
+const DATABASE_URL = `postgresql://postgres:${SUPABASE_PASSWORD}@db.oooxcbiqljntazjylipt.supabase.co:5432/postgres`;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+// Überprüfen, ob das Passwort gesetzt ist
+if (!SUPABASE_PASSWORD) {
+  throw new Error("SUPABASE_PASSWORD Umgebungsvariable nicht gesetzt!");
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Pool erstellen mit der Supabase-Verbindung
+export const pool = new Pool({ 
+  connectionString: DATABASE_URL,
+  ssl: false // Ändere zu true, falls SSL erforderlich ist
+});
+
+// Drizzle ORM initialisieren
+export const db = drizzle(pool, { schema });
