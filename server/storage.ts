@@ -2,6 +2,8 @@ import {
   locations, type Location, type InsertLocation,
   accessCodes, type AccessCode, type InsertAccessCode
 } from "@shared/schema";
+import { db, pool } from './db';
+import { desc, eq } from 'drizzle-orm';
 
 // Define User interface since we've removed it from schema but still need it for compatibility
 interface User {
@@ -14,8 +16,6 @@ interface InsertUser {
   username: string;
   password: string;
 }
-import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -186,8 +186,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLocations(): Promise<Location[]> {
-    // Sortiere Orte nach ID absteigend (neueste zuerst)
-    return await db.select().from(locations).orderBy(desc(locations.id));
+    // Direkter Datenbankzugriff statt Drizzle ORM
+    try {
+      const result = await pool.query('SELECT * FROM locations ORDER BY id DESC');
+      console.log("Direct database query successful, found", result.rows.length, "locations");
+      
+      // Konvertiere die Datenbankergebnisse in das richtige Format
+      return result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        date: row.date,
+        description: row.description,
+        highlight: row.highlight,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        countryCode: row.country_code, // Konvertiere country_code zu countryCode
+        image: row.image
+      }));
+    } catch (error) {
+      console.error("Database query error in getLocations:", error);
+      throw error;
+    }
   }
 
   async getLocation(id: number): Promise<Location | undefined> {
