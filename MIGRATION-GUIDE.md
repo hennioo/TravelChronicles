@@ -172,36 +172,58 @@ Auf Render musst du dieselben Umgebungsvariablen einrichten, die du auf Replit h
 ## 8. Wartung und Updates
 
 1. **Aktualisiere deinen Code:**
-   - Mache deine Änderungen lokal
-   - Committe und pushe zu GitHub:
+   - Bei kleinen Änderungen, kannst du sie direkt in Replit machen und zu GitHub pushen:
      ```bash
      git add .
      git commit -m "Beschreibung der Änderungen"
      git push
      ```
-   - Render wird automatisch neu deployen, wenn Änderungen erkannt werden
+   - Bei größeren Änderungen, lade das Repository herunter, bearbeite es lokal und pushe es zurück
+   - Render wird automatisch bei jedem Push zu deinem GitHub-Repository neu deployen
 
-2. **Überwache deine Anwendung:**
-   - Render bietet Logs und Metriken für deinen Service
-   - Überprüfe sie regelmäßig, um Probleme zu erkennen
+2. **Bild-Uploads nach der Migration:**
+   - Beachte, dass existierende Bild-Uploads in Replit gespeichert sind
+   - Nach der Migration werden neue Bilder im Render-Storage gespeichert
+   - Du kannst bei Bedarf bestehende Bilder manuell kopieren:
+     1. Lade sie von Replit herunter (aus dem uploads-Ordner)
+     2. Verwende das Render-Dashboard, um sie in den /var/data/uploads-Ordner hochzuladen
 
-3. **Datenbankwartung:**
-   - Die Supabase-Datenbank bleibt unverändert
-   - Du kannst weiterhin die Supabase-Benutzeroberfläche für Datenbankoperationen verwenden
+3. **Überwachung der Anwendung:**
+   - Render bietet umfassende Logs im Dashboard
+   - Prüfe die "Metrics"-Sektion für Performance-Monitoring
+   - Aktiviere Benachrichtigungen für Fehler und Ausfälle
+
+4. **Datenbankwartung:**
+   - Die Supabase-Datenbank bleibt unverändert und wird weiterhin verwendet
+   - Du kannst wie gewohnt die Supabase-Benutzeroberfläche für Datenbankoperationen nutzen
+
+5. **Kosten beachten:**
+   - Der Render Free-Tier hat einige Einschränkungen:
+     - Dienste werden nach Inaktivität in den Ruhezustand versetzt
+     - Begrenzte Rechenleistung und Bandbreite
+   - Für produktive Nutzung könnte ein kostenpflichtiger Plan sinnvoll sein
 
 ## Problembehandlung
 
 ### Bild-Uploads funktionieren nicht:
-- Überprüfe, ob der persistente Speicher korrekt eingerichtet ist
-- Stelle sicher, dass die Pfade in fileStorage.ts korrekt sind
+- Überprüfe, ob der persistente Speicher korrekt eingerichtet ist (Mount Path: `/var/data`)
+- Stelle sicher, dass die Umgebungsvariable `RENDER=true` gesetzt ist
 - Überprüfe die Berechtigungen des Speicherverzeichnisses
+- Prüfe die Server-Logs auf Fehlermeldungen im Zusammenhang mit Datei-Operationen
 
 ### Datenbank-Verbindungsprobleme:
-- Überprüfe, ob die DATABASE_URL-Umgebungsvariable korrekt gesetzt ist
-- Stelle sicher, dass die Supabase-Datenbank erreichbar ist
-- Prüfe die Netzwerkregeln in Supabase
+- Überprüfe, ob die DATABASE_URL-Umgebungsvariable exakt mit der in Replit übereinstimmt
+- Teste den Datenbankzugriff mit einem einfachen SQL-Query über die Render-Konsole
+- Prüfe die Netzwerkregeln in Supabase (IP-Adressen von Render sollten zugelassen sein)
 
 ### Fehlgeschlagene Builds:
-- Überprüfe die Build-Logs in Render
-- Stelle sicher, dass alle Abhängigkeiten korrekt installiert sind
-- Überprüfe, ob die Node.js-Version kompatibel ist
+- Überprüfe die Build-Logs im Render-Dashboard
+- Häufige Probleme:
+  - Node.js-Version nicht kompatibel (Render nutzt standardmäßig Node 18.x)
+  - Fehlende Abhängigkeiten 
+  - Fehler im Build-Prozess
+
+### App startet, aber funktioniert nicht richtig:
+- Überprüfe die Umgebungsvariablen in Render (sie müssen exakt denen in Replit entsprechen)
+- Prüfe, ob der persistente Speicher korrekt konfiguriert ist
+- Überprüfe die Anwendungslogs auf spezifische Fehlermeldungen
