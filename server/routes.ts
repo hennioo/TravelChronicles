@@ -54,7 +54,13 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Statischer Dateizugriff für Uploads
-  app.use('/uploads', express.static(uploadDir));
+  // Wichtig: Cache-Control auf no-cache setzen, damit Bilder nicht im Browser-Cache verschwinden
+  app.use('/uploads', express.static(uploadDir, {
+    maxAge: 0,
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-cache, no-store');
+    }
+  }));
 
   // Health Check Endpoint für Replit Deployments
   app.get("/health", (req, res) => {

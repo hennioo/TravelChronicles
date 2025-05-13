@@ -42,8 +42,9 @@ export class MemStorage implements IStorage {
     this.locationCurrentId = 1;
     this.accessCodeCurrentId = 1;
 
-    // Add default access code
-    this.createAccessCode({ code: "suuuu", active: true });
+    // Add access code from environment variable
+    const accessCode = process.env.ACCESS_CODE || "invalid"; // Fallback for development only
+    this.createAccessCode({ code: accessCode, active: true });
 
     // Add sample locations
     this.createLocation({
