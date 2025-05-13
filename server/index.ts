@@ -1,21 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
-import cors from 'cors';
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-// CORS configuration für externe Frontends (wenn du das Backend separat hostest)
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://susibert.netlify.app', 'https://susibert.vercel.app'] // Produktions-Domains
-    : true, // Im Entwicklungsmodus alle Origins erlauben
-  methods: ['GET', 'POST', 'DELETE'],
-  credentials: true,
-  maxAge: 86400 // 24 Stunden CORS cache
-}));
 
 app.use((req, res, next) => {
   const start = Date.now();
