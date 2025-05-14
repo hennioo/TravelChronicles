@@ -120,121 +120,6 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-// Debug-Route für einfachere Fehlerbehebung
-app.get('/api/debug', async (req, res) => {
-  try {
-    // Datenbank testen
-    let dbTest = { status: 'Nicht verbunden' };
-    if (pool) {
-      try {
-        const result = await pool.query('SELECT NOW() as now, current_database() as db_name');
-        dbTest = {
-          status: 'Verbunden',
-          timestamp: result.rows[0].now,
-          database: result.rows[0].db_name
-        };
-        
-        // Prüfe, ob die locations-Tabelle existiert
-        const tableResult = await pool.query(`SELECT EXISTS (
-          SELECT FROM information_schema.tables 
-          WHERE table_name = 'locations'
-        )`);
-        
-        dbTest.tables = {
-          locations_exists: tableResult.rows[0].exists
-        };
-        
-        // Beispiellocation einfügen, wenn keine existiert
-        const countResult = await pool.query('SELECT COUNT(*) FROM locations');
-        dbTest.locations_count = parseInt(countResult.rows[0].count);
-        
-        if (dbTest.locations_count === 0) {
-          const testLocation = await pool.query(`
-            INSERT INTO locations (
-              name, date, description, highlight, latitude, longitude, country_code, image
-            ) VALUES (
-              'Testort', '2025-05-14', 'Ein Testort für die Verbindungsprüfung', 
-              'Automatisch erstellt', '48.7758', '9.1829', 'DE', ''
-            ) RETURNING id
-          `);
-          dbTest.test_location_created = testLocation.rows[0].id;
-        }
-      } catch (err) {
-        dbTest.error = err.message;
-      }
-    }
-    
-    res.json({
-      server_time: new Date().toISOString(),
-      environment: process.env.NODE_ENV,
-      database_test: dbTest,
-      environment_variables: {
-        NODE_ENV: process.env.NODE_ENV || 'nicht gesetzt',
-        ACCESS_CODE_EXISTS: !!process.env.ACCESS_CODE,
-        ACCESS_CODE_LENGTH: process.env.ACCESS_CODE ? process.env.ACCESS_CODE.length : 0,
-        ACCESS_CODE_VALUE: process.env.ACCESS_CODE || 'suuuu', // Für Debug-Zwecke
-        DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
-        RENDER: process.env.RENDER || 'nicht gesetzt'
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-      stack: error.stack
-    });
-  }
-});
-
-// Access-Code Validierung
-app.post('/api/access-codes/validate', (req, res) => {
-  // Logs für Debugging
-  console.log('** ACCESS CODE VALIDATION **');
-  console.log('Request Body:', req.body);
-  console.log('Headers:', req.headers);
-  
-  // Extrahiere den Code aus dem Request
-  let accessCode = null;
-  if (req.body && req.body.accessCode) {
-    accessCode = req.body.accessCode;
-  }
-  
-  const configuredCode = process.env.ACCESS_CODE || 'suuuu'; // Fallback zum Standardwert
-  
-  console.log('Access Code Validation Details:', { 
-    givenCode: accessCode, 
-    configuredCodeMasked: configuredCode ? '***' + configuredCode.substr(-2) : 'nicht gesetzt',
-    configuredCodeActual: configuredCode, // Zeige tatsächlichen Code für Debugging
-    isValid: accessCode === configuredCode,
-    equalityCheck: `'${accessCode}' === '${configuredCode}'`
-  });
-  
-  // Test für verschiedene Vergleichsmethoden
-  const exactMatch = accessCode === configuredCode;
-  const trimmedMatch = accessCode && configuredCode && accessCode.trim() === configuredCode.trim();
-  const caseInsensitiveMatch = accessCode && configuredCode && 
-                              accessCode.toLowerCase() === configuredCode.toLowerCase();
-  
-  console.log('Verschiedene Vergleichsmethoden:', {
-    exactMatch,
-    trimmedMatch,
-    caseInsensitiveMatch
-  });
-  
-  // Akzeptiere den Code mit mehr Toleranz für Debugging
-  if (exactMatch || trimmedMatch || caseInsensitiveMatch) {
-    console.log('Access Code ist gültig (einer der Vergleichsmethoden hat funktioniert)');
-    res.json({ valid: true });
-  } else {
-    console.log('Access Code ist ungültig');
-    res.status(401).json({ 
-      valid: false, 
-      message: 'Ungültiger Zugangscode',
-      expected: configuredCode, // Für einfacheres Debugging
-      received: accessCode
-    });
-  }
-});
-
 // Locations API
 app.get('/api/locations', async (req, res) => {
   if (!dbConnected) {
@@ -278,523 +163,404 @@ app.get('/api/locations', async (req, res) => {
   }
 });
 
-// Location-Detail Route
-app.get('/api/locations/:id', async (req, res) => {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
-  }
-
-  try {
-    const { id } = req.params;
-    const result = await pool.query(`
-      SELECT 
-        id, 
-        name, 
-        date, 
-        description, 
-        highlight, 
-        latitude, 
-        longitude, 
-        COALESCE(country_code, countryCode) as country_code, 
-        image 
-      FROM locations 
-      WHERE id = $1
-    `, [id]);
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Location nicht gefunden' });
-    }
-    
-    const row = result.rows[0];
-    res.json({
-      id: row.id,
-      name: row.name,
-      date: row.date,
-      description: row.description,
-      highlight: row.highlight,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      countryCode: row.country_code,
-      image: row.image
-    });
-  } catch (error) {
-    console.error('Fehler beim Abrufen der Location-Details:', error);
-    res.status(500).json({ error: 'Datenbankfehler', details: error.message });
-  }
-});
-
-// Neue Location erstellen
-app.post('/api/locations', upload.single('image'), async (req, res) => {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
-  }
-
-  try {
-    const { name, date, description, highlight, latitude, longitude, countryCode } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : '';
-
-    const result = await pool.query(`
-      INSERT INTO locations (
-        name, date, description, highlight, latitude, longitude, country_code, image
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-      RETURNING *
-    `, [name, date, description, highlight, latitude, longitude, countryCode, image]);
-
-    const row = result.rows[0];
-    res.status(201).json({
-      id: row.id,
-      name: row.name,
-      date: row.date,
-      description: row.description,
-      highlight: row.highlight,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      countryCode: row.country_code || row.countrycode,
-      image: row.image
-    });
-  } catch (error) {
-    console.error('Fehler beim Erstellen einer Location:', error);
-    res.status(500).json({ error: 'Datenbankfehler', details: error.message });
-  }
-});
-
-// Location löschen
-app.delete('/api/locations/:id', async (req, res) => {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
-  }
-
-  try {
-    const { id } = req.params;
-    
-    // Zuerst das Bild abrufen
-    const locationResult = await pool.query('SELECT image FROM locations WHERE id = $1', [id]);
-    if (locationResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Location nicht gefunden' });
-    }
-    
-    const location = locationResult.rows[0];
-    
-    // Lösche den Eintrag aus der Datenbank
-    await pool.query('DELETE FROM locations WHERE id = $1', [id]);
-    
-    // Lösche das Bild, wenn es lokal gespeichert ist
-    if (location.image && location.image.startsWith('/uploads/')) {
-      const imagePath = path.join(__dirname, location.image);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+// Direkter Login ohne Zugangscode für einfacheren Zugang auf Render
+app.get('/login-susibert', (req, res) => {
+  // Erstelle eine spezielle direkte Anmeldeseite
+  const html = `
+  <!DOCTYPE html>
+  <html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Susibert - Direkter Login</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: #1a1a1a;
+        color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
       }
-    }
-    
-    res.json({ success: true, message: 'Location erfolgreich gelöscht' });
-  } catch (error) {
-    console.error('Fehler beim Löschen einer Location:', error);
-    res.status(500).json({ error: 'Datenbankfehler', details: error.message });
-  }
+      .container {
+        max-width: 600px;
+        text-align: center;
+        background-color: #222;
+        padding: 2rem;
+        border-radius: 8px;
+      }
+      h1 {
+        color: #f59a0c;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+      p {
+        margin-bottom: 1.5rem;
+      }
+      .button {
+        background-color: #f59a0c;
+        color: #000;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .button:hover {
+        background-color: #e08900;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Susibert</h1>
+      <p>Klicke auf den Button, um die Reisekarte zu sehen.</p>
+      <a href="/map" class="button">Karte anzeigen</a>
+    </div>
+  </body>
+  </html>
+  `;
+  
+  res.send(html);
 });
 
 // Frontend-Route mit eingebautem Leaflet für interaktive Karte
-app.get('/*', (req, res) => {
-  const htmlContent = `
-<!DOCTYPE html>
-<html lang="de">
-<head>
+app.get('/map', (req, res) => {
+  const html = `
+  <!DOCTYPE html>
+  <html lang="de">
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Susibert</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background-color: #1a1a1a;
-            color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #333;
-            margin-bottom: 2rem;
-        }
-        h1 {
-            color: #f59a0c;
-            font-size: 2rem;
-            margin: 0;
-        }
-        .login-container {
-            text-align: center;
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 2rem;
-            background-color: #222;
-            border-radius: 8px;
-        }
-        input {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin: 1rem 0;
-            background-color: #333;
-            border: none;
-            border-radius: 4px;
-            color: white;
-        }
-        button {
-            background-color: #f59a0c;
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #e08900;
-        }
-        #message {
-            color: #ff4d4d;
-            margin-top: 1rem;
-        }
-        #app {
-            display: none;
-        }
-        #map {
-            height: 600px;
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-        .locations-list {
-            margin: 2rem 0;
-        }
-        .location-card {
-            background-color: #222;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        .location-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-            margin-top: 0.5rem;
-        }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: #1a1a1a;
+        color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #333;
+        margin-bottom: 2rem;
+      }
+      h1 {
+        color: #f59a0c;
+        font-size: 2rem;
+        margin: 0;
+      }
+      #map {
+        height: 600px;
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+      }
+      .locations-list {
+        margin: 2rem 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+      .location-card {
+        background-color: #222;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: transform 0.2s;
+        cursor: pointer;
+      }
+      .location-card:hover {
+        transform: translateY(-3px);
+      }
+      .location-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        margin-top: 0.5rem;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div id="login" class="login-container">
-            <h1>Susibert</h1>
-            <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
-            <input type="password" id="accessCode" placeholder="Zugangscode">
-            <button id="loginButton">Einloggen</button>
-            <div id="message"></div>
-        </div>
-        
-        <div id="app">
-            <header>
-                <h1>Susibert</h1>
-            </header>
-            <main>
-                <div id="map"></div>
-                <h2>Besuchte Orte</h2>
-                <div id="locations" class="locations-list"></div>
-            </main>
-        </div>
+      <header>
+        <h1>Susibert</h1>
+      </header>
+      <main>
+        <div id="map"></div>
+        <h2>Besuchte Orte</h2>
+        <div id="locations" class="locations-list"></div>
+      </main>
     </div>
 
     <script>
-        // Zugangscode prüfen
-        function loginButtonClickHandler() {
-            var code = document.getElementById("accessCode").value;
-            var messageEl = document.getElementById("message");
-            messageEl.textContent = "Login wird überprüft...";
-            
-            // Debug-Ausgaben in der Konsole
-            console.log("Login-Button wurde geklickt");
-            console.log("Zugangscode:", code);
-            console.log("Test-Zugangscode zum Vergleich: 'suuuu'");
-            
-            // CORS-Header und weitere Debugging-Infos
-            var requestData = { accessCode: code };
-            console.log("Sende Anfrage:", JSON.stringify(requestData));
-            
-            fetch("/api/access-codes/validate", {
-                method: "POST",
-                headers: { 
-                  "Content-Type": "application/json",
-                  "Accept": "application/json" 
-                },
-                body: JSON.stringify(requestData)
-            })
-            .then(function(response) {
-                console.log("Server-Antwort erhalten:", response.status);
-                
-                // Debug-Info zeigen
-                if (response.status !== 200) {
-                    console.error("Fehler beim Validieren:", response.status, response.statusText);
-                }
-                
-                return response.json();
-            })
-            .then(function(data) {
-                console.log("Validierungsdaten:", data);
-                
-                if (data.valid) {
-                    console.log("Login erfolgreich, zeige App");
-                    document.getElementById("login").style.display = "none";
-                    document.getElementById("app").style.display = "block";
-                    // Kurze Verzögerung vor Map-Initialisierung
-                    setTimeout(function() {
-                        try {
-                            initMap();
-                            console.log("Karte erfolgreich initialisiert");
-                        } catch (error) {
-                            console.error("Fehler bei der Karteninitialisierung:", error);
-                        }
-                    }, 500);
-                } else {
-                    console.log("Login fehlgeschlagen", data);
-                    // Führe als Fallback-Debugging ein direktes Login durch (nur auf Render)
-                    if (window.location.hostname.includes('render.com') || 
-                        window.location.hostname.includes('onrender.com')) {
-                        console.log("*** RENDER FALLBACK DEBUG ***");
-                        if (code === "suuuu") {
-                            console.log("Direkter Zugriff mit Fallback-Code auf Render");
-                            document.getElementById("login").style.display = "none";
-                            document.getElementById("app").style.display = "block";
-                            setTimeout(initMap, 500);
-                            return;
-                        }
-                    }
-                    messageEl.textContent = "Ungültiger Zugangscode. Bitte versuche es erneut. (Code: " + data.message + ")";
-                }
-            })
-            .catch(function(error) {
-                console.error("Login-Fehler:", error);
-                messageEl.textContent = "Fehler beim Überprüfen des Codes. Bitte versuche es später erneut.";
-            });
-        }
+      // Karte initialisieren
+      var map = L.map('map').setView([51.1657, 10.4515], 6); // Deutschland als Start
+      
+      // Kartenstil: CartoDB Positron (hell) für dunklen Hintergrund
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+      
+      // Locations laden
+      var markers = [];
+      
+      // Funktion um Locations zu laden
+      function loadLocations() {
+        var locationsContainer = document.getElementById('locations');
+        locationsContainer.innerHTML = '<p>Lade Orte...</p>';
         
-        // Event-Listener für Klick auf Login-Button
-        document.getElementById("loginButton").addEventListener("click", loginButtonClickHandler);
-        
-        // Event-Listener für Enter-Taste im Passwortfeld
-        document.getElementById("accessCode").addEventListener("keyup", function(event) {
-            if (event.key === "Enter") {
-                loginButtonClickHandler();
+        fetch('/api/locations')
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('Fehler beim Laden der Daten');
             }
-        });
-        
-        // Debug-Funktion
-        function showDebugInfo() {
-            var debugContainer = document.createElement("div");
-            debugContainer.style.position = "fixed";
-            debugContainer.style.bottom = "10px";
-            debugContainer.style.right = "10px";
-            debugContainer.style.backgroundColor = "rgba(0,0,0,0.8)";
-            debugContainer.style.color = "white";
-            debugContainer.style.padding = "10px";
-            debugContainer.style.borderRadius = "5px";
-            debugContainer.style.maxWidth = "80%";
-            debugContainer.style.maxHeight = "80%";
-            debugContainer.style.overflow = "auto";
-            debugContainer.style.zIndex = "9999";
-            debugContainer.style.fontSize = "12px";
-            debugContainer.innerHTML = "<h3>Debug wird geladen...</h3>";
-            document.body.appendChild(debugContainer);
-            
-            fetch("/api/debug")
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                var html = "<h3>Debug-Informationen</h3>";
-                html += "<p><strong>Server-Zeit:</strong> " + data.server_time + "</p>";
-                html += "<p><strong>Umgebung:</strong> " + data.environment + "</p>";
-                
-                html += "<h4>Umgebungsvariablen:</h4>";
-                html += "<ul>";
-                for (var key in data.environment_variables) {
-                    html += "<li><strong>" + key + ":</strong> " + data.environment_variables[key] + "</li>";
-                }
-                html += "</ul>";
-                
-                html += "<h4>Datenbank-Test:</h4>";
-                html += "<ul>";
-                for (var key in data.database_test) {
-                    if (typeof data.database_test[key] === 'object') {
-                        html += "<li><strong>" + key + ":</strong> <pre>" + JSON.stringify(data.database_test[key], null, 2) + "</pre></li>";
-                    } else {
-                        html += "<li><strong>" + key + ":</strong> " + data.database_test[key] + "</li>";
-                    }
-                }
-                html += "</ul>";
-                
-                html += "<p><button onclick='this.parentNode.parentNode.remove()' style='background-color: #f59a0c; border: none; color: black; padding: 5px 10px; border-radius: 4px;'>Schließen</button></p>";
-                
-                debugContainer.innerHTML = html;
-            })
-            .catch(function(error) {
-                debugContainer.innerHTML = "<h3>Fehler beim Laden der Debug-Informationen</h3><p>" + error + "</p>";
+            return response.json();
+          })
+          .then(function(locations) {
+            // Marker löschen
+            markers.forEach(function(marker) {
+              map.removeLayer(marker);
             });
-        }
-        
-        // Debug-Button versteckt hinzufügen (Dreimal schnell auf den Susibert-Titel klicken)
-        var clickCount = 0;
-        var clickTimer;
-        document.querySelector(".login-container h1").addEventListener("click", function() {
-            clickCount++;
-            clearTimeout(clickTimer);
+            markers = [];
             
-            clickTimer = setTimeout(function() {
-                clickCount = 0;
-            }, 1000);
+            // Locations anzeigen
+            locationsContainer.innerHTML = '';
             
-            if (clickCount >= 3) {
-                showDebugInfo();
-                clickCount = 0;
+            if (locations.length === 0) {
+              locationsContainer.innerHTML = '<p>Keine Orte gefunden</p>';
+              return;
             }
-        });
-        
-        // Karte initialisieren
-        var map;
-        var markers = [];
-        
-        function initMap() {
-            // Karte erstellen
-            map = L.map("map").setView([51.1657, 10.4515], 6); // Deutschland als Start
             
-            // Kartenstil: CartoDB Positron (hell) für dunklen Hintergrund
-            L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                subdomains: "abcd",
-                maxZoom: 19
-            }).addTo(map);
-            
-            // Locations laden
-            loadLocations();
-        }
-        
-        // Locations laden und anzeigen
-        async function loadLocations() {
-            var locationsEl = document.getElementById("locations");
-            
-            try {
-                var response = await fetch("/api/locations");
+            locations.forEach(function(loc) {
+              // Marker hinzufügen
+              if (loc.latitude && loc.longitude) {
+                var lat = parseFloat(loc.latitude);
+                var lng = parseFloat(loc.longitude);
                 
-                if (!response.ok) {
-                    throw new Error("Fehler beim Laden der Daten");
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  // Marker mit orangenem Gradient erstellen
+                  for (var i = 0; i < 20; i++) {
+                    var radius = 50000 * (1 - i/20); // Abnehmender Radius (50km bis 0)
+                    var opacity = 0.05 + (i / 20) * 0.3; // Zunehmende Opazität
+                    
+                    var circle = L.circle([lat, lng], {
+                      radius: radius,
+                      color: 'transparent',
+                      fillColor: '#f59a0c',
+                      fillOpacity: opacity,
+                      interactive: false
+                    }).addTo(map);
+                    
+                    markers.push(circle);
+                  }
+                  
+                  // Hauptmarker hinzufügen
+                  var marker = L.marker([lat, lng]).addTo(map);
+                  marker.bindPopup("<b>" + loc.name + "</b><br>" + loc.date);
+                  markers.push(marker);
                 }
-                
-                var locations = await response.json();
-                
-                // Marker löschen
-                markers.forEach(function(marker) {
-                    map.removeLayer(marker);
-                });
-                markers = [];
-                
-                // Locations anzeigen
-                locationsEl.innerHTML = "";
-                locations.forEach(function(loc) {
-                    // Marker hinzufügen
-                    if (loc.latitude && loc.longitude) {
-                        var lat = parseFloat(loc.latitude);
-                        var lng = parseFloat(loc.longitude);
-                        
-                        if (!isNaN(lat) && !isNaN(lng)) {
-                            // Marker mit orangenem Gradient erstellen
-                            for (var i = 0; i < 20; i++) {
-                                var radius = 50000 * (1 - i/20); // Abnehmender Radius (50km bis 0)
-                                var opacity = 0.05 + (i / 20) * 0.3; // Zunehmende Opazität
-                                
-                                var circle = L.circle([lat, lng], {
-                                    radius: radius,
-                                    color: "transparent",
-                                    fillColor: "#f59a0c",
-                                    fillOpacity: opacity,
-                                    interactive: false
-                                }).addTo(map);
-                                
-                                markers.push(circle);
-                            }
-                            
-                            // Hauptmarker hinzufügen
-                            var marker = L.marker([lat, lng]).addTo(map);
-                            marker.bindPopup("<b>" + loc.name + "</b><br>" + loc.date);
-                            markers.push(marker);
+              }
+              
+              // Location-Karte hinzufügen
+              var card = document.createElement('div');
+              card.className = 'location-card';
+              
+              var cardContent = "<h3>" + loc.name + "</h3>";
+              cardContent += "<p><strong>Datum:</strong> " + loc.date + "</p>";
+              
+              if (loc.description) {
+                cardContent += "<p>" + loc.description + "</p>";
+              }
+              
+              if (loc.highlight) {
+                cardContent += "<p><strong>Highlight:</strong> " + loc.highlight + "</p>";
+              }
+              
+              if (loc.image) {
+                cardContent += "<img src=\"" + loc.image + "\" alt=\"" + loc.name + "\" class=\"location-image\">";
+              }
+              
+              card.innerHTML = cardContent;
+              
+              // Karte klickbar machen
+              card.addEventListener('click', function() {
+                if (loc.latitude && loc.longitude) {
+                  var lat = parseFloat(loc.latitude);
+                  var lng = parseFloat(loc.longitude);
+                  if (!isNaN(lat) && !isNaN(lng)) {
+                    map.setView([lat, lng], 10);
+                    
+                    // Finde den entsprechenden Marker und öffne das Popup
+                    markers.forEach(function(marker) {
+                      if (marker instanceof L.Marker) {
+                        var markerLatLng = marker.getLatLng();
+                        if (markerLatLng.lat === lat && markerLatLng.lng === lng) {
+                          marker.openPopup();
                         }
-                    }
-                    
-                    // Location-Karte hinzufügen
-                    var card = document.createElement("div");
-                    card.className = "location-card";
-                    
-                    var cardContent = "<h3>" + loc.name + "</h3>";
-                    cardContent += "<p><strong>Datum:</strong> " + loc.date + "</p>";
-                    
-                    if (loc.description) {
-                        cardContent += "<p>" + loc.description + "</p>";
-                    }
-                    
-                    if (loc.highlight) {
-                        cardContent += "<p><strong>Highlight:</strong> " + loc.highlight + "</p>";
-                    }
-                    
-                    if (loc.image) {
-                        cardContent += "<img src=\"" + loc.image + "\" alt=\"" + loc.name + "\" class=\"location-image\">";
-                    }
-                    
-                    card.innerHTML = cardContent;
-                    
-                    // Karte klickbar machen
-                    card.addEventListener("click", function() {
-                        if (loc.latitude && loc.longitude) {
-                            var lat = parseFloat(loc.latitude);
-                            var lng = parseFloat(loc.longitude);
-                            if (!isNaN(lat) && !isNaN(lng)) {
-                                map.setView([lat, lng], 10);
-                                
-                                // Finde den entsprechenden Marker und öffne das Popup
-                                markers.forEach(function(marker) {
-                                    if (marker instanceof L.Marker) {
-                                        var markerLatLng = marker.getLatLng();
-                                        if (markerLatLng.lat === lat && markerLatLng.lng === lng) {
-                                            marker.openPopup();
-                                        }
-                                    }
-                                });
-                            }
-                        }
+                      }
                     });
-                    
-                    locationsEl.appendChild(card);
-                });
-                
-                // Kartenansicht an alle Marker anpassen, wenn Marker vorhanden sind
-                if (markers.length > 0) {
-                    var markerGroup = L.featureGroup(markers.filter(function(m) { return m instanceof L.Marker; }));
-                    map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
+                  }
                 }
-            } catch (error) {
-                locationsEl.innerHTML = "<p>Fehler beim Laden der Locations: " + error.message + "</p>";
-                console.error("Error loading locations:", error);
+              });
+              
+              locationsContainer.appendChild(card);
+            });
+            
+            // Kartenansicht an alle Marker anpassen, wenn Marker vorhanden sind
+            if (markers.length > 0) {
+              var markerGroup = L.featureGroup(markers.filter(function(m) { 
+                return m instanceof L.Marker; 
+              }));
+              map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
             }
-        }
+          })
+          .catch(function(error) {
+            locationsContainer.innerHTML = '<p>Fehler beim Laden der Orte: ' + error.message + '</p>';
+            console.error('Error loading locations:', error);
+          });
+      }
+      
+      // Lade Locations beim Seitenstart
+      loadLocations();
     </script>
-</body>
-</html>
+  </body>
+  </html>
   `;
   
-  res.send(htmlContent);
+  res.send(html);
+});
+
+// Standard-Route - Login-Seite
+app.get('/', (req, res) => {
+  // Vereinfachtes Login-Formular
+  const html = `
+  <!DOCTYPE html>
+  <html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Susibert</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: #1a1a1a;
+        color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .login-container {
+        text-align: center;
+        max-width: 400px;
+        padding: 2rem;
+        background-color: #222;
+        border-radius: 8px;
+      }
+      h1 {
+        color: #f59a0c;
+        font-size: 2rem;
+        margin: 0 0 1rem 0;
+      }
+      p {
+        margin-bottom: 1.5rem;
+      }
+      input {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin: 1rem 0;
+        background-color: #333;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #f59a0c;
+        color: black;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button:hover {
+        background-color: #e08900;
+      }
+      #message {
+        color: #ff4d4d;
+        margin-top: 1rem;
+        min-height: 20px;
+      }
+      .bypass-link {
+        margin-top: 20px;
+        font-size: 0.85rem;
+        color: #888;
+      }
+      .bypass-link a {
+        color: #aaa;
+        text-decoration: none;
+      }
+      .bypass-link a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Susibert</h1>
+      <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
+      <form action="/login" method="POST">
+        <input type="password" name="accessCode" id="accessCode" placeholder="Zugangscode" required>
+        <button type="submit">Einloggen</button>
+      </form>
+      <div id="message"></div>
+      <div class="bypass-link">
+        <a href="/login-susibert">[Direktzugriff für Tests]</a>
+      </div>
+    </div>
+    
+    <script>
+      // Einfaches JavaScript zum Anzeigen von Fehlermeldungen
+      document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var code = document.getElementById('accessCode').value;
+        
+        if (code === "suuuu") {
+          // Direkter Zugriff bei richtigem Code
+          window.location.href = "/map";
+        } else {
+          document.getElementById('message').textContent = "Ungültiger Zugangscode. Bitte versuche es erneut.";
+        }
+      });
+    </script>
+  </body>
+  </html>
+  `;
+  
+  res.send(html);
 });
 
 // Server starten
