@@ -95,6 +95,14 @@ app.get('/api/health', async (req, res) => {
     }
   }
   
+  // Prüfe die Umgebungsvariablen (ACCESS_CODE wird teilweise verdeckt)
+  const envVars = {
+    NODE_ENV: process.env.NODE_ENV || 'nicht gesetzt',
+    DATABASE_URL: process.env.DATABASE_URL ? '***' + process.env.DATABASE_URL.substr(-10) : 'nicht gesetzt',
+    ACCESS_CODE: process.env.ACCESS_CODE ? '***' + process.env.ACCESS_CODE.substr(-2) : 'nicht gesetzt',
+    RENDER: process.env.RENDER || 'nicht gesetzt'
+  };
+  
   res.json({
     status: 'online',
     version: '1.0.0',
@@ -106,20 +114,96 @@ app.get('/api/health', async (req, res) => {
     database: {
       connected: dbConnected,
       status: currentDbStatus
-    }
+    },
+    env: envVars,
+    access_code_fallback: process.env.ACCESS_CODE || 'suuuu'
   });
+});
+
+// Debug-Route für einfachere Fehlerbehebung
+app.get('/api/debug', async (req, res) => {
+  try {
+    // Datenbank testen
+    let dbTest = { status: 'Nicht verbunden' };
+    if (pool) {
+      try {
+        const result = await pool.query('SELECT NOW() as now, current_database() as db_name');
+        dbTest = {
+          status: 'Verbunden',
+          timestamp: result.rows[0].now,
+          database: result.rows[0].db_name
+        };
+        
+        // Prüfe, ob die locations-Tabelle existiert
+        const tableResult = await pool.query(`SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_name = 'locations'
+        )`);
+        
+        dbTest.tables = {
+          locations_exists: tableResult.rows[0].exists
+        };
+        
+        // Beispiellocation einfügen, wenn keine existiert
+        const countResult = await pool.query('SELECT COUNT(*) FROM locations');
+        dbTest.locations_count = parseInt(countResult.rows[0].count);
+        
+        if (dbTest.locations_count === 0) {
+          const testLocation = await pool.query(`
+            INSERT INTO locations (
+              name, date, description, highlight, latitude, longitude, country_code, image
+            ) VALUES (
+              'Testort', '2025-05-14', 'Ein Testort für die Verbindungsprüfung', 
+              'Automatisch erstellt', '48.7758', '9.1829', 'DE', ''
+            ) RETURNING id
+          `);
+          dbTest.test_location_created = testLocation.rows[0].id;
+        }
+      } catch (err) {
+        dbTest.error = err.message;
+      }
+    }
+    
+    res.json({
+      server_time: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      database_test: dbTest,
+      environment_variables: {
+        NODE_ENV: process.env.NODE_ENV || 'nicht gesetzt',
+        ACCESS_CODE_EXISTS: !!process.env.ACCESS_CODE,
+        ACCESS_CODE_LENGTH: process.env.ACCESS_CODE ? process.env.ACCESS_CODE.length : 0,
+        ACCESS_CODE_VALUE: process.env.ACCESS_CODE || 'suuuu', // Für Debug-Zwecke
+        DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+        RENDER: process.env.RENDER || 'nicht gesetzt'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack
+    });
+  }
 });
 
 // Access-Code Validierung
 app.post('/api/access-codes/validate', (req, res) => {
   const { accessCode } = req.body;
+  const configuredCode = process.env.ACCESS_CODE || 'suuuu'; // Fallback zum Standardwert
   
-  if (accessCode === process.env.ACCESS_CODE) {
+  console.log('Access Code Validation angefordert:', { 
+    givenCode: accessCode, 
+    configuredCode: configuredCode ? '***' + configuredCode.substr(-2) : 'nicht gesetzt',
+    isValid: accessCode === configuredCode
+  });
+  
+  if (accessCode === configuredCode) {
+    console.log('Access Code ist gültig');
     res.json({ valid: true });
   } else {
+    console.log('Access Code ist ungültig');
     res.status(401).json({ 
       valid: false, 
-      message: 'Ungültiger Zugangscode' 
+      message: 'Ungültiger Zugangscode'
     });
   }
 });
@@ -402,29 +486,118 @@ app.get('/*', (req, res) => {
 \
     <script>\
         // Zugangscode prüfen\
-        document.getElementById("loginButton").addEventListener("click", async function() {\
+        function loginButtonClickHandler() {\
             var code = document.getElementById("accessCode").value;\
             var messageEl = document.getElementById("message");\
-            \
-            try {\
-                var response = await fetch("/api/access-codes/validate", {\
-                    method: "POST",\
-                    headers: { "Content-Type": "application/json" },\
-                    body: JSON.stringify({ accessCode: code })\
-                });\
-                \
-                var data = await response.json();\
-                \
+            messageEl.textContent = "Login wird überprüft...";\
+            
+            console.log("Login-Button wurde geklickt");\
+            console.log("Zugangscode:", code);\
+            
+            fetch("/api/access-codes/validate", {\
+                method: "POST",\
+                headers: { "Content-Type": "application/json" },\
+                body: JSON.stringify({ accessCode: code })\
+            })\
+            .then(function(response) {\
+                console.log("Server-Antwort erhalten:", response.status);\
+                return response.json();\
+            })\
+            .then(function(data) {\
+                console.log("Validierungsdaten:", data);\
+                
                 if (data.valid) {\
+                    console.log("Login erfolgreich, zeige App");\
                     document.getElementById("login").style.display = "none";\
                     document.getElementById("app").style.display = "block";\
                     initMap();\
                 } else {\
+                    console.log("Login fehlgeschlagen");\
                     messageEl.textContent = "Ungültiger Zugangscode. Bitte versuche es erneut.";\
                 }\
-            } catch (error) {\
+            })\
+            .catch(function(error) {\
+                console.error("Login-Fehler:", error);\
                 messageEl.textContent = "Fehler beim Überprüfen des Codes. Bitte versuche es später erneut.";\
-                console.error("Login error:", error);\
+            });\
+        }\
+        
+        // Event-Listener für Klick auf Login-Button\
+        document.getElementById("loginButton").addEventListener("click", loginButtonClickHandler);\
+        
+        // Event-Listener für Enter-Taste im Passwortfeld\
+        document.getElementById("accessCode").addEventListener("keyup", function(event) {\
+            if (event.key === "Enter") {\
+                loginButtonClickHandler();\
+            }\
+        });\
+        \
+        // Debug-Funktion\
+        function showDebugInfo() {\
+            var debugContainer = document.createElement("div");\
+            debugContainer.style.position = "fixed";\
+            debugContainer.style.bottom = "10px";\
+            debugContainer.style.right = "10px";\
+            debugContainer.style.backgroundColor = "rgba(0,0,0,0.8)";\
+            debugContainer.style.color = "white";\
+            debugContainer.style.padding = "10px";\
+            debugContainer.style.borderRadius = "5px";\
+            debugContainer.style.maxWidth = "80%";\
+            debugContainer.style.maxHeight = "80%";\
+            debugContainer.style.overflow = "auto";\
+            debugContainer.style.zIndex = "9999";\
+            debugContainer.style.fontSize = "12px";\
+            debugContainer.innerHTML = "<h3>Debug wird geladen...</h3>";\
+            document.body.appendChild(debugContainer);\
+            \
+            fetch("/api/debug")\
+            .then(function(response) { return response.json(); })\
+            .then(function(data) {\
+                var html = "<h3>Debug-Informationen</h3>";\
+                html += "<p><strong>Server-Zeit:</strong> " + data.server_time + "</p>";\
+                html += "<p><strong>Umgebung:</strong> " + data.environment + "</p>";\
+                \
+                html += "<h4>Umgebungsvariablen:</h4>";\
+                html += "<ul>";\
+                for (var key in data.environment_variables) {\
+                    html += "<li><strong>" + key + ":</strong> " + data.environment_variables[key] + "</li>";\
+                }\
+                html += "</ul>";\
+                \
+                html += "<h4>Datenbank-Test:</h4>";\
+                html += "<ul>";\
+                for (var key in data.database_test) {\
+                    if (typeof data.database_test[key] === 'object') {\
+                        html += "<li><strong>" + key + ":</strong> <pre>" + JSON.stringify(data.database_test[key], null, 2) + "</pre></li>";\
+                    } else {\
+                        html += "<li><strong>" + key + ":</strong> " + data.database_test[key] + "</li>";\
+                    }\
+                }\
+                html += "</ul>";\
+                \
+                html += "<p><button onclick='this.parentNode.parentNode.remove()' style='background-color: #f59a0c; border: none; color: black; padding: 5px 10px; border-radius: 4px;'>Schließen</button></p>";\
+                \
+                debugContainer.innerHTML = html;\
+            })\
+            .catch(function(error) {\
+                debugContainer.innerHTML = "<h3>Fehler beim Laden der Debug-Informationen</h3><p>" + error + "</p>";\
+            });\
+        }\
+        \
+        // Debug-Button versteckt hinzufügen (Dreimal schnell auf den Susibert-Titel klicken)\
+        var clickCount = 0;\
+        var clickTimer;\
+        document.querySelector(".login-container h1").addEventListener("click", function() {\
+            clickCount++;\
+            clearTimeout(clickTimer);\
+            \
+            clickTimer = setTimeout(function() {\
+                clickCount = 0;\
+            }, 1000);\
+            \
+            if (clickCount >= 3) {\
+                showDebugInfo();\
+                clickCount = 0;\
             }\
         });\
         \
