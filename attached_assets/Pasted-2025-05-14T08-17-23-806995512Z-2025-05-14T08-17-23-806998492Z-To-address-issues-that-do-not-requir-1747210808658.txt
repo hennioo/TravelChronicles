@@ -1,0 +1,51 @@
+2025-05-14T08:17:23.806995512Z 
+2025-05-14T08:17:23.806998492Z To address issues that do not require attention, run:
+2025-05-14T08:17:23.807001352Z   npm audit fix
+2025-05-14T08:17:23.807004072Z 
+2025-05-14T08:17:23.807006922Z To address all issues (including breaking changes), run:
+2025-05-14T08:17:23.807009942Z   npm audit fix --force
+2025-05-14T08:17:23.807012642Z 
+2025-05-14T08:17:23.807015652Z Run `npm audit` for details.
+2025-05-14T08:17:23.880105506Z + echo '2. Erstelle Verzeichnisstruktur...'
+2025-05-14T08:17:23.880110516Z 2. Erstelle Verzeichnisstruktur...
+2025-05-14T08:17:23.880127696Z + mkdir -p dist/public
+2025-05-14T08:17:23.881849823Z + mkdir -p dist/uploads
+2025-05-14T08:17:23.883406137Z + echo '3. Erstelle statische Wartungsseite...'
+2025-05-14T08:17:23.883409307Z 3. Erstelle statische Wartungsseite...
+2025-05-14T08:17:23.883418737Z + cat
+2025-05-14T08:17:23.88486396Z + echo '4. Erstelle Express-Server...'
+2025-05-14T08:17:23.88487176Z 4. Erstelle Express-Server...
+2025-05-14T08:17:23.88487476Z + cat
+2025-05-14T08:17:23.886297932Z 5. Erstelle package.json...
+2025-05-14T08:17:23.886298492Z + echo '5. Erstelle package.json...'
+2025-05-14T08:17:23.886314822Z + cat
+2025-05-14T08:17:23.887662543Z === Build erfolgreich abgeschlossen ===
+2025-05-14T08:17:23.887664123Z + echo '=== Build erfolgreich abgeschlossen ==='
+2025-05-14T08:17:28.636757189Z ==> Uploading build...
+2025-05-14T08:17:37.672821805Z ==> Uploaded in 6.1s. Compression took 2.9s
+2025-05-14T08:17:37.78784716Z ==> Build successful 🎉
+2025-05-14T08:17:39.901794612Z ==> Deploying...
+2025-05-14T08:18:02.379718821Z ==> Running 'npm start'
+2025-05-14T08:18:03.567307367Z 
+2025-05-14T08:18:03.567329998Z > rest-express@1.0.0 start
+2025-05-14T08:18:03.567335058Z > NODE_ENV=production node dist/index.js
+2025-05-14T08:18:03.567337448Z 
+2025-05-14T08:18:03.7746515Z node:internal/modules/cjs/loader:1228
+2025-05-14T08:18:03.774670761Z   throw err;
+2025-05-14T08:18:03.774744365Z   ^
+2025-05-14T08:18:03.774747585Z 
+2025-05-14T08:18:03.774750815Z Error: Cannot find module '/opt/render/project/src/dist/index.js'
+2025-05-14T08:18:03.774752865Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-14T08:18:03.774755585Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-14T08:18:03.774757616Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T08:18:03.774759786Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T08:18:03.774762326Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T08:18:03.774765316Z     at node:internal/main/run_main_module:36:49 {
+2025-05-14T08:18:03.774767926Z   code: 'MODULE_NOT_FOUND',
+2025-05-14T08:18:03.774770426Z   requireStack: []
+2025-05-14T08:18:03.774772386Z }
+2025-05-14T08:18:03.774774216Z 
+2025-05-14T08:18:03.774776126Z Node.js v22.14.0
+2025-05-14T08:18:05.671644163Z ==> Exited with status 1
+2025-05-14T08:18:05.692094349Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-14T08:18:13.658290619Z ==> Running 'npm start'
