@@ -4,13 +4,14 @@
 set -ex
 echo "=== Minimaler Build für Render ==="
 
-# 1. Installiere Express für unseren Server
-echo "Installiere Express und benötigte Pakete..."
-npm install express
+# 1. Installiere Express und weitere benötigte Pakete
+echo "Installiere benötigte Pakete..."
+npm install express pg multer
 
 # 2. Stelle sicher, dass dist-Verzeichnis existiert
 echo "Prüfe Verzeichnisstruktur..."
 mkdir -p dist
+mkdir -p dist/uploads
 
 # 3. Kopiere unsere Wartungsserver-Datei falls die vorhandene fehlt
 echo "Kopiere Wartungsserver-Datei..."
@@ -32,7 +33,9 @@ cat > package.json << 'EOF'
     "dev": "NODE_ENV=development node dist/index.js"
   },
   "dependencies": {
-    "express": "^4.18.3"
+    "express": "^4.18.3",
+    "pg": "^8.11.3",
+    "multer": "^1.4.5-lts.1"
   }
 }
 EOF
