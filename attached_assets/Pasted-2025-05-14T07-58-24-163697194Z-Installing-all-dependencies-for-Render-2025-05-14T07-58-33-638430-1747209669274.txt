@@ -1,0 +1,71 @@
+2025-05-14T07:58:24.163697194Z Installing all dependencies for Render...
+2025-05-14T07:58:33.638430111Z 
+2025-05-14T07:58:33.638456341Z added 606 packages, and audited 607 packages in 9s
+2025-05-14T07:58:33.638466781Z 
+2025-05-14T07:58:33.638471192Z 174 packages are looking for funding
+2025-05-14T07:58:33.638499792Z   run `npm fund` for details
+2025-05-14T07:58:33.651115622Z 
+2025-05-14T07:58:33.651129102Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-14T07:58:33.651132592Z 
+2025-05-14T07:58:33.651136582Z To address issues that do not require attention, run:
+2025-05-14T07:58:33.651140022Z   npm audit fix
+2025-05-14T07:58:33.651143342Z 
+2025-05-14T07:58:33.651147263Z To address all issues (including breaking changes), run:
+2025-05-14T07:58:33.651151413Z   npm audit fix --force
+2025-05-14T07:58:33.651154763Z 
+2025-05-14T07:58:33.651158653Z Run `npm audit` for details.
+2025-05-14T07:58:40.525487635Z 
+2025-05-14T07:58:40.525512696Z changed 2 packages, and audited 607 packages in 7s
+2025-05-14T07:58:40.525521856Z 
+2025-05-14T07:58:40.525563897Z 174 packages are looking for funding
+2025-05-14T07:58:40.525573477Z   run `npm fund` for details
+2025-05-14T07:58:40.533037545Z 
+2025-05-14T07:58:40.533053015Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-14T07:58:40.533057005Z 
+2025-05-14T07:58:40.533061345Z To address all issues (including breaking changes), run:
+2025-05-14T07:58:40.533065635Z   npm audit fix --force
+2025-05-14T07:58:40.533068965Z 
+2025-05-14T07:58:40.533072885Z Run `npm audit` for details.
+2025-05-14T07:58:40.611692383Z Building the application...
+2025-05-14T07:58:40.705838591Z 
+2025-05-14T07:58:40.705861851Z > rest-express@1.0.0 build
+2025-05-14T07:58:40.705869341Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-05-14T07:58:40.705875872Z 
+2025-05-14T07:58:40.882422117Z failed to load config from /opt/render/project/src/vite.config.ts
+2025-05-14T07:58:40.967850857Z error during build:
+2025-05-14T07:58:40.967874157Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /opt/render/project/src/vite.config.ts.timestamp-1747209520857-141e0b6ed94d6.mjs
+2025-05-14T07:58:40.967879347Z     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:268:9)
+2025-05-14T07:58:40.967883098Z     at packageResolve (node:internal/modules/esm/resolve:768:81)
+2025-05-14T07:58:40.967886547Z     at moduleResolve (node:internal/modules/esm/resolve:854:18)
+2025-05-14T07:58:40.967889958Z     at defaultResolve (node:internal/modules/esm/resolve:984:11)
+2025-05-14T07:58:40.967893978Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:685:12)
+2025-05-14T07:58:40.967897388Z     at #cachedDefaultResolve (node:internal/modules/esm/loader:634:25)
+2025-05-14T07:58:40.967900798Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:617:38)
+2025-05-14T07:58:40.967904188Z     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:273:38)
+2025-05-14T07:58:40.967918748Z     at ModuleJob._link (node:internal/modules/esm/module_job:135:49)
+2025-05-14T07:58:40.981403639Z Build completed!
+2025-05-14T07:58:46.756415256Z ==> Uploading build...
+2025-05-14T07:58:56.534860503Z ==> Uploaded in 6.3s. Compression took 3.5s
+2025-05-14T07:58:56.572529858Z ==> Build successful 🎉
+2025-05-14T07:58:58.161448087Z ==> Deploying...
+2025-05-14T07:59:38.9436684Z ==> Running 'npm start'
+2025-05-14T07:59:39.231661411Z 
+2025-05-14T07:59:39.231682462Z > rest-express@1.0.0 start
+2025-05-14T07:59:39.231686522Z > NODE_ENV=production node dist/index.js
+2025-05-14T07:59:39.231688602Z 
+2025-05-14T07:59:39.260638371Z node:internal/modules/cjs/loader:1228
+2025-05-14T07:59:39.260656372Z   throw err;
+2025-05-14T07:59:39.260659081Z   ^
+2025-05-14T07:59:39.260661201Z 
+2025-05-14T07:59:39.260664042Z Error: Cannot find module '/opt/render/project/src/dist/index.js'
+2025-05-14T07:59:39.260666732Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-14T07:59:39.260670172Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-14T07:59:39.260672372Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T07:59:39.260674552Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T07:59:39.260677122Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T07:59:39.260680692Z     at node:internal/main/run_main_module:36:49 {
+2025-05-14T07:59:39.260683432Z   code: 'MODULE_NOT_FOUND',
+2025-05-14T07:59:39.260686332Z   requireStack: []
+2025-05-14T07:59:39.260688452Z }
+2025-05-14T07:59:39.260690362Z 
+2025-05-14T07:59:39.260692422Z Node.js v22.14.0

@@ -3,7 +3,7 @@ services:
     name: susibert
     env: node
     buildCommand: ./build-render.sh
-    startCommand: npm start
+    startCommand: cd dist && node start.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,3 +13,5 @@ services:
         sync: false
       - key: RENDER
         value: "true"
+      - key: PORT
+        value: "10000"
