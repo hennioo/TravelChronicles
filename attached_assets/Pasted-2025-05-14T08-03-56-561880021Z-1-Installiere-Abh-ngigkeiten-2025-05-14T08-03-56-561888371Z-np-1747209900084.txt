@@ -1,0 +1,50 @@
+2025-05-14T08:03:56.561880021Z 1. Installiere Abhängigkeiten...
+2025-05-14T08:03:56.561888371Z + npm install
+2025-05-14T08:04:04.263371631Z 
+2025-05-14T08:04:04.263396081Z added 606 packages, and audited 607 packages in 8s
+2025-05-14T08:04:04.263441112Z 
+2025-05-14T08:04:04.263459532Z 174 packages are looking for funding
+2025-05-14T08:04:04.263472772Z   run `npm fund` for details
+2025-05-14T08:04:04.274949149Z 
+2025-05-14T08:04:04.274959039Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-14T08:04:04.274962009Z 
+2025-05-14T08:04:04.274965459Z To address issues that do not require attention, run:
+2025-05-14T08:04:04.274968539Z   npm audit fix
+2025-05-14T08:04:04.274971259Z 
+2025-05-14T08:04:04.274974059Z To address all issues (including breaking changes), run:
+2025-05-14T08:04:04.274979299Z   npm audit fix --force
+2025-05-14T08:04:04.274982049Z 
+2025-05-14T08:04:04.274985409Z Run `npm audit` for details.
+2025-05-14T08:04:04.352307348Z 2. Installiere Entwicklungsabhängigkeiten...
+2025-05-14T08:04:04.352307798Z + echo '2. Installiere Entwicklungsabhängigkeiten...'
+2025-05-14T08:04:04.352335899Z + npm install --no-save @vitejs/plugin-react autoprefixer postcss tailwindcss esbuild typescript vite react react-dom @types/react @types/react-dom
+2025-05-14T08:04:10.397312164Z 
+2025-05-14T08:04:10.397344004Z changed 4 packages, and audited 607 packages in 6s
+2025-05-14T08:04:10.397359804Z 
+2025-05-14T08:04:10.397381325Z 174 packages are looking for funding
+2025-05-14T08:04:10.397395625Z   run `npm fund` for details
+2025-05-14T08:04:10.406129416Z 
+2025-05-14T08:04:10.406149836Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-14T08:04:10.406154316Z 
+2025-05-14T08:04:10.406158576Z To address all issues (including breaking changes), run:
+2025-05-14T08:04:10.406162866Z   npm audit fix --force
+2025-05-14T08:04:10.406166236Z 
+2025-05-14T08:04:10.406170746Z Run `npm audit` for details.
+2025-05-14T08:04:10.432192529Z 3. Baue Frontend mit Vite und Inline-Konfiguration...
+2025-05-14T08:04:10.432195619Z + echo '3. Baue Frontend mit Vite und Inline-Konfiguration...'
+2025-05-14T08:04:10.432218979Z + cat
+2025-05-14T08:04:10.433964355Z + node direct-vite-build.js
+2025-05-14T08:04:10.461061887Z file:///opt/render/project/src/direct-vite-build.js:1
+2025-05-14T08:04:10.461087408Z const { build } = require('vite');
+2025-05-14T08:04:10.461093898Z                   ^
+2025-05-14T08:04:10.461099748Z 
+2025-05-14T08:04:10.461105048Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-05-14T08:04:10.461109468Z This file is being treated as an ES module because it has a '.js' file extension and '/opt/render/project/src/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-05-14T08:04:10.461123638Z     at file:///opt/render/project/src/direct-vite-build.js:1:19
+2025-05-14T08:04:10.461126748Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-05-14T08:04:10.461128878Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)
+2025-05-14T08:04:10.461132478Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+2025-05-14T08:04:10.461136048Z 
+2025-05-14T08:04:10.461139598Z Node.js v22.14.0
+2025-05-14T08:04:10.465299737Z ==> Build failed 😞
+2025-05-14T08:04:10.465316137Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

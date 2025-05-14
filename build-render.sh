@@ -30,10 +30,13 @@ npm install --no-save \
 
 # 3. Direktbuild des Frontends mit Inline-Konfiguration
 echo "3. Baue Frontend mit Vite und Inline-Konfiguration..."
-cat > direct-vite-build.js << 'EOF'
-const { build } = require('vite');
-const react = require('@vitejs/plugin-react');
-const path = require('path');
+cat > direct-vite-build.mjs << 'EOF'
+import { build } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function buildFrontend() {
   try {
@@ -64,15 +67,18 @@ buildFrontend();
 EOF
 
 # Führe direkten Vite-Build aus
-node direct-vite-build.js
+node direct-vite-build.mjs
 
 # 4. Baue das Backend mit esbuild
 echo "4. Baue Backend mit esbuild..."
 mkdir -p dist
 
-cat > server-build.js << 'EOF'
-const { build } = require('esbuild');
-const path = require('path');
+cat > server-build.mjs << 'EOF'
+import { build } from 'esbuild';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function buildBackend() {
   try {
@@ -103,7 +109,7 @@ buildBackend();
 EOF
 
 # Führe Backend-Build aus
-node server-build.js
+node server-build.mjs
 
 # 5. Kopiere die package.json und erstelle uploads Verzeichnis
 echo "5. Kopiere zusätzliche Dateien für Produktion..."
@@ -113,13 +119,17 @@ mkdir -p dist/uploads
 # 6. Erstelle eine einfache Express-Server-Datei für den Fall, dass der Build fehlschlägt
 echo "6. Erstelle Fallback-Server..."
 cat > dist/fallback.js << 'EOF'
-const express = require('express');
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const port = process.env.PORT || 10000;
 
-app.use(express.static('dist/public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.get('/api/health', (req, res) => res.send('ok'));
-app.get('/*', (req, res) => res.sendFile(__dirname + '/public/index.html'));
+app.get('/*', (req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
 
 app.listen(port, () => {
   console.log(`Fallback-Server läuft auf Port ${port}`);
@@ -127,10 +137,13 @@ app.listen(port, () => {
 EOF
 
 # 7. Erstelle ein Startup-Skript, das versucht, den Hauptserver zu starten und auf Fallback zurückgreift
-cat > dist/start.js << 'EOF'
-const { execSync, spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+cat > dist/start.mjs << 'EOF'
+import { execSync, spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Prüfe, ob die Hauptanwendungsdatei existiert
 const mainAppPath = path.join(__dirname, 'index.js');
@@ -149,17 +162,17 @@ try {
     child.on('error', (err) => {
       console.error('Fehler beim Starten der Hauptanwendung:', err);
       console.log('Starte Fallback-Server...');
-      require('./fallback');
+      import('./fallback.js');
     });
   } else {
     console.log('Hauptanwendung nicht gefunden, starte Fallback-Server...');
-    require('./fallback');
+    import('./fallback.js');
   }
 } catch (error) {
   console.error('Fehler beim Serverstart:', error);
   console.log('Starte Fallback-Server...');
   try {
-    require('./fallback');
+    import('./fallback.js');
   } catch (fallbackError) {
     console.error('Auch Fallback-Server fehlgeschlagen:', fallbackError);
   }
@@ -173,8 +186,9 @@ cat > dist/package.json << 'EOF'
   "name": "rest-express",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "NODE_ENV=production node start.js"
+    "start": "NODE_ENV=production node start.mjs"
   },
   "dependencies": {
     "express": "^4.18.3"
