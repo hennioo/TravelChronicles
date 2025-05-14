@@ -1,0 +1,50 @@
+2025-05-14T08:29:00.923069373Z Installiere Express...
+2025-05-14T08:29:00.923090023Z + npm install express
+2025-05-14T08:29:11.486946703Z 
+2025-05-14T08:29:11.486970584Z added 606 packages, and audited 607 packages in 10s
+2025-05-14T08:29:11.486984224Z 
+2025-05-14T08:29:11.487025515Z 174 packages are looking for funding
+2025-05-14T08:29:11.487030425Z   run `npm fund` for details
+2025-05-14T08:29:11.499889738Z 
+2025-05-14T08:29:11.499903918Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-14T08:29:11.499908418Z 
+2025-05-14T08:29:11.499913409Z To address issues that do not require attention, run:
+2025-05-14T08:29:11.499917449Z   npm audit fix
+2025-05-14T08:29:11.499921239Z 
+2025-05-14T08:29:11.499925539Z To address all issues (including breaking changes), run:
+2025-05-14T08:29:11.499930209Z   npm audit fix --force
+2025-05-14T08:29:11.499933909Z 
+2025-05-14T08:29:11.499938499Z Run `npm audit` for details.
+2025-05-14T08:29:11.577007593Z === Build abgeschlossen ===
+2025-05-14T08:29:11.577007753Z + echo '=== Build abgeschlossen ==='
+2025-05-14T08:29:12.015180355Z ==> Uploading build...
+2025-05-14T08:29:22.073207218Z ==> Uploaded in 7.1s. Compression took 2.9s
+2025-05-14T08:29:22.122811097Z ==> Build successful 🎉
+2025-05-14T08:29:28.335376671Z ==> Deploying...
+2025-05-14T08:29:51.965266656Z   requireStack: []
+2025-05-14T08:29:51.965268947Z }
+2025-05-14T08:29:51.965358511Z 
+2025-05-14T08:29:51.965364791Z Node.js v22.14.0
+2025-05-14T08:29:53.582605325Z ==> Exited with status 1
+2025-05-14T08:29:53.599839432Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-14T08:29:59.162465787Z ==> Running 'npm start'
+2025-05-14T08:30:00.057267987Z 
+2025-05-14T08:30:00.057300289Z > rest-express@1.0.0 start
+2025-05-14T08:30:00.057305649Z > NODE_ENV=production node dist/index.js
+2025-05-14T08:30:00.057307759Z 
+2025-05-14T08:30:00.259200782Z node:internal/modules/cjs/loader:1228
+2025-05-14T08:30:00.259282276Z   throw err;
+2025-05-14T08:30:00.259285996Z   ^
+2025-05-14T08:30:00.259288406Z 
+2025-05-14T08:30:00.259291036Z Error: Cannot find module '/opt/render/project/src/dist/index.js'
+2025-05-14T08:30:00.259293706Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-14T08:30:00.259296927Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-14T08:30:00.259299376Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T08:30:00.259301767Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T08:30:00.259304767Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T08:30:00.259309027Z     at node:internal/main/run_main_module:36:49 {
+2025-05-14T08:30:00.259312037Z   code: 'MODULE_NOT_FOUND',
+2025-05-14T08:30:00.259315607Z   requireStack: []
+2025-05-14T08:30:00.259318057Z }
+2025-05-14T08:30:00.259335328Z 
+2025-05-14T08:30:00.259338238Z Node.js v22.14.0
