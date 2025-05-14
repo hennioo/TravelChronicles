@@ -1,0 +1,50 @@
+2025-05-14T09:21:47.207840726Z + npm install express pg multer
+2025-05-14T09:21:47.207899237Z === Minimaler Build für Render ===
+2025-05-14T09:21:47.207922447Z Installiere benötigte Pakete...
+2025-05-14T09:21:49.283700539Z 
+2025-05-14T09:21:49.28372323Z up to date, audited 607 packages in 2s
+2025-05-14T09:21:49.283733299Z 
+2025-05-14T09:21:49.28373632Z 174 packages are looking for funding
+2025-05-14T09:21:49.28373961Z   run `npm fund` for details
+2025-05-14T09:21:49.301033237Z 
+2025-05-14T09:21:49.301052967Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-14T09:21:49.301055737Z 
+2025-05-14T09:21:49.301058747Z To address issues that do not require attention, run:
+2025-05-14T09:21:49.301061337Z   npm audit fix
+2025-05-14T09:21:49.301063587Z 
+2025-05-14T09:21:49.301090768Z To address all issues (including breaking changes), run:
+2025-05-14T09:21:49.301093958Z   npm audit fix --force
+2025-05-14T09:21:49.301096068Z 
+2025-05-14T09:21:49.301099098Z Run `npm audit` for details.
+2025-05-14T09:21:49.366209133Z + echo 'Prüfe Verzeichnisstruktur...'
+2025-05-14T09:21:49.366209144Z Prüfe Verzeichnisstruktur...
+2025-05-14T09:21:49.366226974Z + mkdir -p dist
+2025-05-14T09:21:49.368280505Z + mkdir -p dist/uploads
+2025-05-14T09:21:49.36986599Z + echo 'Kopiere Wartungsserver-Datei...'
+2025-05-14T09:21:49.36986907Z Kopiere Wartungsserver-Datei...
+2025-05-14T09:21:49.3698752Z + '[' '!' -f dist/index.js ']'
+2025-05-14T09:21:49.36989588Z + cp -v server.js dist/index.js
+2025-05-14T09:21:49.372220036Z 'server.js' -> 'dist/index.js'
+2025-05-14T09:21:49.372231386Z Erstelle package.json Backup...
+2025-05-14T09:21:49.372244347Z + echo 'Erstelle package.json Backup...'
+2025-05-14T09:21:49.372251127Z + cp package.json package.json.original
+2025-05-14T09:21:49.374199977Z + cat
+2025-05-14T09:21:49.376032725Z === Build abgeschlossen ===
+2025-05-14T09:21:49.376034825Z + echo '=== Build abgeschlossen ==='
+2025-05-14T09:21:50.8745112Z ==> Uploading build...
+2025-05-14T09:22:01.328259225Z ==> Uploaded in 6.6s. Compression took 3.8s
+2025-05-14T09:22:01.368303884Z ==> Build successful 🎉
+2025-05-14T09:22:03.333736975Z ==> Deploying...
+2025-05-14T09:22:25.85766851Z ==> Running 'npm start'
+2025-05-14T09:22:27.045268219Z 
+2025-05-14T09:22:27.0453067Z > rest-express@1.0.0 start
+2025-05-14T09:22:27.045311131Z > NODE_ENV=production node dist/index.js
+2025-05-14T09:22:27.045313201Z 
+2025-05-14T09:22:28.245175048Z Verbinde mit Datenbank über DATABASE_URL...
+2025-05-14T09:22:28.344912543Z Susibert Server läuft auf Port 10000
+2025-05-14T09:22:28.344930494Z Umgebung: production
+2025-05-14T09:22:28.344932734Z Datenbankverbindung: Nicht verbunden
+2025-05-14T09:22:28.345260092Z Datum/Zeit: 2025-05-14T09:22:28.344Z
+2025-05-14T09:22:29.49380046Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-14T09:22:29.451Z }
+2025-05-14T09:22:30.080010533Z Tabelle locations existiert: true
+2025-05-14T09:22:33.988622978Z ==> Your service is live 🎉
