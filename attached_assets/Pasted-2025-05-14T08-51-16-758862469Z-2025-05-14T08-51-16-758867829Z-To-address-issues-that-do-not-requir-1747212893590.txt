@@ -1,0 +1,71 @@
+2025-05-14T08:51:16.758862469Z 
+2025-05-14T08:51:16.758867829Z To address issues that do not require attention, run:
+2025-05-14T08:51:16.758872509Z   npm audit fix
+2025-05-14T08:51:16.758876899Z 
+2025-05-14T08:51:16.758880879Z To address all issues (including breaking changes), run:
+2025-05-14T08:51:16.758885779Z   npm audit fix --force
+2025-05-14T08:51:16.75889003Z 
+2025-05-14T08:51:16.75889493Z Run `npm audit` for details.
+2025-05-14T08:51:16.822466287Z + echo 'Prüfe Verzeichnisstruktur...'
+2025-05-14T08:51:16.822472338Z Prüfe Verzeichnisstruktur...
+2025-05-14T08:51:16.822493358Z + mkdir -p dist
+2025-05-14T08:51:16.824524797Z + mkdir -p dist/uploads
+2025-05-14T08:51:16.826306152Z + echo 'Kopiere Wartungsserver-Datei...'
+2025-05-14T08:51:16.826306422Z Kopiere Wartungsserver-Datei...
+2025-05-14T08:51:16.826326092Z + '[' '!' -f dist/index.js ']'
+2025-05-14T08:51:16.826330442Z + cp -v server.js dist/index.js
+2025-05-14T08:51:16.828170998Z 'server.js' -> 'dist/index.js'
+2025-05-14T08:51:16.828422303Z + echo 'Erstelle package.json Backup...'
+2025-05-14T08:51:16.828433673Z Erstelle package.json Backup...
+2025-05-14T08:51:16.828433783Z + cp package.json package.json.original
+2025-05-14T08:51:16.83037494Z + cat
+2025-05-14T08:51:16.831992871Z + echo '=== Build abgeschlossen ==='
+2025-05-14T08:51:16.831994991Z === Build abgeschlossen ===
+2025-05-14T08:51:18.205583554Z ==> Uploading build...
+2025-05-14T08:51:27.974468519Z ==> Uploaded in 6.5s. Compression took 3.2s
+2025-05-14T08:51:28.073676725Z ==> Build successful 🎉
+2025-05-14T08:51:34.59760316Z ==> Deploying...
+2025-05-14T08:51:56.394603441Z ==> Running 'npm start'
+2025-05-14T08:51:57.588528458Z 
+2025-05-14T08:51:57.588545159Z > rest-express@1.0.0 start
+2025-05-14T08:51:57.588549839Z > NODE_ENV=production node dist/index.js
+2025-05-14T08:51:57.588552369Z 
+2025-05-14T08:51:57.802688762Z /opt/render/project/src/dist/index.js:494
+2025-05-14T08:51:57.802721532Z                             marker.bindPopup(`<b>${loc.name}</b><br>${loc.date}`);
+2025-05-14T08:51:57.802727152Z                                                  ^
+2025-05-14T08:51:57.802729472Z 
+2025-05-14T08:51:57.802732183Z SyntaxError: missing ) after argument list
+2025-05-14T08:51:57.802734713Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-14T08:51:57.802737103Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-14T08:51:57.802739293Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-14T08:51:57.802741383Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-14T08:51:57.802743623Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-14T08:51:57.802745893Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T08:51:57.802748063Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T08:51:57.802750273Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T08:51:57.802753873Z     at node:internal/main/run_main_module:36:49
+2025-05-14T08:51:57.802755963Z 
+2025-05-14T08:51:57.802758163Z Node.js v22.14.0
+2025-05-14T08:52:03.385111628Z ==> Exited with status 1
+2025-05-14T08:52:03.403250324Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-14T08:52:11.288792534Z ==> Running 'npm start'
+2025-05-14T08:52:12.293538454Z 
+2025-05-14T08:52:12.293559294Z > rest-express@1.0.0 start
+2025-05-14T08:52:12.293564535Z > NODE_ENV=production node dist/index.js
+2025-05-14T08:52:12.293566335Z 
+2025-05-14T08:52:12.493758294Z /opt/render/project/src/dist/index.js:494
+2025-05-14T08:52:12.493775155Z                             marker.bindPopup(`<b>${loc.name}</b><br>${loc.date}`);
+2025-05-14T08:52:12.493780075Z                                                  ^
+2025-05-14T08:52:12.493782825Z 
+2025-05-14T08:52:12.493785335Z SyntaxError: missing ) after argument list
+2025-05-14T08:52:12.493787925Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-14T08:52:12.493792325Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-14T08:52:12.493795385Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-14T08:52:12.493798105Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-14T08:52:12.493800815Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-14T08:52:12.493803625Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T08:52:12.493806185Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T08:52:12.493808705Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T08:52:12.493814286Z     at node:internal/main/run_main_module:36:49
+2025-05-14T08:52:12.493817086Z 
+2025-05-14T08:52:12.493819806Z Node.js v22.14.0
