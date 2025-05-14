@@ -368,367 +368,371 @@ app.delete('/api/locations/:id', async (req, res) => {
 
 // Frontend-Route mit eingebautem Leaflet für interaktive Karte
 app.get('/*', (req, res) => {
-  res.send('<!DOCTYPE html>\
-<html lang="de">\
-<head>\
-    <meta charset="UTF-8">\
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
-    <title>Susibert</title>\
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>\
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>\
-    <style>\
-        body {\
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen, Ubuntu, Cantarell, \'Open Sans\', \'Helvetica Neue\', sans-serif;\
-            background-color: #1a1a1a;\
-            color: #f5f5f5;\
-            margin: 0;\
-            padding: 0;\
-        }\
-        .container {\
-            max-width: 1200px;\
-            margin: 0 auto;\
-            padding: 20px;\
-        }\
-        header {\
-            display: flex;\
-            justify-content: space-between;\
-            align-items: center;\
-            padding: 1rem 0;\
-            border-bottom: 1px solid #333;\
-            margin-bottom: 2rem;\
-        }\
-        h1 {\
-            color: #f59a0c;\
-            font-size: 2rem;\
-            margin: 0;\
-        }\
-        .login-container {\
-            text-align: center;\
-            max-width: 400px;\
-            margin: 100px auto;\
-            padding: 2rem;\
-            background-color: #222;\
-            border-radius: 8px;\
-        }\
-        input {\
-            display: block;\
-            width: 100%;\
-            padding: 10px;\
-            margin: 1rem 0;\
-            background-color: #333;\
-            border: none;\
-            border-radius: 4px;\
-            color: white;\
-        }\
-        button {\
-            background-color: #f59a0c;\
-            color: black;\
-            border: none;\
-            padding: 10px 20px;\
-            border-radius: 4px;\
-            cursor: pointer;\
-            font-weight: bold;\
-        }\
-        button:hover {\
-            background-color: #e08900;\
-        }\
-        #message {\
-            color: #ff4d4d;\
-            margin-top: 1rem;\
-        }\
-        #app {\
-            display: none;\
-        }\
-        #map {\
-            height: 600px;\
-            width: 100%;\
-            border-radius: 8px;\
-            margin-bottom: 2rem;\
-        }\
-        .locations-list {\
-            margin: 2rem 0;\
-        }\
-        .location-card {\
-            background-color: #222;\
-            border-radius: 8px;\
-            padding: 1rem;\
-            margin-bottom: 1rem;\
-        }\
-        .location-image {\
-            max-width: 100%;\
-            height: auto;\
-            border-radius: 4px;\
-            margin-top: 0.5rem;\
-        }\
-    </style>\
-</head>\
-<body>\
-    <div class="container">\
-        <div id="login" class="login-container">\
-            <h1>Susibert</h1>\
-            <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>\
-            <input type="password" id="accessCode" placeholder="Zugangscode">\
-            <button id="loginButton">Einloggen</button>\
-            <div id="message"></div>\
-        </div>\
-        \
-        <div id="app">\
-            <header>\
-                <h1>Susibert</h1>\
-            </header>\
-            <main>\
-                <div id="map"></div>\
-                <h2>Besuchte Orte</h2>\
-                <div id="locations" class="locations-list"></div>\
-            </main>\
-        </div>\
-    </div>\
-\
-    <script>\
-        // Zugangscode prüfen\
-        function loginButtonClickHandler() {\
-            var code = document.getElementById("accessCode").value;\
-            var messageEl = document.getElementById("message");\
-            messageEl.textContent = "Login wird überprüft...";\
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Susibert</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #1a1a1a;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            color: #f59a0c;
+            font-size: 2rem;
+            margin: 0;
+        }
+        .login-container {
+            text-align: center;
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2rem;
+            background-color: #222;
+            border-radius: 8px;
+        }
+        input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 1rem 0;
+            background-color: #333;
+            border: none;
+            border-radius: 4px;
+            color: white;
+        }
+        button {
+            background-color: #f59a0c;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #e08900;
+        }
+        #message {
+            color: #ff4d4d;
+            margin-top: 1rem;
+        }
+        #app {
+            display: none;
+        }
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .locations-list {
+            margin: 2rem 0;
+        }
+        .location-card {
+            background-color: #222;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .location-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="login" class="login-container">
+            <h1>Susibert</h1>
+            <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
+            <input type="password" id="accessCode" placeholder="Zugangscode">
+            <button id="loginButton">Einloggen</button>
+            <div id="message"></div>
+        </div>
+        
+        <div id="app">
+            <header>
+                <h1>Susibert</h1>
+            </header>
+            <main>
+                <div id="map"></div>
+                <h2>Besuchte Orte</h2>
+                <div id="locations" class="locations-list"></div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Zugangscode prüfen
+        function loginButtonClickHandler() {
+            var code = document.getElementById("accessCode").value;
+            var messageEl = document.getElementById("message");
+            messageEl.textContent = "Login wird überprüft...";
             
-            console.log("Login-Button wurde geklickt");\
-            console.log("Zugangscode:", code);\
+            console.log("Login-Button wurde geklickt");
+            console.log("Zugangscode:", code);
             
-            fetch("/api/access-codes/validate", {\
-                method: "POST",\
-                headers: { "Content-Type": "application/json" },\
-                body: JSON.stringify({ accessCode: code })\
-            })\
-            .then(function(response) {\
-                console.log("Server-Antwort erhalten:", response.status);\
-                return response.json();\
-            })\
-            .then(function(data) {\
-                console.log("Validierungsdaten:", data);\
+            fetch("/api/access-codes/validate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ accessCode: code })
+            })
+            .then(function(response) {
+                console.log("Server-Antwort erhalten:", response.status);
+                return response.json();
+            })
+            .then(function(data) {
+                console.log("Validierungsdaten:", data);
                 
-                if (data.valid) {\
-                    console.log("Login erfolgreich, zeige App");\
-                    document.getElementById("login").style.display = "none";\
-                    document.getElementById("app").style.display = "block";\
-                    initMap();\
-                } else {\
-                    console.log("Login fehlgeschlagen");\
-                    messageEl.textContent = "Ungültiger Zugangscode. Bitte versuche es erneut.";\
-                }\
-            })\
-            .catch(function(error) {\
-                console.error("Login-Fehler:", error);\
-                messageEl.textContent = "Fehler beim Überprüfen des Codes. Bitte versuche es später erneut.";\
-            });\
-        }\
+                if (data.valid) {
+                    console.log("Login erfolgreich, zeige App");
+                    document.getElementById("login").style.display = "none";
+                    document.getElementById("app").style.display = "block";
+                    initMap();
+                } else {
+                    console.log("Login fehlgeschlagen");
+                    messageEl.textContent = "Ungültiger Zugangscode. Bitte versuche es erneut.";
+                }
+            })
+            .catch(function(error) {
+                console.error("Login-Fehler:", error);
+                messageEl.textContent = "Fehler beim Überprüfen des Codes. Bitte versuche es später erneut.";
+            });
+        }
         
-        // Event-Listener für Klick auf Login-Button\
-        document.getElementById("loginButton").addEventListener("click", loginButtonClickHandler);\
+        // Event-Listener für Klick auf Login-Button
+        document.getElementById("loginButton").addEventListener("click", loginButtonClickHandler);
         
-        // Event-Listener für Enter-Taste im Passwortfeld\
-        document.getElementById("accessCode").addEventListener("keyup", function(event) {\
-            if (event.key === "Enter") {\
-                loginButtonClickHandler();\
-            }\
-        });\
-        \
-        // Debug-Funktion\
-        function showDebugInfo() {\
-            var debugContainer = document.createElement("div");\
-            debugContainer.style.position = "fixed";\
-            debugContainer.style.bottom = "10px";\
-            debugContainer.style.right = "10px";\
-            debugContainer.style.backgroundColor = "rgba(0,0,0,0.8)";\
-            debugContainer.style.color = "white";\
-            debugContainer.style.padding = "10px";\
-            debugContainer.style.borderRadius = "5px";\
-            debugContainer.style.maxWidth = "80%";\
-            debugContainer.style.maxHeight = "80%";\
-            debugContainer.style.overflow = "auto";\
-            debugContainer.style.zIndex = "9999";\
-            debugContainer.style.fontSize = "12px";\
-            debugContainer.innerHTML = "<h3>Debug wird geladen...</h3>";\
-            document.body.appendChild(debugContainer);\
-            \
-            fetch("/api/debug")\
-            .then(function(response) { return response.json(); })\
-            .then(function(data) {\
-                var html = "<h3>Debug-Informationen</h3>";\
-                html += "<p><strong>Server-Zeit:</strong> " + data.server_time + "</p>";\
-                html += "<p><strong>Umgebung:</strong> " + data.environment + "</p>";\
-                \
-                html += "<h4>Umgebungsvariablen:</h4>";\
-                html += "<ul>";\
-                for (var key in data.environment_variables) {\
-                    html += "<li><strong>" + key + ":</strong> " + data.environment_variables[key] + "</li>";\
-                }\
-                html += "</ul>";\
-                \
-                html += "<h4>Datenbank-Test:</h4>";\
-                html += "<ul>";\
-                for (var key in data.database_test) {\
-                    if (typeof data.database_test[key] === 'object') {\
-                        html += "<li><strong>" + key + ":</strong> <pre>" + JSON.stringify(data.database_test[key], null, 2) + "</pre></li>";\
-                    } else {\
-                        html += "<li><strong>" + key + ":</strong> " + data.database_test[key] + "</li>";\
-                    }\
-                }\
-                html += "</ul>";\
-                \
-                html += "<p><button onclick='this.parentNode.parentNode.remove()' style='background-color: #f59a0c; border: none; color: black; padding: 5px 10px; border-radius: 4px;'>Schließen</button></p>";\
-                \
-                debugContainer.innerHTML = html;\
-            })\
-            .catch(function(error) {\
-                debugContainer.innerHTML = "<h3>Fehler beim Laden der Debug-Informationen</h3><p>" + error + "</p>";\
-            });\
-        }\
-        \
-        // Debug-Button versteckt hinzufügen (Dreimal schnell auf den Susibert-Titel klicken)\
-        var clickCount = 0;\
-        var clickTimer;\
-        document.querySelector(".login-container h1").addEventListener("click", function() {\
-            clickCount++;\
-            clearTimeout(clickTimer);\
-            \
-            clickTimer = setTimeout(function() {\
-                clickCount = 0;\
-            }, 1000);\
-            \
-            if (clickCount >= 3) {\
-                showDebugInfo();\
-                clickCount = 0;\
-            }\
-        });\
-        \
-        // Karte initialisieren\
-        var map;\
-        var markers = [];\
-        \
-        function initMap() {\
-            // Karte erstellen\
-            map = L.map("map").setView([51.1657, 10.4515], 6); // Deutschland als Start\
-            \
-            // Kartenstil: CartoDB Positron (hell) für dunklen Hintergrund\
-            L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {\
-                attribution: \'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>\',\
-                subdomains: "abcd",\
-                maxZoom: 19\
-            }).addTo(map);\
-            \
-            // Locations laden\
-            loadLocations();\
-        }\
-        \
-        // Locations laden und anzeigen\
-        async function loadLocations() {\
-            var locationsEl = document.getElementById("locations");\
-            \
-            try {\
-                var response = await fetch("/api/locations");\
-                \
-                if (!response.ok) {\
-                    throw new Error("Fehler beim Laden der Daten");\
-                }\
-                \
-                var locations = await response.json();\
-                \
-                // Marker löschen\
-                markers.forEach(function(marker) {\
-                    map.removeLayer(marker);\
-                });\
-                markers = [];\
-                \
-                // Locations anzeigen\
-                locationsEl.innerHTML = "";\
-                locations.forEach(function(loc) {\
-                    // Marker hinzufügen\
-                    if (loc.latitude && loc.longitude) {\
-                        var lat = parseFloat(loc.latitude);\
-                        var lng = parseFloat(loc.longitude);\
-                        \
-                        if (!isNaN(lat) && !isNaN(lng)) {\
-                            // Marker mit orangenem Gradient erstellen\
-                            for (var i = 0; i < 20; i++) {\
-                                var radius = 50000 * (1 - i/20); // Abnehmender Radius (50km bis 0)\
-                                var opacity = 0.05 + (i / 20) * 0.3; // Zunehmende Opazität\
-                                \
-                                var circle = L.circle([lat, lng], {\
-                                    radius: radius,\
-                                    color: "transparent",\
-                                    fillColor: "#f59a0c",\
-                                    fillOpacity: opacity,\
-                                    interactive: false\
-                                }).addTo(map);\
-                                \
-                                markers.push(circle);\
-                            }\
-                            \
-                            // Hauptmarker hinzufügen\
-                            var marker = L.marker([lat, lng]).addTo(map);\
-                            marker.bindPopup("<b>" + loc.name + "</b><br>" + loc.date);\
-                            markers.push(marker);\
-                        }\
-                    }\
-                    \
-                    // Location-Karte hinzufügen\
-                    var card = document.createElement("div");\
-                    card.className = "location-card";\
-                    \
-                    var cardContent = "<h3>" + loc.name + "</h3>";\
-                    cardContent += "<p><strong>Datum:</strong> " + loc.date + "</p>";\
-                    \
-                    if (loc.description) {\
-                        cardContent += "<p>" + loc.description + "</p>";\
-                    }\
-                    \
-                    if (loc.highlight) {\
-                        cardContent += "<p><strong>Highlight:</strong> " + loc.highlight + "</p>";\
-                    }\
-                    \
-                    if (loc.image) {\
-                        cardContent += "<img src=\\"" + loc.image + "\\" alt=\\"" + loc.name + "\\" class=\\"location-image\\">";\
-                    }\
-                    \
-                    card.innerHTML = cardContent;\
-                    \
-                    // Karte klickbar machen\
-                    card.addEventListener("click", function() {\
-                        if (loc.latitude && loc.longitude) {\
-                            var lat = parseFloat(loc.latitude);\
-                            var lng = parseFloat(loc.longitude);\
-                            if (!isNaN(lat) && !isNaN(lng)) {\
-                                map.setView([lat, lng], 10);\
-                                \
-                                // Finde den entsprechenden Marker und öffne das Popup\
-                                markers.forEach(function(marker) {\
-                                    if (marker instanceof L.Marker) {\
-                                        var markerLatLng = marker.getLatLng();\
-                                        if (markerLatLng.lat === lat && markerLatLng.lng === lng) {\
-                                            marker.openPopup();\
-                                        }\
-                                    }\
-                                });\
-                            }\
-                        }\
-                    });\
-                    \
-                    locationsEl.appendChild(card);\
-                });\
-                \
-                // Kartenansicht an alle Marker anpassen, wenn Marker vorhanden sind\
-                if (markers.length > 0) {\
-                    var markerGroup = L.featureGroup(markers.filter(function(m) { return m instanceof L.Marker; }));\
-                    map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });\
-                }\
-            } catch (error) {\
-                locationsEl.innerHTML = "<p>Fehler beim Laden der Locations: " + error.message + "</p>";\
-                console.error("Error loading locations:", error);\
-            }\
-        }\
-    </script>\
-</body>\
-</html>');
+        // Event-Listener für Enter-Taste im Passwortfeld
+        document.getElementById("accessCode").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                loginButtonClickHandler();
+            }
+        });
+        
+        // Debug-Funktion
+        function showDebugInfo() {
+            var debugContainer = document.createElement("div");
+            debugContainer.style.position = "fixed";
+            debugContainer.style.bottom = "10px";
+            debugContainer.style.right = "10px";
+            debugContainer.style.backgroundColor = "rgba(0,0,0,0.8)";
+            debugContainer.style.color = "white";
+            debugContainer.style.padding = "10px";
+            debugContainer.style.borderRadius = "5px";
+            debugContainer.style.maxWidth = "80%";
+            debugContainer.style.maxHeight = "80%";
+            debugContainer.style.overflow = "auto";
+            debugContainer.style.zIndex = "9999";
+            debugContainer.style.fontSize = "12px";
+            debugContainer.innerHTML = "<h3>Debug wird geladen...</h3>";
+            document.body.appendChild(debugContainer);
+            
+            fetch("/api/debug")
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                var html = "<h3>Debug-Informationen</h3>";
+                html += "<p><strong>Server-Zeit:</strong> " + data.server_time + "</p>";
+                html += "<p><strong>Umgebung:</strong> " + data.environment + "</p>";
+                
+                html += "<h4>Umgebungsvariablen:</h4>";
+                html += "<ul>";
+                for (var key in data.environment_variables) {
+                    html += "<li><strong>" + key + ":</strong> " + data.environment_variables[key] + "</li>";
+                }
+                html += "</ul>";
+                
+                html += "<h4>Datenbank-Test:</h4>";
+                html += "<ul>";
+                for (var key in data.database_test) {
+                    if (typeof data.database_test[key] === 'object') {
+                        html += "<li><strong>" + key + ":</strong> <pre>" + JSON.stringify(data.database_test[key], null, 2) + "</pre></li>";
+                    } else {
+                        html += "<li><strong>" + key + ":</strong> " + data.database_test[key] + "</li>";
+                    }
+                }
+                html += "</ul>";
+                
+                html += "<p><button onclick='this.parentNode.parentNode.remove()' style='background-color: #f59a0c; border: none; color: black; padding: 5px 10px; border-radius: 4px;'>Schließen</button></p>";
+                
+                debugContainer.innerHTML = html;
+            })
+            .catch(function(error) {
+                debugContainer.innerHTML = "<h3>Fehler beim Laden der Debug-Informationen</h3><p>" + error + "</p>";
+            });
+        }
+        
+        // Debug-Button versteckt hinzufügen (Dreimal schnell auf den Susibert-Titel klicken)
+        var clickCount = 0;
+        var clickTimer;
+        document.querySelector(".login-container h1").addEventListener("click", function() {
+            clickCount++;
+            clearTimeout(clickTimer);
+            
+            clickTimer = setTimeout(function() {
+                clickCount = 0;
+            }, 1000);
+            
+            if (clickCount >= 3) {
+                showDebugInfo();
+                clickCount = 0;
+            }
+        });
+        
+        // Karte initialisieren
+        var map;
+        var markers = [];
+        
+        function initMap() {
+            // Karte erstellen
+            map = L.map("map").setView([51.1657, 10.4515], 6); // Deutschland als Start
+            
+            // Kartenstil: CartoDB Positron (hell) für dunklen Hintergrund
+            L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: "abcd",
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Locations laden
+            loadLocations();
+        }
+        
+        // Locations laden und anzeigen
+        async function loadLocations() {
+            var locationsEl = document.getElementById("locations");
+            
+            try {
+                var response = await fetch("/api/locations");
+                
+                if (!response.ok) {
+                    throw new Error("Fehler beim Laden der Daten");
+                }
+                
+                var locations = await response.json();
+                
+                // Marker löschen
+                markers.forEach(function(marker) {
+                    map.removeLayer(marker);
+                });
+                markers = [];
+                
+                // Locations anzeigen
+                locationsEl.innerHTML = "";
+                locations.forEach(function(loc) {
+                    // Marker hinzufügen
+                    if (loc.latitude && loc.longitude) {
+                        var lat = parseFloat(loc.latitude);
+                        var lng = parseFloat(loc.longitude);
+                        
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            // Marker mit orangenem Gradient erstellen
+                            for (var i = 0; i < 20; i++) {
+                                var radius = 50000 * (1 - i/20); // Abnehmender Radius (50km bis 0)
+                                var opacity = 0.05 + (i / 20) * 0.3; // Zunehmende Opazität
+                                
+                                var circle = L.circle([lat, lng], {
+                                    radius: radius,
+                                    color: "transparent",
+                                    fillColor: "#f59a0c",
+                                    fillOpacity: opacity,
+                                    interactive: false
+                                }).addTo(map);
+                                
+                                markers.push(circle);
+                            }
+                            
+                            // Hauptmarker hinzufügen
+                            var marker = L.marker([lat, lng]).addTo(map);
+                            marker.bindPopup("<b>" + loc.name + "</b><br>" + loc.date);
+                            markers.push(marker);
+                        }
+                    }
+                    
+                    // Location-Karte hinzufügen
+                    var card = document.createElement("div");
+                    card.className = "location-card";
+                    
+                    var cardContent = "<h3>" + loc.name + "</h3>";
+                    cardContent += "<p><strong>Datum:</strong> " + loc.date + "</p>";
+                    
+                    if (loc.description) {
+                        cardContent += "<p>" + loc.description + "</p>";
+                    }
+                    
+                    if (loc.highlight) {
+                        cardContent += "<p><strong>Highlight:</strong> " + loc.highlight + "</p>";
+                    }
+                    
+                    if (loc.image) {
+                        cardContent += "<img src=\"" + loc.image + "\" alt=\"" + loc.name + "\" class=\"location-image\">";
+                    }
+                    
+                    card.innerHTML = cardContent;
+                    
+                    // Karte klickbar machen
+                    card.addEventListener("click", function() {
+                        if (loc.latitude && loc.longitude) {
+                            var lat = parseFloat(loc.latitude);
+                            var lng = parseFloat(loc.longitude);
+                            if (!isNaN(lat) && !isNaN(lng)) {
+                                map.setView([lat, lng], 10);
+                                
+                                // Finde den entsprechenden Marker und öffne das Popup
+                                markers.forEach(function(marker) {
+                                    if (marker instanceof L.Marker) {
+                                        var markerLatLng = marker.getLatLng();
+                                        if (markerLatLng.lat === lat && markerLatLng.lng === lng) {
+                                            marker.openPopup();
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    
+                    locationsEl.appendChild(card);
+                });
+                
+                // Kartenansicht an alle Marker anpassen, wenn Marker vorhanden sind
+                if (markers.length > 0) {
+                    var markerGroup = L.featureGroup(markers.filter(function(m) { return m instanceof L.Marker; }));
+                    map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
+                }
+            } catch (error) {
+                locationsEl.innerHTML = "<p>Fehler beim Laden der Locations: " + error.message + "</p>";
+                console.error("Error loading locations:", error);
+            }
+        }
+    </script>
+</body>
+</html>
+  `;
+  
+  res.send(htmlContent);
 });
 
 // Server starten

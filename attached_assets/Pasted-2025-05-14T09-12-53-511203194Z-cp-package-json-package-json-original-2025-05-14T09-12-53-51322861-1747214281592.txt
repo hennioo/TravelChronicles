@@ -1,0 +1,50 @@
+2025-05-14T09:12:53.511203194Z + cp package.json package.json.original
+2025-05-14T09:12:53.513228615Z + cat
+2025-05-14T09:12:53.515450571Z + echo '=== Build abgeschlossen ==='
+2025-05-14T09:12:53.515466871Z === Build abgeschlossen ===
+2025-05-14T09:12:58.327126862Z ==> Uploading build...
+2025-05-14T09:13:08.08503605Z ==> Uploaded in 6.3s. Compression took 3.4s
+2025-05-14T09:13:08.136895637Z ==> Build successful 🎉
+2025-05-14T09:13:18.585006864Z ==> Deploying...
+2025-05-14T09:13:50.517692122Z ==> Running 'npm start'
+2025-05-14T09:13:51.720874838Z 
+2025-05-14T09:13:51.72091581Z > rest-express@1.0.0 start
+2025-05-14T09:13:51.720923481Z > NODE_ENV=production node dist/index.js
+2025-05-14T09:13:51.720928121Z 
+2025-05-14T09:13:52.016744478Z /opt/render/project/src/dist/index.js:371
+2025-05-14T09:13:52.016757779Z   res.send('<!DOCTYPE html>\
+2025-05-14T09:13:52.016762099Z 
+2025-05-14T09:13:52.016766279Z SyntaxError: Invalid or unexpected token
+2025-05-14T09:13:52.016770889Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-14T09:13:52.01677523Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-14T09:13:52.01677928Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-14T09:13:52.0169525Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-14T09:13:52.016958791Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-14T09:13:52.016963211Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T09:13:52.016967431Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T09:13:52.016972202Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T09:13:52.016980992Z     at node:internal/main/run_main_module:36:49
+2025-05-14T09:13:52.016984973Z 
+2025-05-14T09:13:52.016989333Z Node.js v22.14.0
+2025-05-14T09:13:52.977706501Z ==> Exited with status 1
+2025-05-14T09:13:52.996728187Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-14T09:13:59.426806941Z ==> Running 'npm start'
+2025-05-14T09:14:00.432746924Z 
+2025-05-14T09:14:00.432768185Z > rest-express@1.0.0 start
+2025-05-14T09:14:00.432773855Z > NODE_ENV=production node dist/index.js
+2025-05-14T09:14:00.432776295Z 
+2025-05-14T09:14:00.728839547Z /opt/render/project/src/dist/index.js:371
+2025-05-14T09:14:00.728857928Z   res.send('<!DOCTYPE html>\
+2025-05-14T09:14:00.728860928Z 
+2025-05-14T09:14:00.728863559Z SyntaxError: Invalid or unexpected token
+2025-05-14T09:14:00.728866939Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-14T09:14:00.728870089Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-14T09:14:00.728872359Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-14T09:14:00.728874609Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-14T09:14:00.728876909Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-14T09:14:00.728879029Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T09:14:00.728881309Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T09:14:00.72889625Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T09:14:00.728901281Z     at node:internal/main/run_main_module:36:49
+2025-05-14T09:14:00.728903441Z 
+2025-05-14T09:14:00.728905871Z Node.js v22.14.0
