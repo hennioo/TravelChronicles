@@ -127,33 +127,39 @@ app.get('/api/locations', async (req, res) => {
   }
 
   try {
-    // Berücksichtige potenzielle Unterschiede im Spaltennamen (countryCode vs country_code)
-    const result = await pool.query(`
-      SELECT 
-        id, 
-        name, 
-        date, 
-        description, 
-        highlight, 
-        latitude, 
-        longitude, 
-        COALESCE(country_code, countryCode) as country_code, 
-        image 
-      FROM locations 
-      ORDER BY id DESC
-    `);
+    console.log("API: Lade Locations aus der Datenbank...");
     
-    // Transformiere die Daten zurück zum Frontend-Format
+    // Prüfe die Tabellen- und Spaltenstruktur
+    const tablesResult = await pool.query(`
+      SELECT table_name, column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'locations'
+    `);
+    console.log("Tabellen-/Spalteninformationen:", tablesResult.rows);
+    
+    // Berücksichtige potenzielle Unterschiede im Spaltennamen (countryCode vs country_code)
+    // Nutze ein generisches Query, das robuster gegen Spaltenänderungen ist
+    const result = await pool.query(`SELECT * FROM locations ORDER BY id DESC`);
+    console.log("Locations geladen, Anzahl:", result.rows.length);
+    
+    // Transformiere die Daten zurück zum Frontend-Format mit Fallbacks für fehlende Felder
     const locations = result.rows.map(row => ({
       id: row.id,
-      name: row.name,
-      date: row.date,
-      description: row.description,
-      highlight: row.highlight,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      countryCode: row.country_code,
-      image: row.image
+      name: row.name || "Unbenannter Ort",
+      date: row.date || new Date().toISOString().split('T')[0],
+      description: row.description || "",
+      highlight: row.highlight || "",
+      latitude: row.latitude || "0",
+      longitude: row.longitude || "0",
+      countryCode: row.country_code || row.countrycode || "XX",
+      // Stelle sicher, dass Bilder korrekte URLs sind
+      image: row.image && row.image.startsWith('http') 
+        ? row.image 
+        : row.image && row.image.startsWith('/') 
+          ? row.image 
+          : row.image 
+            ? `/uploads/${row.image}` 
+            : ""
     }));
     
     res.json(locations);
@@ -310,31 +316,45 @@ app.get('/map', (req, res) => {
     </div>
 
     <script>
-      // Karte initialisieren
-      var map = L.map('map').setView([51.1657, 10.4515], 6); // Deutschland als Start
-      
-      // Kartenstil: CartoDB Positron (hell) für dunklen Hintergrund
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
-      }).addTo(map);
+      // Warte, bis die Seite vollständig geladen ist
+      document.addEventListener('DOMContentLoaded', function() {
+        try {
+          console.log("Initialisiere Karte...");
+          
+          // Karte initialisieren
+          var map = L.map('map').setView([51.1657, 10.4515], 6); // Deutschland als Start
+          
+          // Kartenstil: CartoDB Positron (hell) für dunklen Hintergrund
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+          }).addTo(map);
+          
+          console.log("Karte erfolgreich initialisiert");
+        } catch (e) {
+          console.error("Fehler bei der Karteninitialisierung:", e);
+        }
+      });
       
       // Locations laden
       var markers = [];
       
       // Funktion um Locations zu laden
       function loadLocations() {
-        var locationsContainer = document.getElementById('locations');
-        locationsContainer.innerHTML = '<p>Lade Orte...</p>';
-        
-        fetch('/api/locations')
-          .then(function(response) {
-            if (!response.ok) {
-              throw new Error('Fehler beim Laden der Daten');
-            }
-            return response.json();
-          })
+        try {
+          console.log("Starte Laden der Locations...");
+          var locationsContainer = document.getElementById('locations');
+          locationsContainer.innerHTML = '<p>Lade Orte...</p>';
+          
+          fetch('/api/locations')
+            .then(function(response) {
+              console.log("API-Antwort erhalten:", response.status);
+              if (!response.ok) {
+                throw new Error('Fehler beim Laden der Daten: ' + response.status);
+              }
+              return response.json();
+            })
           .then(function(locations) {
             // Marker löschen
             markers.forEach(function(marker) {
@@ -439,8 +459,20 @@ app.get('/map', (req, res) => {
           });
       }
       
-      // Lade Locations beim Seitenstart
-      loadLocations();
+      // Lade Locations beim Seitenstart, aber erst nachdem die Karte initialisiert wurde
+      document.addEventListener('DOMContentLoaded', function() {
+        // Kurze Verzögerung, um sicherzustellen, dass die Karte geladen ist
+        setTimeout(function() {
+          try {
+            console.log("Starte Location-Laden nach Karteninitialisierung...");
+            loadLocations();
+          } catch (error) {
+            console.error("Fehler beim Laden der Locations:", error);
+            document.getElementById('locations').innerHTML = 
+              '<p>Fehler beim Laden der Orte. Bitte die Seite neu laden.</p>';
+          }
+        }, 1000);
+      });
     </script>
   </body>
   </html>
