@@ -1,0 +1,62 @@
+2025-05-14T22:14:53.956748475Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-14T22:14:57.859742794Z ==> Checking out commit 22a097e920adf2f33ff169704013ab64cebe36bb in branch main
+2025-05-14T22:14:59.778325122Z ==> Downloading cache...
+2025-05-14T22:15:14.222724435Z ==> Transferred 189MB in 8s. Extraction took 6s.
+2025-05-14T22:16:32.154220939Z ==> Using Node.js version 22.14.0 (default)
+2025-05-14T22:16:32.241852805Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-14T22:16:32.442100049Z ==> Using Bun version 1.1.0 (default)
+2025-05-14T22:16:32.466907707Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-14T22:16:32.497285773Z ==> Running build command './build-render.sh'...
+2025-05-14T22:16:32.507752155Z + echo '=== Minimaler Build für Render ==='
+2025-05-14T22:16:32.507773126Z === Minimaler Build für Render ===
+2025-05-14T22:16:32.521273669Z + echo 'Installiere benötigte Pakete...'
+2025-05-14T22:16:32.521281879Z + npm install express pg multer
+2025-05-14T22:16:32.521290249Z Installiere benötigte Pakete...
+2025-05-14T22:16:37.337263805Z 
+2025-05-14T22:16:37.337291086Z up to date, audited 609 packages in 3s
+2025-05-14T22:16:37.337314106Z 
+2025-05-14T22:16:37.337340647Z 174 packages are looking for funding
+2025-05-14T22:16:37.337349657Z   run `npm fund` for details
+2025-05-14T22:16:37.355975718Z 
+2025-05-14T22:16:37.355991178Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-14T22:16:37.355994658Z 
+2025-05-14T22:16:37.355999578Z To address issues that do not require attention, run:
+2025-05-14T22:16:37.356003169Z   npm audit fix
+2025-05-14T22:16:37.356005859Z 
+2025-05-14T22:16:37.356008699Z To address all issues (including breaking changes), run:
+2025-05-14T22:16:37.356013139Z   npm audit fix --force
+2025-05-14T22:16:37.356015899Z 
+2025-05-14T22:16:37.356019839Z Run `npm audit` for details.
+2025-05-14T22:16:37.422175498Z Prüfe Verzeichnisstruktur...
+2025-05-14T22:16:37.422177838Z + echo 'Prüfe Verzeichnisstruktur...'
+2025-05-14T22:16:37.422222119Z + mkdir -p dist
+2025-05-14T22:16:37.424212883Z + mkdir -p dist/uploads
+2025-05-14T22:16:37.425920649Z + echo 'Kopiere Wartungsserver-Datei...'
+2025-05-14T22:16:37.425932229Z Kopiere Wartungsserver-Datei...
+2025-05-14T22:16:37.425933659Z + '[' '!' -f dist/index.js ']'
+2025-05-14T22:16:37.425954219Z + cp -v server.js dist/index.js
+2025-05-14T22:16:37.440951343Z 'server.js' -> 'dist/index.js'
+2025-05-14T22:16:37.441273511Z + echo 'Erstelle package.json Backup...'
+2025-05-14T22:16:37.441282282Z Erstelle package.json Backup...
+2025-05-14T22:16:37.441287462Z + cp package.json package.json.original
+2025-05-14T22:16:37.443264155Z + cat
+2025-05-14T22:16:37.46948825Z + echo '=== Build abgeschlossen ==='
+2025-05-14T22:16:37.46950102Z === Build abgeschlossen ===
+2025-05-14T22:16:38.914259328Z ==> Uploading build...
+2025-05-14T22:16:57.441765378Z ==> Uploaded in 7.7s. Compression took 10.8s
+2025-05-14T22:16:57.512944691Z ==> Build successful 🎉
+2025-05-14T22:17:05.555663996Z ==> Deploying...
+2025-05-14T22:17:22.333032663Z ==> Running 'npm start'
+2025-05-14T22:17:22.564060713Z 
+2025-05-14T22:17:22.564083104Z > rest-express@1.0.0 start
+2025-05-14T22:17:22.564086864Z > NODE_ENV=production node dist/index.js
+2025-05-14T22:17:22.564089304Z 
+2025-05-14T22:17:22.863771962Z Uploads-Verzeichnis existiert: /opt/render/project/src/dist/uploads
+2025-05-14T22:17:22.864028726Z Verbinde mit Datenbank über DATABASE_URL...
+2025-05-14T22:17:22.929535206Z Susibert Server läuft auf Port 10000
+2025-05-14T22:17:22.929560486Z Umgebung: production
+2025-05-14T22:17:22.929566456Z Datenbankverbindung: Nicht verbunden
+2025-05-14T22:17:22.92981947Z Datum/Zeit: 2025-05-14T22:17:22.929Z
+2025-05-14T22:17:23.730233027Z Datenbankverbindung erfolgreich: { now: 2025-05-14T22:17:23.683Z }
+2025-05-14T22:17:23.824088531Z Tabelle locations existiert: true
+2025-05-14T22:17:27.105412452Z ==> Your service is live 🎉
