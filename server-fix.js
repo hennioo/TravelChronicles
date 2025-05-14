@@ -14,9 +14,6 @@ const port = process.env.PORT || 10000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Vereinfachte Session ohne Cookie-Parser-Abhängigkeit
-// Sessions werden mit URL-Parameter und temporärem Speicher im Server-Arbeitsspeicher verwaltet
-
 // Session zur Speicherung des Login-Status (sehr einfache Implementierung)
 const sessions = {};
 
@@ -28,14 +25,13 @@ function createSession() {
   return sessionId;
 }
 
-// Session-Middleware ohne Cookie-Parser
+// Session-Cookie-Middleware
 function sessionMiddleware(req, res, next) {
-  const sessionId = req.query.session;
+  const sessionId = req.query.session || req.cookies?.sessionId;
   
   req.session = null;
   
   if (sessionId && sessions[sessionId]) {
-    // Prüfe, ob die Session abgelaufen ist
     if (sessions[sessionId].expires > Date.now()) {
       req.session = sessions[sessionId];
       req.sessionId = sessionId;
@@ -223,11 +219,17 @@ app.post('/api/access-codes/validate', (req, res) => {
     // Erstelle eine Session
     const sessionId = createSession();
     
-    // Wir verwenden URL-Parameter statt Cookies
+    // Setze Session-Cookie
+    res.cookie('sessionId', sessionId, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 Stunden
+    });
+    
     res.json({ 
       valid: true, 
       sessionId: sessionId,
-      redirectTo: '/map?session=' + sessionId
+      redirectTo: '/map'
     });
   } else {
     res.status(401).json({ valid: false, message: 'Ungültiger Zugangscode' });
@@ -736,8 +738,14 @@ app.post('/login', (req, res) => {
     // Erstelle eine Session
     const sessionId = createSession();
     
-    // Leite zur Map-Seite mit Session-Parameter weiter
-    res.redirect('/map?session=' + sessionId);
+    // Setze Session-Cookie
+    res.cookie('sessionId', sessionId, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 Stunden
+    });
+    
+    res.redirect('/map');
   } else {
     res.redirect('/?error=invalid');
   }
