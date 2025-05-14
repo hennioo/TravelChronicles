@@ -1,0 +1,50 @@
+2025-05-14T10:45:44.0472801Z + echo '=== Build abgeschlossen ==='
+2025-05-14T10:45:44.04728196Z === Build abgeschlossen ===
+2025-05-14T10:45:45.867280165Z ==> Uploading build...
+2025-05-14T10:45:55.14687377Z ==> Uploaded in 5.8s. Compression took 3.4s
+2025-05-14T10:45:55.30682798Z ==> Build successful 🎉
+2025-05-14T10:45:59.224287073Z ==> Deploying...
+2025-05-14T10:46:20.68667311Z ==> Running 'npm start'
+2025-05-14T10:46:21.790789283Z 
+2025-05-14T10:46:21.790821744Z > rest-express@1.0.0 start
+2025-05-14T10:46:21.790829084Z > NODE_ENV=production node dist/index.js
+2025-05-14T10:46:21.790831354Z 
+2025-05-14T10:46:21.994529724Z /opt/render/project/src/dist/index.js:1056
+2025-05-14T10:46:21.994549084Z               imageHtml = `<img src="${loc.image}" alt="${loc.name}" class="location-image">`;
+2025-05-14T10:46:21.994555164Z                             ^^^
+2025-05-14T10:46:21.994557314Z 
+2025-05-14T10:46:21.994559505Z SyntaxError: missing ) after argument list
+2025-05-14T10:46:21.994562665Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-14T10:46:21.994566145Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-14T10:46:21.994568775Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-14T10:46:21.994571635Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-14T10:46:21.994574585Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-14T10:46:21.994577175Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T10:46:21.994579815Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T10:46:21.994582635Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T10:46:21.994585135Z     at node:internal/main/run_main_module:36:49
+2025-05-14T10:46:21.994586995Z 
+2025-05-14T10:46:21.994589125Z Node.js v22.14.0
+2025-05-14T10:46:23.54335925Z ==> Exited with status 1
+2025-05-14T10:46:23.561144717Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-14T10:46:29.956538373Z ==> Running 'npm start'
+2025-05-14T10:46:30.980053731Z 
+2025-05-14T10:46:30.980086252Z > rest-express@1.0.0 start
+2025-05-14T10:46:30.980091362Z > NODE_ENV=production node dist/index.js
+2025-05-14T10:46:30.980133233Z 
+2025-05-14T10:46:31.168566036Z /opt/render/project/src/dist/index.js:1056
+2025-05-14T10:46:31.168588286Z               imageHtml = `<img src="${loc.image}" alt="${loc.name}" class="location-image">`;
+2025-05-14T10:46:31.168594446Z                             ^^^
+2025-05-14T10:46:31.168597837Z 
+2025-05-14T10:46:31.168600957Z SyntaxError: missing ) after argument list
+2025-05-14T10:46:31.168604767Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-14T10:46:31.168608497Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-14T10:46:31.168611687Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-14T10:46:31.168614767Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-14T10:46:31.168618097Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-14T10:46:31.168621827Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-14T10:46:31.168625127Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-14T10:46:31.168628357Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-14T10:46:31.168631758Z     at node:internal/main/run_main_module:36:49
+2025-05-14T10:46:31.168634678Z 
+2025-05-14T10:46:31.168637678Z Node.js v22.14.0
