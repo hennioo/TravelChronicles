@@ -238,252 +238,271 @@ app.get('/login-susibert', (req, res) => {
 
 // Frontend-Route mit eingebautem Leaflet für interaktive Karte
 app.get('/map', (req, res) => {
-  const html = `
-  <!DOCTYPE html>
-  <html lang="de">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Susibert</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-      body {
-        font-family: system-ui, -apple-system, sans-serif;
-        background-color: #1a1a1a;
-        color: #f5f5f5;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-      header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 0;
-        border-bottom: 1px solid #333;
-        margin-bottom: 2rem;
-      }
-      h1 {
-        color: #f59a0c;
-        font-size: 2rem;
-        margin: 0;
-      }
-      #map {
-        height: 600px;
-        width: 100%;
-        border-radius: 8px;
-        margin-bottom: 2rem;
-      }
-      .locations-list {
-        margin: 2rem 0;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1rem;
-      }
-      .location-card {
-        background-color: #222;
-        border-radius: 8px;
-        padding: 1rem;
-        transition: transform 0.2s;
-        cursor: pointer;
-      }
-      .location-card:hover {
-        transform: translateY(-3px);
-      }
-      .location-image {
-        max-width: 100%;
-        height: auto;
-        border-radius: 4px;
-        margin-top: 0.5rem;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>Susibert</h1>
-      </header>
-      <main>
-        <div id="map"></div>
-        <h2>Besuchte Orte</h2>
-        <div id="locations" class="locations-list"></div>
-      </main>
-    </div>
+  const html = `<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Susibert</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #1a1a1a;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid #333;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      color: #f59a0c;
+      font-size: 2rem;
+      margin: 0;
+    }
+    #map {
+      height: 600px;
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+    .locations-list {
+      margin: 2rem 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .location-card {
+      background-color: #222;
+      border-radius: 8px;
+      padding: 1rem;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .location-card:hover {
+      transform: translateY(-3px);
+    }
+    .location-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+    .error-message {
+      background-color: rgba(255, 80, 80, 0.2);
+      border: 1px solid #ff5050;
+      color: #ff5050;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .loading-text {
+      margin-top: 10px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Susibert</h1>
+    </header>
+    <main>
+      <div id="map"></div>
+      <h2>Besuchte Orte</h2>
+      <div id="locations" class="locations-list">
+        <div class="loading">
+          <div class="loading-text">Lade Orte...</div>
+        </div>
+      </div>
+    </main>
+  </div>
 
-    <script>
-      // Warte, bis die Seite vollständig geladen ist
-      document.addEventListener('DOMContentLoaded', function() {
-        try {
-          console.log("Initialisiere Karte...");
-          
-          // Karte initialisieren
-          var map = L.map('map').setView([51.1657, 10.4515], 6); // Deutschland als Start
-          
-          // Kartenstil: CartoDB Positron (hell) für dunklen Hintergrund
-          L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 19
-          }).addTo(map);
-          
-          console.log("Karte erfolgreich initialisiert");
-        } catch (e) {
-          console.error("Fehler bei der Karteninitialisierung:", e);
-        }
-      });
+  <script>
+    // Globale Variablen
+    var map;
+    var markers = [];
+    
+    // Funktion zur Initialisierung der Karte
+    function initMap() {
+      console.log("Initialisiere Karte...");
       
-      // Locations laden
-      var markers = [];
-      
-      // Funktion um Locations zu laden
-      function loadLocations() {
-        try {
-          console.log("Starte Laden der Locations...");
-          var locationsContainer = document.getElementById('locations');
-          locationsContainer.innerHTML = '<p>Lade Orte...</p>';
-          
-          fetch('/api/locations')
-            .then(function(response) {
-              console.log("API-Antwort erhalten:", response.status);
-              if (!response.ok) {
-                throw new Error('Fehler beim Laden der Daten: ' + response.status);
-              }
-              return response.json();
-            })
-          .then(function(locations) {
-            // Marker löschen
-            markers.forEach(function(marker) {
-              map.removeLayer(marker);
-            });
-            markers = [];
-            
-            // Locations anzeigen
-            locationsContainer.innerHTML = '';
-            
-            if (locations.length === 0) {
-              locationsContainer.innerHTML = '<p>Keine Orte gefunden</p>';
-              return;
-            }
-            
-            locations.forEach(function(loc) {
-              // Marker hinzufügen
-              if (loc.latitude && loc.longitude) {
-                var lat = parseFloat(loc.latitude);
-                var lng = parseFloat(loc.longitude);
-                
-                if (!isNaN(lat) && !isNaN(lng)) {
-                  // Marker mit orangenem Gradient erstellen
-                  for (var i = 0; i < 20; i++) {
-                    var radius = 50000 * (1 - i/20); // Abnehmender Radius (50km bis 0)
-                    var opacity = 0.05 + (i / 20) * 0.3; // Zunehmende Opazität
-                    
-                    var circle = L.circle([lat, lng], {
-                      radius: radius,
-                      color: 'transparent',
-                      fillColor: '#f59a0c',
-                      fillOpacity: opacity,
-                      interactive: false
-                    }).addTo(map);
-                    
-                    markers.push(circle);
-                  }
-                  
-                  // Hauptmarker hinzufügen
-                  var marker = L.marker([lat, lng]).addTo(map);
-                  marker.bindPopup("<b>" + loc.name + "</b><br>" + loc.date);
-                  markers.push(marker);
-                }
-              }
-              
-              // Location-Karte hinzufügen
-              var card = document.createElement('div');
-              card.className = 'location-card';
-              
-              var cardContent = "<h3>" + loc.name + "</h3>";
-              cardContent += "<p><strong>Datum:</strong> " + loc.date + "</p>";
-              
-              if (loc.description) {
-                cardContent += "<p>" + loc.description + "</p>";
-              }
-              
-              if (loc.highlight) {
-                cardContent += "<p><strong>Highlight:</strong> " + loc.highlight + "</p>";
-              }
-              
-              if (loc.image) {
-                cardContent += "<img src=\"" + loc.image + "\" alt=\"" + loc.name + "\" class=\"location-image\">";
-              }
-              
-              card.innerHTML = cardContent;
-              
-              // Karte klickbar machen
-              card.addEventListener('click', function() {
-                if (loc.latitude && loc.longitude) {
-                  var lat = parseFloat(loc.latitude);
-                  var lng = parseFloat(loc.longitude);
-                  if (!isNaN(lat) && !isNaN(lng)) {
-                    map.setView([lat, lng], 10);
-                    
-                    // Finde den entsprechenden Marker und öffne das Popup
-                    markers.forEach(function(marker) {
-                      if (marker instanceof L.Marker) {
-                        var markerLatLng = marker.getLatLng();
-                        if (markerLatLng.lat === lat && markerLatLng.lng === lng) {
-                          marker.openPopup();
-                        }
-                      }
-                    });
-                  }
-                }
-              });
-              
-              locationsContainer.appendChild(card);
-            });
-            
-            // Kartenansicht an alle Marker anpassen, wenn Marker vorhanden sind
-            if (markers.length > 0) {
-              var markerGroup = L.featureGroup(markers.filter(function(m) { 
-                return m instanceof L.Marker; 
-              }));
-              map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
-            }
-          })
-          .catch(function(error) {
-            locationsContainer.innerHTML = '<p>Fehler beim Laden der Orte: ' + error.message + '</p>';
-            console.error('Error loading locations:', error);
-          });
+      try {
+        // Karte initialisieren
+        map = L.map('map').setView([51.1657, 10.4515], 6);
+        
+        // Kartenstil: CartoDB Positron (hell) für dunklen Hintergrund
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          subdomains: 'abcd',
+          maxZoom: 19
+        }).addTo(map);
+        
+        console.log("Karte erfolgreich initialisiert");
+        return true;
+      } catch (e) {
+        console.error("Fehler bei der Karteninitialisierung:", e);
+        document.getElementById('map').innerHTML = '<div class="error-message">Fehler beim Laden der Karte: ' + e.message + '</div>';
+        return false;
       }
+    }
+    
+    // Funktion zum Laden der Locations
+    function loadLocations() {
+      console.log("Starte Laden der Locations...");
+      var locationsContainer = document.getElementById('locations');
       
-      // Lade Locations beim Seitenstart, aber erst nachdem die Karte initialisiert wurde
-      document.addEventListener('DOMContentLoaded', function() {
-        // Kurze Verzögerung, um sicherzustellen, dass die Karte geladen ist
-        setTimeout(function() {
-          try {
-            console.log("Starte Location-Laden nach Karteninitialisierung...");
-            loadLocations();
-          } catch (error) {
-            console.error("Fehler beim Laden der Locations:", error);
-            document.getElementById('locations').innerHTML = 
-              '<p>Fehler beim Laden der Orte. Bitte die Seite neu laden.</p>';
+      fetch('/api/locations')
+        .then(function(response) {
+          console.log("API-Antwort erhalten:", response.status);
+          if (!response.ok) {
+            throw new Error('Fehler beim Laden der Daten: ' + response.status);
           }
-        }, 1000);
-      });
-    </script>
-  </body>
-  </html>
-  `;
+          return response.json();
+        })
+        .then(function(locations) {
+          console.log("Locations geladen:", locations.length);
+          
+          // Marker löschen, falls welche existieren
+          if (markers && markers.length > 0) {
+            markers.forEach(function(marker) {
+              if (map && marker) {
+                map.removeLayer(marker);
+              }
+            });
+          }
+          markers = [];
+          
+          // Locations anzeigen
+          locationsContainer.innerHTML = '';
+          
+          if (!locations || locations.length === 0) {
+            locationsContainer.innerHTML = '<p>Keine Orte gefunden</p>';
+            return;
+          }
+          
+          locations.forEach(function(loc) {
+            // Prüfe auf gültige Koordinaten
+            var lat = parseFloat(loc.latitude);
+            var lng = parseFloat(loc.longitude);
+            
+            if (map && !isNaN(lat) && !isNaN(lng)) {
+              // Marker mit orangenem Gradient erstellen
+              for (var i = 0; i < 10; i++) {
+                var radius = 50000 * (1 - i/10);
+                var opacity = 0.05 + (i / 10) * 0.3;
+                
+                var circle = L.circle([lat, lng], {
+                  radius: radius,
+                  color: 'transparent',
+                  fillColor: '#f59a0c',
+                  fillOpacity: opacity,
+                  interactive: false
+                }).addTo(map);
+                
+                markers.push(circle);
+              }
+              
+              // Hauptmarker hinzufügen
+              var marker = L.marker([lat, lng]).addTo(map);
+              marker.bindPopup("<b>" + loc.name + "</b><br>" + loc.date);
+              markers.push(marker);
+            }
+            
+            // Location-Karte hinzufügen
+            var card = document.createElement('div');
+            card.className = 'location-card';
+            
+            var cardContent = "<h3>" + loc.name + "</h3>";
+            cardContent += "<p><strong>Datum:</strong> " + loc.date + "</p>";
+            
+            if (loc.description) {
+              cardContent += "<p>" + loc.description + "</p>";
+            }
+            
+            if (loc.highlight) {
+              cardContent += "<p><strong>Highlight:</strong> " + loc.highlight + "</p>";
+            }
+            
+            if (loc.image && loc.image !== "") {
+              cardContent += "<img src=\"" + loc.image + "\" alt=\"" + loc.name + "\" class=\"location-image\">";
+            }
+            
+            card.innerHTML = cardContent;
+            
+            // Karte klickbar machen
+            card.addEventListener('click', function() {
+              if (map && !isNaN(lat) && !isNaN(lng)) {
+                map.setView([lat, lng], 10);
+                
+                // Finde den entsprechenden Marker und öffne das Popup
+                markers.forEach(function(marker) {
+                  if (marker instanceof L.Marker) {
+                    var markerLatLng = marker.getLatLng();
+                    if (markerLatLng.lat === lat && markerLatLng.lng === lng) {
+                      marker.openPopup();
+                    }
+                  }
+                });
+              }
+            });
+            
+            locationsContainer.appendChild(card);
+          });
+          
+          // Kartenansicht an alle Marker anpassen, wenn Marker vorhanden sind
+          if (map && markers.length > 0) {
+            var markerGroup = L.featureGroup(markers.filter(function(m) { 
+              return m instanceof L.Marker; 
+            }));
+            map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
+          }
+        })
+        .catch(function(error) {
+          console.error('Fehler beim Laden der Locations:', error);
+          locationsContainer.innerHTML = '<div class="error-message">Fehler beim Laden der Orte: ' + error.message + '</div>';
+        });
+    }
+    
+    // Bei Seitenladung
+    window.onload = function() {
+      // Karte initialisieren
+      if (initMap()) {
+        // Locations laden, nachdem die Karte initialisiert wurde
+        setTimeout(loadLocations, 500);
+      } else {
+        // Trotzdem Locations laden, auch wenn die Karte nicht initialisiert werden konnte
+        loadLocations();
+      }
+    };
+  </script>
+</body>
+</html>`;
   
   res.send(html);
 });
 
 // Standard-Route - Login-Seite
 app.get('/', (req, res) => {
-  // Vereinfachtes Login-Formular
+  // Vereinfachtes Login-Formular mit einem direkten Link zum Direktzugriff
   const html = `
   <!DOCTYPE html>
   <html lang="de">
@@ -564,7 +583,7 @@ app.get('/', (req, res) => {
     <div class="login-container">
       <h1>Susibert</h1>
       <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
-      <form action="/login" method="POST">
+      <form id="loginForm">
         <input type="password" name="accessCode" id="accessCode" placeholder="Zugangscode" required>
         <button type="submit">Einloggen</button>
       </form>
@@ -576,15 +595,19 @@ app.get('/', (req, res) => {
     
     <script>
       // Einfaches JavaScript zum Anzeigen von Fehlermeldungen
-      document.querySelector('form').addEventListener('submit', function(e) {
+      document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
         var code = document.getElementById('accessCode').value;
+        var messageEl = document.getElementById('message');
+        
+        messageEl.textContent = "Überprüfe Code...";
         
         if (code === "suuuu") {
           // Direkter Zugriff bei richtigem Code
+          messageEl.textContent = "Code korrekt, lade Karte...";
           window.location.href = "/map";
         } else {
-          document.getElementById('message').textContent = "Ungültiger Zugangscode. Bitte versuche es erneut.";
+          messageEl.textContent = "Ungültiger Zugangscode. Bitte versuche es erneut.";
         }
       });
     </script>
@@ -593,6 +616,73 @@ app.get('/', (req, res) => {
   `;
   
   res.send(html);
+});
+
+// POST-Login-Route für sauberere API
+app.post('/login', (req, res) => {
+  const { accessCode } = req.body;
+  const configuredCode = process.env.ACCESS_CODE || 'suuuu';
+  
+  console.log('Login-Versuch mit Code:', accessCode ? '***' + accessCode.substr(-2) : 'fehlt');
+  
+  if (accessCode === configuredCode) {
+    res.redirect('/map');
+  } else {
+    res.redirect('/?error=invalid');
+  }
+});
+
+// Fehler-Route für nicht vorhandene Pfade
+app.use((req, res) => {
+  res.status(404).send(`
+    <!DOCTYPE html>
+    <html lang="de">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Nicht gefunden - Susibert</title>
+      <style>
+        body {
+          font-family: system-ui, -apple-system, sans-serif;
+          background-color: #1a1a1a;
+          color: #f5f5f5;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          text-align: center;
+        }
+        .error-container {
+          max-width: 500px;
+          padding: 2rem;
+          background-color: #222;
+          border-radius: 8px;
+        }
+        h1 {
+          color: #f59a0c;
+          font-size: 2rem;
+          margin-bottom: 1rem;
+        }
+        a {
+          color: #f59a0c;
+          text-decoration: none;
+        }
+        a:hover {
+          text-decoration: underline;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="error-container">
+        <h1>Seite nicht gefunden</h1>
+        <p>Die angeforderte Seite existiert nicht.</p>
+        <p><a href="/">Zurück zur Startseite</a></p>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 // Server starten
