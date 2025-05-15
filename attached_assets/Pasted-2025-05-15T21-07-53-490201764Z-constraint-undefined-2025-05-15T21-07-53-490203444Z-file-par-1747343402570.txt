@@ -1,0 +1,50 @@
+2025-05-15T21:07:53.490201764Z   constraint: undefined,
+2025-05-15T21:07:53.490203444Z   file: 'parse_relation.c',
+2025-05-15T21:07:53.490205124Z   line: '3722',
+2025-05-15T21:07:53.490206754Z   routine: 'errorMissingColumn'
+2025-05-15T21:07:53.490208404Z }
+2025-05-15T21:08:02.164709781Z ==> Your service is live 🎉
+2025-05-15T21:08:59.881457483Z Fehler beim Abrufen der Orte: error: column "title" does not exist
+2025-05-15T21:08:59.881482414Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T21:08:59.881489404Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T21:08:59.881528615Z     at async /opt/render/project/src/dist/index.js:1713:20 {
+2025-05-15T21:08:59.881536805Z   length: 105,
+2025-05-15T21:08:59.881541605Z   severity: 'ERROR',
+2025-05-15T21:08:59.881545765Z   code: '42703',
+2025-05-15T21:08:59.881549595Z   detail: undefined,
+2025-05-15T21:08:59.881553525Z   hint: undefined,
+2025-05-15T21:08:59.881557945Z   position: '12',
+2025-05-15T21:08:59.881562875Z   internalPosition: undefined,
+2025-05-15T21:08:59.881566685Z   internalQuery: undefined,
+2025-05-15T21:08:59.881571045Z   where: undefined,
+2025-05-15T21:08:59.881575416Z   schema: undefined,
+2025-05-15T21:08:59.881579616Z   table: undefined,
+2025-05-15T21:08:59.881583986Z   column: undefined,
+2025-05-15T21:08:59.881587906Z   dataType: undefined,
+2025-05-15T21:08:59.881592116Z   constraint: undefined,
+2025-05-15T21:08:59.881596216Z   file: 'parse_relation.c',
+2025-05-15T21:08:59.881600346Z   line: '3722',
+2025-05-15T21:08:59.881604486Z   routine: 'errorMissingColumn'
+2025-05-15T21:08:59.881608897Z }
+2025-05-15T21:09:17.3212336Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T21:09:17.321262461Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T21:09:17.321285831Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T21:09:17.321290151Z     at async /opt/render/project/src/dist/index.js:1763:20 {
+2025-05-15T21:09:17.321293031Z   length: 127,
+2025-05-15T21:09:17.321296711Z   severity: 'ERROR',
+2025-05-15T21:09:17.321299591Z   code: '42703',
+2025-05-15T21:09:17.321302322Z   detail: undefined,
+2025-05-15T21:09:17.321305191Z   hint: undefined,
+2025-05-15T21:09:17.321307732Z   position: '24',
+2025-05-15T21:09:17.321311312Z   internalPosition: undefined,
+2025-05-15T21:09:17.321314052Z   internalQuery: undefined,
+2025-05-15T21:09:17.321317032Z   where: undefined,
+2025-05-15T21:09:17.321319802Z   schema: undefined,
+2025-05-15T21:09:17.321322472Z   table: undefined,
+2025-05-15T21:09:17.321325212Z   column: undefined,
+2025-05-15T21:09:17.321327882Z   dataType: undefined,
+2025-05-15T21:09:17.321330782Z   constraint: undefined,
+2025-05-15T21:09:17.321334122Z   file: 'parse_target.c',
+2025-05-15T21:09:17.321340702Z   line: '1066',
+2025-05-15T21:09:17.321343683Z   routine: 'checkInsertTargets'
+2025-05-15T21:09:17.321346772Z }
