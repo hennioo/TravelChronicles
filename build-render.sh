@@ -26,6 +26,12 @@ cp -v server.js map-render.js
 cp -v server.js simple-final.js
 cp -v server.js fixed-render.js
 
+# Setze Umgebungsvariable für Render
+echo "RENDER=true" >> .env
+echo "NODE_ENV=production" >> .env
+echo "export RENDER=true" >> ~/.bashrc
+echo "export NODE_ENV=production" >> ~/.bashrc
+
 # Stelle sicher, dass Uploads-Verzeichnis existiert und Bilder kopiert sind
 echo "Kopiere Uploads-Verzeichnis..."
 # In alle möglichen Verzeichnisse kopieren, um sicherzustellen, dass sie unabhängig vom Pfad gefunden werden

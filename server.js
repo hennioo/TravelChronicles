@@ -20,13 +20,20 @@ let dbConnected = false;
 const sessions = {};
 const ACCESS_CODE = process.env.ACCESS_CODE || 'suuuu';
 
+// Hosting-Konfiguration
+const PRODUCTION_DOMAIN = 'susio.site';
+const isProduction = process.env.NODE_ENV === 'production' || 
+                     (process.env.RENDER && process.env.RENDER === 'true');
+
 // Verschiedene mögliche Uploads-Verzeichnisse einrichten für unterschiedliche Umgebungen
 const uploadsDirectories = [
   path.join(__dirname, 'uploads'),  // Standard
   path.join(__dirname, 'dist', 'uploads'),  // Für Render
   path.join(__dirname, 'dist', 'public', 'uploads'),  // Alternative für Render
   path.join(__dirname, '..', 'uploads'),  // Für relative Pfade
-  path.join(__dirname, '..', 'dist', 'uploads')  // Weitere Alternative
+  path.join(__dirname, '..', 'dist', 'uploads'),  // Weitere Alternative
+  '/opt/render/project/src/uploads',  // Absoluter Pfad für Render
+  '/opt/render/project/src/dist/uploads'  // Weitere Render-Option
 ];
 
 let uploadsDir = '';
@@ -2015,6 +2022,7 @@ app.get('/map', requireAuth, function(req, res) {
             
             // Host und Protokoll für absolute URLs
             const baseUrl = window.location.protocol + '//' + window.location.host;
+            const productionUrl = 'https://susio.site';
             
             // Mögliche Pfade für das Bild
             const basePaths = [
@@ -2026,10 +2034,14 @@ app.get('/map', requireAuth, function(req, res) {
               '/dist/uploads/',
               '/dist/public/uploads/',
               '/public/uploads/',
-              // Absolute URLs
+              // Absolute URLs mit aktueller Domain
               baseUrl + '/uploads/',
               baseUrl + '/dist/uploads/',
               baseUrl + '/',
+              // Absolute URLs mit fester Produktions-Domain (für lokale Tests)
+              productionUrl + '/uploads/',
+              productionUrl + '/dist/uploads/',
+              productionUrl + '/',
               // Notfall-Pfade
               '/images/',
               '/assets/',
