@@ -1053,6 +1053,14 @@ app.get('/', function(req, res) {
 
 // Geschützte Kartenansicht mit Leaflet
 app.get('/map', requireAuth, function(req, res) {
+  // Debug-Ausgabe für den Pfad der Uploads
+  console.log('Debug: Map-Seite wird geladen mit Uploads-Verzeichnis:', {
+    uploadsDir: uploadsDir,
+    dirname: __dirname,
+    env: process.env.NODE_ENV,
+    host: req.get('host'),
+    protocol: req.protocol
+  });
   if (!dbConnected) {
     return res.send(`
       <!DOCTYPE html>
@@ -2005,12 +2013,27 @@ app.get('/map', requireAuth, function(req, res) {
           function tryAlternativeImagePaths(imgElement, originalFilename) {
             console.log('Versuche alternative Bildpfade für:', originalFilename);
             
+            // Host und Protokoll für absolute URLs
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            
             // Mögliche Pfade für das Bild
             const basePaths = [
+              // Standard-Pfade
               '/uploads/',
+              // Direkter Dateizugriff
+              '/' + originalFilename,
+              // Render-spezifische Pfade
               '/dist/uploads/',
-              './uploads/',
-              '../uploads/',
+              '/dist/public/uploads/',
+              '/public/uploads/',
+              // Absolute URLs
+              baseUrl + '/uploads/',
+              baseUrl + '/dist/uploads/',
+              baseUrl + '/',
+              // Notfall-Pfade
+              '/images/',
+              '/assets/',
+              '/dist/',
               '/'
             ];
             
@@ -2020,23 +2043,39 @@ app.get('/map', requireAuth, function(req, res) {
             function tryNextPath(index) {
               if (index >= basePaths.length || found) return;
               
-              const fullPath = basePaths[index] + originalFilename;
+              // Konstruiere den vollen Pfad, beachte Sonderfälle
+              let fullPath;
+              if (basePaths[index].includes(originalFilename)) {
+                // Wenn der Pfad bereits den Dateinamen enthält (für direkten Zugriff)
+                fullPath = basePaths[index];
+              } else {
+                // Normaler Fall: Pfad + Dateiname
+                fullPath = basePaths[index] + originalFilename;
+              }
+              
               console.log('Versuche Pfad:', fullPath);
               
               const testImg = new Image();
               testImg.onload = function() {
-                console.log('Bild gefunden unter:', fullPath);
+                console.log('ERFOLG: Bild gefunden unter:', fullPath);
                 imgElement.src = fullPath;
                 imgElement.style.display = 'block';
                 found = true;
+                
+                // Speichere den erfolgreichen Pfad für zukünftige Verwendung
+                window.successfulImagePaths = window.successfulImagePaths || {};
+                window.successfulImagePaths[originalFilename] = fullPath;
               };
               
               testImg.onerror = function() {
-                console.log('Bild nicht gefunden unter:', fullPath);
+                console.log('Nicht gefunden:', fullPath);
                 tryNextPath(index + 1);
               };
               
-              testImg.src = fullPath;
+              // Zeitverzögerung für bessere Zuverlässigkeit
+              setTimeout(() => {
+                testImg.src = fullPath;
+              }, 10 * index); // Kleine Verzögerung zwischen den Versuchen
             }
             
             // Starte mit dem ersten Pfad
