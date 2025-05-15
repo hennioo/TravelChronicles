@@ -811,9 +811,6 @@ app.get('/', function(req, res) {
   } else if (req.query.error === 'wrong-code') {
     errorText = 'Ungültiger Zugangscode. Bitte versuche es erneut.';
   }
-
-  // Pfad zum Pärchenbild
-  const coupleImageUrl = '/uploads/couple.jpg';
   
   res.send(`<!DOCTYPE html>
 <html lang="de">
@@ -832,12 +829,12 @@ app.get('/', function(req, res) {
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-image: url("${coupleImageUrl}");
+      background-image: url("/uploads/couple.jpg");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
     }
-    /* Fallback für den Fall, dass das Bild nicht geladen werden kann */
+    /* Fallback-Hintergrund */
     body::before {
       content: "";
       position: absolute;
@@ -931,7 +928,7 @@ app.get('/', function(req, res) {
 <body>
   <div class="login-container">
     <div class="avatar">
-      <img src="${coupleImageUrl}" alt="Pärchenbild" onerror="this.style.display='none'; this.parentNode.innerHTML='S'">
+      <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.style.display='none'; this.parentNode.innerHTML='S'">
     </div>
     <h1>Susibert</h1>
     <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
