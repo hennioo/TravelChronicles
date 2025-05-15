@@ -28,13 +28,28 @@ cp -v server.js fixed-render.js
 
 # Stelle sicher, dass Uploads-Verzeichnis existiert und Bilder kopiert sind
 echo "Kopiere Uploads-Verzeichnis..."
-# In beide Verzeichnisse kopieren, um sicherzustellen, dass sie unabhängig vom Pfad gefunden werden
-cp -rv uploads/* dist/uploads/
-cp -rv uploads/* dist/public/uploads/
+# In alle möglichen Verzeichnisse kopieren, um sicherzustellen, dass sie unabhängig vom Pfad gefunden werden
+mkdir -p dist/uploads
+mkdir -p dist/public/uploads
+mkdir -p public/uploads
+
+# Kopiere in alle Verzeichnisse
+cp -rv uploads/* dist/uploads/ || echo "Warnung: Konnte nicht in dist/uploads kopieren"
+cp -rv uploads/* dist/public/uploads/ || echo "Warnung: Konnte nicht in dist/public/uploads kopieren"
+cp -rv uploads/* public/uploads/ || echo "Warnung: Konnte nicht in public/uploads kopieren"
+
+# Kopiere auch direkt nach /dist, da manche Pfade dort suchen
+cp -rv uploads/* dist/ || echo "Warnung: Konnte nicht direkt in dist/ kopieren"
+
+# Kopiere couple.jpg und couple.png direkt ins Root-Verzeichnis für absoluten Notfall
+cp -v uploads/couple.jpg dist/ || echo "Warnung: Konnte couple.jpg nicht in dist/ kopieren"
+cp -v uploads/couple.png dist/ || echo "Warnung: Konnte couple.png nicht in dist/ kopieren"
 
 # Stelle sicher, dass keine Berechtigungsprobleme auftreten
-chmod -R 755 dist/uploads/
-chmod -R 755 dist/public/uploads/
+chmod -R 755 dist/uploads/ || true
+chmod -R 755 dist/public/uploads/ || true
+chmod -R 755 public/uploads/ || true
+chmod -R 755 dist/*.jpg dist/*.png || true
 
 # 4. Benutzerdefinierte package.json für Start-Befehl, falls Procfile ignoriert wird
 echo "Erstelle package.json Backup..."

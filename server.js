@@ -24,7 +24,9 @@ const ACCESS_CODE = process.env.ACCESS_CODE || 'suuuu';
 const uploadsDirectories = [
   path.join(__dirname, 'uploads'),  // Standard
   path.join(__dirname, 'dist', 'uploads'),  // Für Render
-  path.join(__dirname, 'dist', 'public', 'uploads')  // Alternative für Render
+  path.join(__dirname, 'dist', 'public', 'uploads'),  // Alternative für Render
+  path.join(__dirname, '..', 'uploads'),  // Für relative Pfade
+  path.join(__dirname, '..', 'dist', 'uploads')  // Weitere Alternative
 ];
 
 let uploadsDir = '';
