@@ -1,4 +1,4 @@
-// Endgültige Version für Render
+// Finale Render-kompatible Version
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
@@ -53,19 +53,34 @@ try {
         console.log('Datenbankverbindung erfolgreich:', result.rows[0]);
         dbConnected = true;
         
-        // Prüfe, ob die Tabellen existieren
-        return pool.query("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'locations')");
-      })
-      .then(function(tabResult) {
-        console.log('Tabelle locations existiert:', tabResult.rows[0].exists);
+        // Modifiziere die Tabelle um fehlende Spalten hinzuzufügen
+        console.log('Prüfe Tabellenstruktur...');
         
-        // Stelle sicher, dass das image-Feld NULL erlaubt
-        return pool.query("ALTER TABLE locations ALTER COLUMN image DROP NOT NULL").catch(err => {
-          console.log('Konnte NOT NULL Constraint nicht entfernen (möglicherweise bereits erledigt):', err.message);
-        });
+        // Erste Abfrage: Überprüfe, ob highlight-Spalte ein NOT NULL Constraint hat
+        return pool.query(`
+          SELECT 
+            column_name, is_nullable
+          FROM 
+            information_schema.columns 
+          WHERE 
+            table_name = 'locations' AND 
+            column_name = 'highlight'
+        `);
+      })
+      .then(function(result) {
+        if (result.rows.length > 0 && result.rows[0].is_nullable === 'NO') {
+          console.log('Aktualisiere "highlight" Spalte um NULL-Werte zu erlauben...');
+          return pool.query(`ALTER TABLE locations ALTER COLUMN highlight DROP NOT NULL`);
+        } else {
+          console.log('Die Spalte "highlight" akzeptiert bereits NULL-Werte oder existiert nicht.');
+          return Promise.resolve();
+        }
+      })
+      .then(function() {
+        console.log('Datenbankstruktur aktualisiert.');
       })
       .catch(function(err) {
-        console.error('Fehler bei der Datenbankverbindung:', err);
+        console.error('Fehler bei der Datenbankaktualisierung:', err);
       });
   } else {
     console.log('DATABASE_URL nicht vorhanden, starte im Offline-Modus');
@@ -122,14 +137,432 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
+    const ext = path.extname(file.originalname).toLowerCase();
     cb(null, 'image-' + uniqueSuffix + ext);
   }
 });
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  fileFilter: function(req, file, cb) {
+    // HEIC, PNG und JPG/JPEG zulassen
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.heic'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    
+    if (allowedExtensions.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Nur JPG, PNG und HEIC Bilder sind erlaubt'));
+    }
+  }
+});
+
+// Admin-Route für Datenbankübersicht
+app.get('/admin', requireAuth, function(req, res) {
+  if (!dbConnected) {
+    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
+  }
+
+  pool.query('SELECT * FROM locations ORDER BY id DESC')
+    .then(function(result) {
+      const locations = result.rows;
+      
+      // Nachricht wenn die Datenbank geleert wurde
+      const clearedMessage = req.query.cleared ? '<div style="background-color: rgba(0, 255, 0, 0.1); border: 1px solid #00aa00; color: #00cc00; padding: 10px; border-radius: 4px; margin-bottom: 20px;">Alle Orte wurden erfolgreich gelöscht.</div>' : '';
+      const errorMessage = req.query.error ? `<div style="background-color: rgba(255, 0, 0, 0.1); border: 1px solid #aa0000; color: #ff4d4d; padding: 10px; border-radius: 4px; margin-bottom: 20px;">Fehler: ${req.query.error}</div>` : '';
+      
+      res.send(`
+        <!DOCTYPE html>
+        <html lang="de">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Datenbank-Admin - Susibert</title>
+          <style>
+            body {
+              font-family: system-ui, -apple-system, sans-serif;
+              background-color: #1a1a1a;
+              color: #f5f5f5;
+              margin: 0;
+              padding: 20px;
+            }
+            h1 {
+              color: #f59a0c;
+              border-bottom: 1px solid #333;
+              padding-bottom: 10px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th, td {
+              border: 1px solid #333;
+              padding: 8px;
+              text-align: left;
+            }
+            th {
+              background-color: #222;
+            }
+            tr:nth-child(even) {
+              background-color: #222;
+            }
+            .actions {
+              display: flex;
+              gap: 10px;
+            }
+            .btn {
+              display: inline-block;
+              padding: 5px 10px;
+              background-color: #f59a0c;
+              color: black;
+              border-radius: 4px;
+              text-decoration: none;
+              cursor: pointer;
+              border: none;
+              font-size: 14px;
+              font-family: inherit;
+            }
+            .btn-danger {
+              background-color: #d33;
+              color: white;
+            }
+            .btn-nav {
+              margin-right: 10px;
+            }
+            .warning {
+              background-color: rgba(255, 0, 0, 0.1);
+              padding: 10px;
+              border-radius: 5px;
+              margin-bottom: 20px;
+            }
+            
+            /* Modaler Dialog */
+            .modal {
+              display: none;
+              position: fixed;
+              z-index: 1000;
+              left: 0;
+              top: 0;
+              width: 100%;
+              height: 100%;
+              background-color: rgba(0,0,0,0.7);
+            }
+            
+            .modal-content {
+              background-color: #333;
+              margin: 15% auto;
+              padding: 20px;
+              border-radius: 8px;
+              width: 80%;
+              max-width: 500px;
+              text-align: center;
+            }
+            
+            .modal-footer {
+              display: flex;
+              justify-content: center;
+              gap: 10px;
+              margin-top: 20px;
+            }
+            
+            .close {
+              color: #aaa;
+              float: right;
+              font-size: 28px;
+              font-weight: bold;
+              cursor: pointer;
+            }
+            
+            .close:hover {
+              color: white;
+            }
+            
+            /* Zusätzliche Stile für die dreifache Bestätigung */
+            .confirmation-step {
+              display: none;
+              margin-top: 15px;
+            }
+            
+            .confirmation-step.active {
+              display: block;
+            }
+            
+            .confirmation-checkbox {
+              margin-bottom: 15px;
+            }
+            
+            .reset-progress {
+              height: 10px;
+              background-color: #444;
+              border-radius: 5px;
+              margin-top: 15px;
+              overflow: hidden;
+            }
+            
+            .reset-progress-bar {
+              height: 100%;
+              background-color: #d33;
+              width: 0%;
+              transition: width 0.3s;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Datenbank-Admin</h1>
+          
+          ${clearedMessage}
+          ${errorMessage}
+          
+          <a href="/map" class="btn btn-nav">Zurück zur Karte</a>
+          <button id="resetDbBtn" class="btn btn-danger btn-nav">Datenbank zurücksetzen</button>
+          
+          <h2>Gespeicherte Orte (${locations.length})</h2>
+          
+          ${locations.length === 0 ? '<p>Keine Orte in der Datenbank.</p>' : ''}
+          
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Datum</th>
+                <th>Bild</th>
+                <th>Beschreibung</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${locations.map(loc => `
+                <tr>
+                  <td>${loc.id}</td>
+                  <td>${loc.name || ''}</td>
+                  <td>${loc.date ? new Date(loc.date).toLocaleDateString() : '-'}</td>
+                  <td>${loc.image ? 'Ja' : 'Nein'}</td>
+                  <td>${loc.description || '-'}</td>
+                  <td>
+                    <div class="actions">
+                      <a href="/api/locations/${loc.id}/delete" class="btn btn-danger" onclick="return confirm('Diesen Ort löschen?')">Löschen</a>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <!-- Modaler Dialog für die dreifache Bestätigung -->
+          <div id="resetModal" class="modal">
+            <div class="modal-content">
+              <span class="close">&times;</span>
+              <h2 style="color: #d33;">Datenbank vollständig zurücksetzen</h2>
+              
+              <div id="step1" class="confirmation-step active">
+                <p><strong>WARNUNG:</strong> Diese Aktion wird <strong>alle</strong> Orte und Bilder unwiderruflich löschen.</p>
+                <p>Diese Aktion kann nicht rückgängig gemacht werden.</p>
+                <div class="modal-footer">
+                  <button class="btn" id="cancelReset">Abbrechen</button>
+                  <button class="btn btn-danger" id="confirmStep1">Weiter</button>
+                </div>
+              </div>
+              
+              <div id="step2" class="confirmation-step">
+                <p><strong>Zweite Warnung:</strong> Du bist dabei, <strong>${locations.length} Orte</strong> zu löschen!</p>
+                <p>Bitte bestätige, dass du dir der Konsequenzen bewusst bist.</p>
+                <div class="confirmation-checkbox">
+                  <input type="checkbox" id="confirmCheckbox">
+                  <label for="confirmCheckbox">Ich verstehe, dass alle Daten verloren gehen werden</label>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn" id="backToStep1">Zurück</button>
+                  <button class="btn btn-danger" id="confirmStep2" disabled>Weiter</button>
+                </div>
+              </div>
+              
+              <div id="step3" class="confirmation-step">
+                <p><strong>Letzte Warnung:</strong> Gib "RESET" ein, um zu bestätigen:</p>
+                <input type="text" id="resetText" placeholder="RESET" style="width: 100%; padding: 8px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 4px;">
+                <div class="reset-progress">
+                  <div class="reset-progress-bar" id="resetProgressBar"></div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn" id="backToStep2">Zurück</button>
+                  <button class="btn btn-danger" id="finalReset" disabled>Datenbank zurücksetzen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <script>
+            // Modal-Elemente
+            const modal = document.getElementById("resetModal");
+            const resetBtn = document.getElementById("resetDbBtn");
+            const span = document.getElementsByClassName("close")[0];
+            const cancelBtn = document.getElementById("cancelReset");
+            
+            // Bestätigungsschritte
+            const step1 = document.getElementById("step1");
+            const step2 = document.getElementById("step2");
+            const step3 = document.getElementById("step3");
+            
+            // Schaltflächen
+            const confirmStep1 = document.getElementById("confirmStep1");
+            const backToStep1 = document.getElementById("backToStep1");
+            const confirmStep2 = document.getElementById("confirmStep2");
+            const backToStep2 = document.getElementById("backToStep2");
+            const finalReset = document.getElementById("finalReset");
+            
+            // Eingabeelemente
+            const confirmCheckbox = document.getElementById("confirmCheckbox");
+            const resetText = document.getElementById("resetText");
+            const resetProgressBar = document.getElementById("resetProgressBar");
+            
+            // Öffne Modal
+            resetBtn.onclick = function() {
+              modal.style.display = "block";
+              showStep(1);
+            }
+            
+            // Schließe Modal
+            span.onclick = closeModal;
+            cancelBtn.onclick = closeModal;
+            
+            function closeModal() {
+              modal.style.display = "none";
+              resetForm();
+            }
+            
+            // Navigiere zwischen Schritten
+            confirmStep1.onclick = function() {
+              showStep(2);
+            }
+            
+            backToStep1.onclick = function() {
+              showStep(1);
+            }
+            
+            confirmStep2.onclick = function() {
+              showStep(3);
+            }
+            
+            backToStep2.onclick = function() {
+              showStep(2);
+            }
+            
+            // Checkbox-Validierung
+            confirmCheckbox.onchange = function() {
+              confirmStep2.disabled = !this.checked;
+            }
+            
+            // Text-Eingabe-Validierung mit Fortschrittsanzeige
+            resetText.oninput = function() {
+              const expectedText = "RESET";
+              const currentText = this.value;
+              const progress = (currentText.length / expectedText.length) * 100;
+              
+              resetProgressBar.style.width = progress + "%";
+              
+              if (currentText === expectedText) {
+                finalReset.disabled = false;
+                resetProgressBar.style.width = "100%";
+              } else {
+                finalReset.disabled = true;
+              }
+            }
+            
+            // Endgültiges Zurücksetzen
+            finalReset.onclick = function() {
+              window.location.href = "/admin/complete-reset";
+            }
+            
+            // Helfer-Funktionen
+            function showStep(stepNumber) {
+              // Verstecke alle Schritte
+              step1.classList.remove("active");
+              step2.classList.remove("active");
+              step3.classList.remove("active");
+              
+              // Zeige aktuellen Schritt
+              if (stepNumber === 1) step1.classList.add("active");
+              if (stepNumber === 2) step2.classList.add("active");
+              if (stepNumber === 3) step3.classList.add("active");
+            }
+            
+            function resetForm() {
+              confirmCheckbox.checked = false;
+              confirmStep2.disabled = true;
+              resetText.value = "";
+              finalReset.disabled = true;
+              resetProgressBar.style.width = "0%";
+              showStep(1);
+            }
+            
+            // Klick außerhalb des Modals schließt es
+            window.onclick = function(event) {
+              if (event.target == modal) {
+                closeModal();
+              }
+            }
+          </script>
+        </body>
+        </html>
+      `);
+    })
+    .catch(function(error) {
+      res.status(500).send(`
+        <h1>Fehler</h1>
+        <p>Fehler beim Laden der Datenbank: ${error.message}</p>
+        <a href="/map">Zurück zur Karte</a>
+      `);
+    });
+});
+
+// Vollständiger Datenbank-Reset (nach dreifacher Bestätigung)
+app.get('/admin/complete-reset', requireAuth, function(req, res) {
+  if (!dbConnected) {
+    return res.redirect('/admin?error=' + encodeURIComponent('Datenbank nicht verbunden'));
+  }
+
+  pool.query('DELETE FROM locations')
+    .then(function() {
+      // Lösche auch alle Bilddateien im uploads-Verzeichnis, außer couple.jpg
+      try {
+        const files = fs.readdirSync(uploadsDir);
+        for (const file of files) {
+          if (file !== 'couple.jpg') {
+            fs.unlinkSync(path.join(uploadsDir, file));
+          }
+        }
+        console.log('Alle Bilder gelöscht (außer couple.jpg)');
+      } catch (err) {
+        console.error('Fehler beim Löschen der Bilder:', err);
+      }
+      
+      res.redirect('/admin?cleared=true');
+    })
+    .catch(function(error) {
+      console.error('Fehler beim Zurücksetzen der Datenbank:', error);
+      res.redirect('/admin?error=' + encodeURIComponent('Fehler beim Zurücksetzen: ' + error.message));
+    });
+});
+
+// Datenbank leeren
+app.get('/admin/clear', requireAuth, function(req, res) {
+  if (!dbConnected) {
+    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
+  }
+
+  pool.query('DELETE FROM locations')
+    .then(function() {
+      res.redirect('/admin?cleared=true');
+    })
+    .catch(function(error) {
+      res.status(500).send(`
+        <h1>Fehler</h1>
+        <p>Fehler beim Leeren der Datenbank: ${error.message}</p>
+        <a href="/admin">Zurück zur Admin-Seite</a>
+      `);
+    });
 });
 
 // API-Routen
@@ -202,7 +635,7 @@ app.get('/api/locations', requireAuth, function(req, res) {
         locations.push({
           id: row.id,
           name: row.name || "Unbenannter Ort",
-          date: row.date ? new Date(row.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          date: row.date ? new Date(row.date).toISOString().split('T')[0] : null,
           description: row.description || "",
           highlight: row.highlight || "",
           latitude: row.latitude || "0",
@@ -231,31 +664,38 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
     
     // Die Daten aus dem Formular extrahieren
     var name = req.body.name || '';
-    var date = req.body.date || null;
     var description = req.body.description || '';
-    var highlight = req.body.highlight || '';
+    
+    // Koordinaten
     var latitude = req.body.latitude || '';
     var longitude = req.body.longitude || '';
-    var countryCode = req.body.countryCode || '';
     
     // Validierung
     if (!name || name.trim() === '') {
-      return res.status(400).json({ error: 'Name ist erforderlich' });
+      return res.status(400).json({ error: 'Titel ist erforderlich' });
     }
     
     if (!latitude || !longitude) {
-      return res.status(400).json({ error: 'Breiten- und Längengrad sind erforderlich' });
+      return res.status(400).json({ error: 'Bitte wähle einen Ort auf der Karte' });
     }
     
-    // Wenn ein Bild hochgeladen wurde, speichere den Pfad
-    var imagePath = req.file ? req.file.filename : null;
+    // Bild ist jetzt erforderlich
+    if (!req.file) {
+      return res.status(400).json({ error: 'Bitte füge ein Bild hinzu (JPG, PNG oder HEIC)' });
+    }
+    
+    // Speichere das Bild
+    var imagePath = req.file.filename;
     console.log('Bildpfad:', imagePath);
     
-    // SQL-Query zur Erstellung eines neuen Standorts
+    // Setze aktuelles Datum
+    const currentDate = new Date();
+    
+    // SQL-Query zur Erstellung eines neuen Standorts mit explizitem leeren String für highlight
     pool.query(
-      'INSERT INTO locations (name, date, description, highlight, latitude, longitude, country_code, image) ' +
-      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-      [name, date || new Date(), description, highlight, latitude, longitude, countryCode, imagePath]
+      'INSERT INTO locations (name, date, description, latitude, longitude, image, highlight) ' +
+      'VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [name, currentDate, description, latitude, longitude, imagePath, ''] // Leerer String für highlight
     )
       .then(function(result) {
         if (result.rows.length === 0) {
@@ -264,12 +704,10 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
         
         console.log('Ort erstellt:', result.rows[0]);
         
-        // Bereite die Antwort vor mit vollständiger Bild-URL, falls ein Bild vorhanden ist
+        // Bereite die Antwort vor mit vollständiger Bild-URL
         var location = result.rows[0];
-        if (location.image) {
-          var baseUrl = req.protocol + '://' + req.get('host');
-          location.image = baseUrl + '/uploads/' + location.image;
-        }
+        var baseUrl = req.protocol + '://' + req.get('host');
+        location.image = baseUrl + '/uploads/' + location.image;
         
         res.status(201).json(location);
       })
@@ -283,19 +721,29 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
   }
 });
 
-// Ort löschen
+// Ort löschen (API-Endpunkt)
 app.delete('/api/locations/:id', requireAuth, function(req, res) {
+  deleteLocation(req.params.id, res);
+});
+
+// Ort löschen (Link-Version für einfacheren Aufruf)
+app.get('/api/locations/:id/delete', requireAuth, function(req, res) {
+  deleteLocation(req.params.id, res, '/admin');
+});
+
+// Hilfsfunktion zum Löschen von Orten
+function deleteLocation(id, res, redirectUrl = null) {
   if (!dbConnected) {
     return res.status(503).json({ error: 'Datenbank nicht verbunden' });
   }
 
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
+  const numId = parseInt(id);
+  if (isNaN(numId)) {
     return res.status(400).json({ error: 'Ungültige ID' });
   }
 
   // Hole zuerst den Ort, um das Bild zu identifizieren
-  pool.query('SELECT * FROM locations WHERE id = $1', [id])
+  pool.query('SELECT * FROM locations WHERE id = $1', [numId])
     .then(function(result) {
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Ort nicht gefunden' });
@@ -304,7 +752,7 @@ app.delete('/api/locations/:id', requireAuth, function(req, res) {
       const location = result.rows[0];
       
       // Lösche aus der Datenbank
-      return pool.query('DELETE FROM locations WHERE id = $1', [id])
+      return pool.query('DELETE FROM locations WHERE id = $1', [numId])
         .then(function() {
           // Wenn der Ort ein Bild hatte, lösche es auch (optional)
           if (location.image && !location.image.startsWith('http')) {
@@ -319,14 +767,23 @@ app.delete('/api/locations/:id', requireAuth, function(req, res) {
             }
           }
           
-          res.json({ success: true, message: 'Ort erfolgreich gelöscht' });
+          if (redirectUrl) {
+            res.redirect(redirectUrl);
+          } else {
+            res.json({ success: true, message: 'Ort erfolgreich gelöscht' });
+          }
         });
     })
     .catch(function(error) {
       console.error('Fehler beim Löschen des Ortes:', error);
-      res.status(500).json({ error: 'Datenbankfehler', details: error.message });
+      
+      if (redirectUrl) {
+        res.redirect(redirectUrl + '?error=' + encodeURIComponent('Fehler beim Löschen: ' + error.message));
+      } else {
+        res.status(500).json({ error: 'Datenbankfehler', details: error.message });
+      }
     });
-});
+}
 
 // Login-Seite
 app.get('/', function(req, res) {
@@ -354,6 +811,9 @@ app.get('/', function(req, res) {
   } else if (req.query.error === 'wrong-code') {
     errorText = 'Ungültiger Zugangscode. Bitte versuche es erneut.';
   }
+
+  // Pfad zum Pärchenbild
+  const coupleImageUrl = '/uploads/couple.jpg';
   
   res.send(`<!DOCTYPE html>
 <html lang="de">
@@ -364,7 +824,7 @@ app.get('/', function(req, res) {
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      background-color: #1a532a;
+      background-color: #1a1a1a;
       color: #f5f5f5;
       margin: 0;
       padding: 0;
@@ -372,6 +832,21 @@ app.get('/', function(req, res) {
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background-image: url("${coupleImageUrl}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    /* Fallback für den Fall, dass das Bild nicht geladen werden kann */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #1a532a;
+      z-index: -1;
     }
     .login-container {
       text-align: center;
@@ -456,7 +931,7 @@ app.get('/', function(req, res) {
 <body>
   <div class="login-container">
     <div class="avatar">
-      <div>S</div>
+      <img src="${coupleImageUrl}" alt="Pärchenbild" onerror="this.style.display='none'; this.parentNode.innerHTML='S'">
     </div>
     <h1>Susibert</h1>
     <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
@@ -501,6 +976,9 @@ app.get('/map', requireAuth, function(req, res) {
     `);
   }
 
+  // Pfad zum Pärchenbild
+  const coupleImageUrl = '/uploads/couple.jpg';
+
   // HTML für die Kartenansicht
   res.send(`
     <!DOCTYPE html>
@@ -544,14 +1022,18 @@ app.get('/map', requireAuth, function(req, res) {
         .logo-circle {
           width: 36px;
           height: 36px;
-          background-color: #f59a0c;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: bold;
-          color: #000;
-          font-size: 18px;
+          overflow: hidden;
+          border: 2px solid #f59a0c;
+        }
+        
+        .logo-circle img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
         
         h1 {
@@ -638,7 +1120,7 @@ app.get('/map', requireAuth, function(req, res) {
         
         .location-card img {
           width: 100%;
-          height: 100px;
+          height: 140px;
           object-fit: cover;
         }
         
@@ -691,10 +1173,10 @@ app.get('/map', requireAuth, function(req, res) {
         
         .location-detail-content img {
           width: 100%;
-          max-height: 250px;
+          max-height: 300px;
           object-fit: cover;
           border-radius: 4px;
-          margin-top: 10px;
+          margin-bottom: 15px;
         }
         
         .location-detail h2 {
@@ -708,11 +1190,6 @@ app.get('/map', requireAuth, function(req, res) {
           color: white;
           font-size: 1.5rem;
           cursor: pointer;
-        }
-        
-        .highlight {
-          color: #f59a0c;
-          font-style: italic;
         }
 
         .location-actions {
@@ -805,6 +1282,12 @@ app.get('/map', requireAuth, function(req, res) {
           z-index: 1000;
           padding: 10px 15px;
         }
+
+        .admin-link {
+          margin-left: 10px;
+          font-size: 0.8em;
+          opacity: 0.7;
+        }
         
         /* Responsive Design */
         @media (min-width: 768px) {
@@ -881,12 +1364,18 @@ app.get('/map', requireAuth, function(req, res) {
           margin-bottom: 15px;
           display: none;
         }
+
+        .required-mark {
+          color: #f59a0c;
+        }
       </style>
     </head>
     <body>
       <div class="header">
         <a href="/map" class="logo">
-          <div class="logo-circle">S</div>
+          <div class="logo-circle">
+            <img src="${coupleImageUrl}" alt="Pärchenbild" onerror="this.parentNode.innerHTML='S'; this.parentNode.style.backgroundColor='#f59a0c'; this.parentNode.style.color='black';">
+          </div>
           <h1>Susibert</h1>
         </a>
         <div>
@@ -897,6 +1386,7 @@ app.get('/map', requireAuth, function(req, res) {
             <span>Bearbeiten</span>
           </button>
           <a href="/logout" class="button">Abmelden</a>
+          <a href="/admin" class="admin-link">Admin</a>
         </div>
       </div>
       
@@ -945,33 +1435,19 @@ app.get('/map', requireAuth, function(req, res) {
             <input type="hidden" id="longitude" name="longitude">
             
             <div class="form-group">
-              <label for="name">Name*</label>
+              <label for="name">Titel <span class="required-mark">*</span></label>
               <input type="text" class="form-control" id="name" name="name" required>
             </div>
             
             <div class="form-group">
-              <label for="date">Datum (Monat/Jahr)</label>
-              <input type="month" class="form-control" id="date" name="date">
-            </div>
-            
-            <div class="form-group">
-              <label for="countryCode">Land (Ländercode)</label>
-              <input type="text" class="form-control" id="countryCode" name="countryCode" placeholder="z.B. DE, FR, ES">
-            </div>
-            
-            <div class="form-group">
-              <label for="description">Beschreibung</label>
+              <label for="description">Beschreibung (optional)</label>
               <textarea class="form-control" id="description" name="description"></textarea>
             </div>
             
             <div class="form-group">
-              <label for="highlight">Highlight</label>
-              <input type="text" class="form-control" id="highlight" name="highlight">
-            </div>
-            
-            <div class="form-group">
-              <label for="image">Bild (optional)</label>
-              <input type="file" class="form-control" id="image" name="image" accept="image/*">
+              <label for="image">Bild <span class="required-mark">*</span></label>
+              <input type="file" class="form-control" id="image" name="image" accept=".jpg,.jpeg,.png,.heic" required>
+              <small style="color:#aaa; display:block; margin-top:5px">JPG, PNG oder HEIC (max. 20MB)</small>
             </div>
             
             <div class="form-actions">
@@ -1057,24 +1533,14 @@ app.get('/map', requireAuth, function(req, res) {
           
           let content = '';
           
-          if (location.date) {
-            content += \`<div class="location-meta">Datum: \${formatMonthYear(location.date)}</div>\`;
-          }
-          
-          if (location.countryCode) {
-            content += \`<div class="location-meta">Land: \${location.countryCode}</div>\`;
-          }
-          
-          if (location.description) {
-            content += \`<p>\${location.description}</p>\`;
-          }
-          
-          if (location.highlight) {
-            content += \`<p class="highlight">Highlight: \${location.highlight}</p>\`;
-          }
-          
+          // Zuerst das Bild, wenn vorhanden
           if (location.image) {
             content += \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`;
+          }
+          
+          // Dann die Beschreibung, wenn vorhanden
+          if (location.description) {
+            content += \`<p>\${location.description}</p>\`;
           }
           
           detailContent.innerHTML = content;
@@ -1097,11 +1563,6 @@ app.get('/map', requireAuth, function(req, res) {
           // Koordinaten setzen
           latitudeInput.value = lat;
           longitudeInput.value = lng;
-          
-          // Aktuelles Datum als Voreinstellung (Monat/Jahr)
-          const today = new Date();
-          const monthYear = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-          document.getElementById('date').value = monthYear;
           
           // Anzeigen
           addLocationForm.style.display = 'block';
@@ -1245,7 +1706,6 @@ app.get('/map', requireAuth, function(req, res) {
           
           let html = '';
           locations.forEach(location => {
-            const date = location.date ? formatMonthYear(location.date) : '';
             const imageHtml = location.image 
               ? \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`
               : '';
@@ -1255,10 +1715,6 @@ app.get('/map', requireAuth, function(req, res) {
                 \${imageHtml}
                 <div class="location-card-content">
                   <h3>\${location.name}</h3>
-                  <div class="location-meta">
-                    \${date}
-                    \${location.countryCode ? ' · ' + location.countryCode : ''}
-                  </div>
                 </div>
               </div>
             \`;

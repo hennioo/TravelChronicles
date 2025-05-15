@@ -1,5 +1,4 @@
-// Ultra-robuste Version der Susibert-Anwendung für Render
-// Mit ES5-Kompatibilität (keine Template-Strings, keine Arrow-Functions)
+// Render kompatible Version mit Bugfixes
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
@@ -15,9 +14,82 @@ const port = process.env.PORT || 10000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session-Management (vereinfacht, kein Redis notwendig)
+// Globale Variablen
+let pool;
+let dbConnected = false;
 const sessions = {};
+const ACCESS_CODE = process.env.ACCESS_CODE || 'suuuu';
 
+// Uploads-Verzeichnis einrichten
+const uploadsDir = path.join(__dirname, 'uploads');
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Uploads-Verzeichnis erstellt: ' + uploadsDir);
+  } else {
+    console.log('Uploads-Verzeichnis existiert: ' + uploadsDir);
+  }
+} catch (error) {
+  console.error('Fehler beim Erstellen des Uploads-Verzeichnisses:', error);
+}
+
+// Statische Dateien und Uploads
+app.use('/uploads', express.static(uploadsDir));
+
+// Datenbankverbindung initialisieren
+try {
+  if (process.env.DATABASE_URL) {
+    console.log('Verbinde mit Datenbank über DATABASE_URL...');
+    
+    // Robustere DB-Verbindung für Render
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+    
+    // Teste die Verbindung
+    pool.query('SELECT NOW() as now')
+      .then(function(result) {
+        console.log('Datenbankverbindung erfolgreich:', result.rows[0]);
+        dbConnected = true;
+        
+        // Modifiziere die Tabelle um fehlende Spalten hinzuzufügen
+        console.log('Prüfe Tabellenstruktur...');
+        
+        // Erste Abfrage: Überprüfe, ob highlight-Spalte ein NOT NULL Constraint hat
+        return pool.query(`
+          SELECT 
+            column_name, is_nullable
+          FROM 
+            information_schema.columns 
+          WHERE 
+            table_name = 'locations' AND 
+            column_name = 'highlight'
+        `);
+      })
+      .then(function(result) {
+        if (result.rows.length > 0 && result.rows[0].is_nullable === 'NO') {
+          console.log('Aktualisiere "highlight" Spalte um NULL-Werte zu erlauben...');
+          return pool.query(`ALTER TABLE locations ALTER COLUMN highlight DROP NOT NULL`);
+        } else {
+          console.log('Die Spalte "highlight" akzeptiert bereits NULL-Werte oder existiert nicht.');
+          return Promise.resolve();
+        }
+      })
+      .then(function() {
+        console.log('Datenbankstruktur aktualisiert.');
+      })
+      .catch(function(err) {
+        console.error('Fehler bei der Datenbankaktualisierung:', err);
+      });
+  } else {
+    console.log('DATABASE_URL nicht vorhanden, starte im Offline-Modus');
+  }
+} catch (error) {
+  console.error('Fehler beim Datenbankverbindungsaufbau:', error);
+}
+
+// Session Management
 function createSession() {
   const sessionId = crypto.randomBytes(16).toString('hex');
   const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 Stunden
@@ -37,8 +109,9 @@ function isValidSession(sessionId) {
 }
 
 function requireAuth(req, res, next) {
-  // Session-ID aus Query-Parameter oder Cookie extrahieren
   var sessionId = req.query.session;
+  
+  // Versuche, Session aus Cookies zu extrahieren
   if (!sessionId && req.headers.cookie) {
     var cookies = req.headers.cookie.split(';');
     for (var i = 0; i < cookies.length; i++) {
@@ -57,83 +130,6 @@ function requireAuth(req, res, next) {
   }
 }
 
-// Datenbankverbindung
-var pool;
-var dbConnected = false;
-
-try {
-  if (process.env.DATABASE_URL) {
-    console.log('Verbinde mit Datenbank über DATABASE_URL...');
-    
-    // Robustere DB-Verbindung für Render
-    pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-    
-    // Teste die Verbindung
-    pool.query('SELECT NOW() as now')
-      .then(function(result) {
-        console.log('Datenbankverbindung erfolgreich:', result.rows[0]);
-        dbConnected = true;
-        
-        // Prüfe, ob die Tabellen existieren
-        pool.query("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'locations')")
-          .then(function(result) {
-            console.log('Tabelle locations existiert:', result.rows[0].exists);
-            
-            // Wenn die Tabelle nicht existiert, erstelle sie
-            if (!result.rows[0].exists) {
-              console.log('Erstelle Tabelle locations...');
-              pool.query(
-                "CREATE TABLE IF NOT EXISTS locations (" +
-                "id SERIAL PRIMARY KEY, " +
-                "name VARCHAR(255) NOT NULL, " +
-                "date DATE, " +
-                "description TEXT, " +
-                "highlight TEXT, " +
-                "latitude VARCHAR(50) NOT NULL, " +
-                "longitude VARCHAR(50) NOT NULL, " +
-                "country_code VARCHAR(10), " +
-                "image VARCHAR(255), " +
-                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
-              ).then(function() {
-                console.log('Tabelle locations erstellt');
-              }).catch(function(err) {
-                console.error('Fehler beim Erstellen der Tabelle locations:', err);
-              });
-            }
-          })
-          .catch(function(err) {
-            console.error('Fehler beim Prüfen der Tabelle locations:', err);
-          });
-      })
-      .catch(function(err) {
-        console.error('Fehler bei der Datenbankverbindung:', err);
-      });
-  } else {
-    console.log('DATABASE_URL nicht vorhanden, starte im Offline-Modus');
-  }
-} catch (error) {
-  console.error('Fehler beim Datenbankverbindungsaufbau:', error);
-}
-
-// Uploads-Verzeichnis einrichten (extra robust für Render)
-const uploadsDir = path.join(__dirname, 'uploads');
-try {
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log('Uploads-Verzeichnis erstellt: ' + uploadsDir);
-  } else {
-    console.log('Uploads-Verzeichnis existiert: ' + uploadsDir);
-  }
-} catch (error) {
-  console.error('Fehler beim Erstellen des Uploads-Verzeichnisses:', error);
-}
-
-// Statische Dateien und Uploads
-app.use('/uploads', express.static(uploadsDir));
-
 // Multer für Datei-Uploads konfigurieren
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -141,26 +137,209 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
+    const ext = path.extname(file.originalname).toLowerCase();
     cb(null, 'image-' + uniqueSuffix + ext);
   }
 });
 
-// Höheres Limit für Datei-Uploads
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  fileFilter: function(req, file, cb) {
+    // HEIC, PNG und JPG/JPEG zulassen
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.heic'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    
+    if (allowedExtensions.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Nur JPG, PNG und HEIC Bilder sind erlaubt'));
+    }
+  }
+});
+
+// Admin-Route für Datenbankübersicht
+app.get('/admin', requireAuth, function(req, res) {
+  if (!dbConnected) {
+    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
+  }
+
+  pool.query('SELECT * FROM locations ORDER BY id DESC')
+    .then(function(result) {
+      const locations = result.rows;
+      
+      res.send(`
+        <!DOCTYPE html>
+        <html lang="de">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Datenbank-Admin - Susibert</title>
+          <style>
+            body {
+              font-family: system-ui, -apple-system, sans-serif;
+              background-color: #1a1a1a;
+              color: #f5f5f5;
+              margin: 0;
+              padding: 20px;
+            }
+            h1 {
+              color: #f59a0c;
+              border-bottom: 1px solid #333;
+              padding-bottom: 10px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th, td {
+              border: 1px solid #333;
+              padding: 8px;
+              text-align: left;
+            }
+            th {
+              background-color: #222;
+            }
+            tr:nth-child(even) {
+              background-color: #222;
+            }
+            .actions {
+              display: flex;
+              gap: 10px;
+            }
+            .btn {
+              display: inline-block;
+              padding: 5px 10px;
+              background-color: #f59a0c;
+              color: black;
+              border-radius: 4px;
+              text-decoration: none;
+              cursor: pointer;
+            }
+            .btn-danger {
+              background-color: #d33;
+              color: white;
+            }
+            .btn-nav {
+              margin-right: 10px;
+            }
+            .warning {
+              background-color: rgba(255, 0, 0, 0.1);
+              padding: 10px;
+              border-radius: 5px;
+              margin-bottom: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Datenbank-Admin</h1>
+          
+          <a href="/map" class="btn btn-nav">Zurück zur Karte</a>
+          <a href="/admin/clear" class="btn btn-danger btn-nav" onclick="return confirm('Wirklich ALLE Orte löschen?')">Datenbank leeren</a>
+          
+          <h2>Gespeicherte Orte (${locations.length})</h2>
+          
+          ${locations.length === 0 ? '<p>Keine Orte in der Datenbank.</p>' : ''}
+          
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Datum</th>
+                <th>Bild</th>
+                <th>Beschreibung</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${locations.map(loc => `
+                <tr>
+                  <td>${loc.id}</td>
+                  <td>${loc.name || ''}</td>
+                  <td>${loc.date ? new Date(loc.date).toLocaleDateString() : '-'}</td>
+                  <td>${loc.image ? 'Ja' : 'Nein'}</td>
+                  <td>${loc.description || '-'}</td>
+                  <td>
+                    <div class="actions">
+                      <a href="/api/locations/${loc.id}/delete" class="btn btn-danger" onclick="return confirm('Diesen Ort löschen?')">Löschen</a>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `);
+    })
+    .catch(function(error) {
+      res.status(500).send(`
+        <h1>Fehler</h1>
+        <p>Fehler beim Laden der Datenbank: ${error.message}</p>
+        <a href="/map">Zurück zur Karte</a>
+      `);
+    });
+});
+
+// Datenbank leeren
+app.get('/admin/clear', requireAuth, function(req, res) {
+  if (!dbConnected) {
+    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
+  }
+
+  pool.query('DELETE FROM locations')
+    .then(function() {
+      res.redirect('/admin?cleared=true');
+    })
+    .catch(function(error) {
+      res.status(500).send(`
+        <h1>Fehler</h1>
+        <p>Fehler beim Leeren der Datenbank: ${error.message}</p>
+        <a href="/admin">Zurück zur Admin-Seite</a>
+      `);
+    });
 });
 
 // API-Routen
-app.get('/api/health', function(req, res) {
-  res.json({
-    status: 'online',
-    version: '1.0.0',
-    database: dbConnected ? 'verbunden' : 'nicht verbunden',
-    environment: process.env.NODE_ENV || 'development',
-    timestamp: new Date().toISOString()
-  });
+
+// Login-Check direkt
+app.get('/login-check', function(req, res) {
+  var inputCode = req.query.code;
+  
+  if (inputCode === ACCESS_CODE) {
+    // Erstelle Session
+    var sessionId = createSession();
+    res.cookie('sessionId', sessionId, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+    res.redirect('/map');
+  } else {
+    res.redirect('/?error=wrong-code');
+  }
+});
+
+// Abmelden
+app.get('/logout', function(req, res) {
+  var sessionId = null;
+  if (req.headers.cookie) {
+    var cookies = req.headers.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].trim();
+      if (cookie.startsWith('sessionId=')) {
+        sessionId = cookie.split('=')[1];
+        break;
+      }
+    }
+  }
+  
+  // Entferne Session
+  if (sessionId && sessions[sessionId]) {
+    delete sessions[sessionId];
+  }
+  
+  // Lösche Cookie
+  res.clearCookie('sessionId');
+  res.redirect('/');
 });
 
 // Locations API
@@ -181,12 +360,11 @@ app.get('/api/locations', requireAuth, function(req, res) {
         var row = result.rows[i];
         var imagePath = row.image || '';
         
-        // Verarbeite den Bildpfad, um eine vollständige URL zu erstellen
+        // Verarbeite den Bildpfad
         if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('/')) {
           imagePath = '/uploads/' + imagePath;
         }
         
-        // Wenn das Bild eine relative URL mit führendem Slash ist, füge die Basis-URL hinzu
         if (imagePath && imagePath.startsWith('/')) {
           imagePath = baseUrl + imagePath;
         }
@@ -194,7 +372,7 @@ app.get('/api/locations', requireAuth, function(req, res) {
         locations.push({
           id: row.id,
           name: row.name || "Unbenannter Ort",
-          date: row.date ? new Date(row.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          date: row.date ? new Date(row.date).toISOString().split('T')[0] : null,
           description: row.description || "",
           highlight: row.highlight || "",
           latitude: row.latitude || "0",
@@ -218,114 +396,131 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
     return res.status(503).json({ error: 'Datenbank nicht verbunden' });
   }
 
-  console.log('Neuer Ort wird erstellt...', req.body);
-  
-  var name = req.body.name;
-  var date = req.body.date;
-  var description = req.body.description;
-  var highlight = req.body.highlight;
-  var latitude = req.body.latitude;
-  var longitude = req.body.longitude;
-  var countryCode = req.body.countryCode;
-  
-  if (!name || !latitude || !longitude) {
-    return res.status(400).json({ error: 'Name, Breitengrad und Längengrad sind erforderlich' });
-  }
-  
-  // Wenn ein Bild hochgeladen wurde, speichere den Pfad
-  var imagePath = req.file ? req.file.filename : null;
-  console.log('Bildpfad:', imagePath);
-  
-  // SQL-Query zur Erstellung eines neuen Standorts
-  pool.query(
-    'INSERT INTO locations (name, date, description, highlight, latitude, longitude, country_code, image) ' +
-    'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-    [name, date || new Date(), description, highlight, latitude, longitude, countryCode, imagePath]
-  )
-    .then(function(result) {
-      if (result.rows.length === 0) {
-        throw new Error('Fehler beim Erstellen des Standorts');
-      }
-      
-      console.log('Ort erstellt:', result.rows[0]);
-      
-      // Bereite die Antwort vor mit vollständiger Bild-URL, falls ein Bild vorhanden ist
-      var location = result.rows[0];
-      if (location.image) {
+  try {
+    console.log('Neuer Ort wird erstellt:', req.body);
+    
+    // Die Daten aus dem Formular extrahieren
+    var name = req.body.name || '';
+    var description = req.body.description || '';
+    
+    // Koordinaten
+    var latitude = req.body.latitude || '';
+    var longitude = req.body.longitude || '';
+    
+    // Validierung
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ error: 'Titel ist erforderlich' });
+    }
+    
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Bitte wähle einen Ort auf der Karte' });
+    }
+    
+    // Bild ist jetzt erforderlich
+    if (!req.file) {
+      return res.status(400).json({ error: 'Bitte füge ein Bild hinzu (JPG, PNG oder HEIC)' });
+    }
+    
+    // Speichere das Bild
+    var imagePath = req.file.filename;
+    console.log('Bildpfad:', imagePath);
+    
+    // Setze aktuelles Datum
+    const currentDate = new Date();
+    
+    // SQL-Query zur Erstellung eines neuen Standorts mit explizitem NULL-Wert für highlight
+    pool.query(
+      'INSERT INTO locations (name, date, description, latitude, longitude, image, highlight) ' +
+      'VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [name, currentDate, description, latitude, longitude, imagePath, ''] // Leerer String für highlight
+    )
+      .then(function(result) {
+        if (result.rows.length === 0) {
+          throw new Error('Fehler beim Erstellen des Standorts');
+        }
+        
+        console.log('Ort erstellt:', result.rows[0]);
+        
+        // Bereite die Antwort vor mit vollständiger Bild-URL
+        var location = result.rows[0];
         var baseUrl = req.protocol + '://' + req.get('host');
         location.image = baseUrl + '/uploads/' + location.image;
-      }
-      
-      res.status(201).json(location);
-    })
-    .catch(function(error) {
-      console.error('Fehler beim Erstellen des Standorts:', error);
-      res.status(500).json({ error: 'Datenbankfehler', details: error.message });
-    });
+        
+        res.status(201).json(location);
+      })
+      .catch(function(error) {
+        console.error('Fehler beim Erstellen des Standorts in DB:', error);
+        res.status(500).json({ error: 'Datenbankfehler', details: error.message });
+      });
+  } catch (error) {
+    console.error('Allgemeiner Fehler:', error);
+    res.status(500).json({ error: 'Serverfehler', details: error.message });
+  }
 });
 
-// Ort löschen
+// Ort löschen (API-Endpunkt)
 app.delete('/api/locations/:id', requireAuth, function(req, res) {
+  deleteLocation(req.params.id, res);
+});
+
+// Ort löschen (Link-Version für einfacheren Aufruf)
+app.get('/api/locations/:id/delete', requireAuth, function(req, res) {
+  deleteLocation(req.params.id, res, '/admin');
+});
+
+// Hilfsfunktion zum Löschen von Orten
+function deleteLocation(id, res, redirectUrl = null) {
   if (!dbConnected) {
     return res.status(503).json({ error: 'Datenbank nicht verbunden' });
   }
 
-  var id = req.params.id;
-  console.log('Lösche Ort mit ID:', id);
-  
-  // Finde den Ort, um das zugehörige Bild zu löschen, falls vorhanden
-  pool.query('SELECT * FROM locations WHERE id = $1', [id])
-    .then(function(findResult) {
-      if (findResult.rows.length === 0) {
-        return res.status(404).json({ error: 'Standort nicht gefunden' });
+  const numId = parseInt(id);
+  if (isNaN(numId)) {
+    return res.status(400).json({ error: 'Ungültige ID' });
+  }
+
+  // Hole zuerst den Ort, um das Bild zu identifizieren
+  pool.query('SELECT * FROM locations WHERE id = $1', [numId])
+    .then(function(result) {
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Ort nicht gefunden' });
       }
       
-      var location = findResult.rows[0];
+      const location = result.rows[0];
       
-      // Lösche den Ort aus der Datenbank
-      return pool.query('DELETE FROM locations WHERE id = $1 RETURNING *', [id])
+      // Lösche aus der Datenbank
+      return pool.query('DELETE FROM locations WHERE id = $1', [numId])
         .then(function() {
-          // Wenn der Ort ein Bild hat, versuche es zu löschen
+          // Wenn der Ort ein Bild hatte, lösche es auch (optional)
           if (location.image && !location.image.startsWith('http')) {
-            var imagePath = path.join(uploadsDir, location.image);
-            if (fs.existsSync(imagePath)) {
-              try {
+            try {
+              const imagePath = path.join(uploadsDir, location.image);
+              if (fs.existsSync(imagePath)) {
                 fs.unlinkSync(imagePath);
-                console.log('Bild gelöscht:', imagePath);
-              } catch (err) {
-                console.error('Fehler beim Löschen des Bildes:', err);
               }
+            } catch (err) {
+              // Nur loggen, nicht abbrechen
+              console.error('Fehler beim Löschen der Bilddatei:', err);
             }
           }
           
-          console.log('Ort gelöscht:', location);
-          res.json({ success: true, message: 'Standort erfolgreich gelöscht', location: location });
+          if (redirectUrl) {
+            res.redirect(redirectUrl);
+          } else {
+            res.json({ success: true, message: 'Ort erfolgreich gelöscht' });
+          }
         });
     })
     .catch(function(error) {
-      console.error('Fehler beim Löschen des Standorts:', error);
-      res.status(500).json({ error: 'Datenbankfehler', details: error.message });
+      console.error('Fehler beim Löschen des Ortes:', error);
+      
+      if (redirectUrl) {
+        res.redirect(redirectUrl + '?error=' + encodeURIComponent('Fehler beim Löschen: ' + error.message));
+      } else {
+        res.status(500).json({ error: 'Datenbankfehler', details: error.message });
+      }
     });
-});
-
-// Login überprüfen
-app.post('/api/login', function(req, res) {
-  var accessCode = req.body.accessCode;
-  var configuredCode = process.env.ACCESS_CODE || 'suuuu';
-  
-  console.log('Login-Versuch mit Code:', accessCode ? '***' + accessCode.substr(-2) : 'fehlt');
-  
-  if (accessCode === configuredCode) {
-    // Erstelle eine neue Session
-    var sessionId = createSession();
-    
-    // Setze ein Session-Cookie und leite zur geschützten Seite um
-    res.setHeader('Set-Cookie', 'sessionId=' + sessionId + '; Path=/; HttpOnly; Max-Age=86400');
-    res.json({ success: true, redirect: '/map' });
-  } else {
-    res.status(401).json({ success: false, message: 'Ungültiger Zugangscode' });
-  }
-});
+}
 
 // Login-Seite
 app.get('/', function(req, res) {
@@ -346,895 +541,1053 @@ app.get('/', function(req, res) {
     return res.redirect('/map');
   }
   
-  res.send('<!DOCTYPE html>\
-<html lang="de">\
-<head>\
-  <meta charset="UTF-8">\
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">\
-  <title>Susibert</title>\
-  <style>\
-    body {\
-      font-family: system-ui, -apple-system, sans-serif;\
-      background-color: #1a1a1a;\
-      color: #f5f5f5;\
-      margin: 0;\
-      padding: 0;\
-      display: flex;\
-      justify-content: center;\
-      align-items: center;\
-      height: 100vh;\
-    }\
-    .login-container {\
-      text-align: center;\
-      max-width: 400px;\
-      padding: 2rem;\
-      background-color: #222;\
-      border-radius: 8px;\
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\
-    }\
-    .avatar {\
-      width: 120px;\
-      height: 120px;\
-      border-radius: 60px;\
-      margin: 0 auto 1rem;\
-      overflow: hidden;\
-      border: 3px solid #f59a0c;\
-    }\
-    .avatar img {\
-      width: 100%;\
-      height: 100%;\
-      object-fit: cover;\
-    }\
-    h1 {\
-      color: #f59a0c;\
-      font-size: 2rem;\
-      margin: 0 0 1rem 0;\
-    }\
-    p {\
-      margin-bottom: 1.5rem;\
-    }\
-    input {\
-      display: block;\
-      width: 100%;\
-      padding: 10px;\
-      margin: 1rem 0;\
-      background-color: #333;\
-      border: none;\
-      border-radius: 4px;\
-      color: white;\
-      box-sizing: border-box;\
-    }\
-    button {\
-      background-color: #f59a0c;\
-      color: black;\
-      border: none;\
-      padding: 10px 20px;\
-      border-radius: 4px;\
-      cursor: pointer;\
-      font-weight: bold;\
-      width: 100%;\
-      transition: background-color 0.2s;\
-    }\
-    button:hover {\
-      background-color: #e08900;\
-    }\
-    #message {\
-      color: #ff4d4d;\
-      margin-top: 1rem;\
-      min-height: 20px;\
-    }\
-    .bypass-link {\
-      margin-top: 20px;\
-      font-size: 0.85rem;\
-      color: #888;\
-    }\
-    .bypass-link a {\
-      color: #aaa;\
-      text-decoration: none;\
-    }\
-    .bypass-link a:hover {\
-      text-decoration: underline;\
-    }\
-  </style>\
-</head>\
-<body>\
-  <div class="login-container">\
-    <div class="avatar">\
-      <img src="/uploads/couple.png" alt="Susibert" onerror="this.src=\'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20baseProfile%3D%22full%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f59a0c%22%3E%3C%2Frect%3E%3Ctext%20x%3D%2260%22%20y%3D%2260%22%20font-size%3D%2240%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%20font-family%3D%22sans-serif%22%20fill%3D%22%23000%22%3ES%3C%2Ftext%3E%3C%2Fsvg%3E\'">\
-    </div>\
-    <h1>Susibert</h1>\
-    <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>\
-    <form id="loginForm">\
-      <input type="password" name="accessCode" id="accessCode" placeholder="Zugangscode" required>\
-      <button type="submit">Enter Susibert</button>\
-    </form>\
-    <div id="message"></div>\
-    <div class="bypass-link">\
-      <a href="#" id="directAccessLink">[Direktzugriff für Tests]</a>\
-    </div>\
-  </div>\
-  \
-  <script>\
-    // Prüfe, ob ein Fehler in der URL ist\
-    var urlParams = new URLSearchParams(window.location.search);\
-    if (urlParams.has("error")) {\
-      var messageEl = document.getElementById("message");\
-      if (urlParams.get("error") === "auth") {\
-        messageEl.textContent = "Bitte melde dich an, um auf die Karte zuzugreifen.";\
-      }\
-    }\
-    \
-    // Login-Formular-Handler\
-    document.getElementById("loginForm").addEventListener("submit", function(e) {\
-      e.preventDefault();\
-      \
-      var code = document.getElementById("accessCode").value;\
-      var messageEl = document.getElementById("message");\
-      \
-      messageEl.textContent = "Überprüfe Code...";\
-      \
-      // API-Aufruf zur Code-Validierung\
-      fetch("/api/login", {\
-        method: "POST",\
-        headers: {\
-          "Content-Type": "application/json",\
-        },\
-        body: JSON.stringify({ accessCode: code })\
-      })\
-      .then(function(response) {\
-        return response.json();\
-      })\
-      .then(function(data) {\
-        if (data.success) {\
-          messageEl.textContent = "Code korrekt, lade Karte...";\
-          window.location.href = data.redirect;\
-        } else {\
-          messageEl.textContent = data.message || "Ungültiger Zugangscode. Bitte versuche es erneut.";\
-        }\
-      })\
-      .catch(function(error) {\
-        console.error("Fehler:", error);\
-        messageEl.textContent = "Fehler beim Überprüfen des Codes. Bitte versuche es später erneut.";\
-      });\
-    });\
-    \
-    // Direktzugriff für Entwicklungszwecke (verwendet den Standard-Code)\
-    document.getElementById("directAccessLink").addEventListener("click", function(e) {\
-      e.preventDefault();\
-      document.getElementById("accessCode").value = "suuuu";\
-      document.getElementById("loginForm").dispatchEvent(new Event("submit"));\
-    });\
-  </script>\
-</body>\
-</html>');
+  // Fehlertext, falls vorhanden
+  var errorText = '';
+  if (req.query.error === 'auth') {
+    errorText = 'Bitte melde dich an, um auf die Karte zuzugreifen.';
+  } else if (req.query.error === 'wrong-code') {
+    errorText = 'Ungültiger Zugangscode. Bitte versuche es erneut.';
+  }
+
+  // Direkte Einbettung des Hintergrundbilds als Base64
+  // Alternativ kann auch eine öffentliche URL verwendet werden
+  const backgroundStyle = `
+    body {
+      background-color: #1a1a1a;
+      background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1740&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+    }
+  `;
+  
+  res.send(`<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Susibert</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #1a1a1a;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-image: url("/uploads/couple.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    /* Fallback für den Fall, dass das Bild nicht geladen werden kann */
+    ${backgroundStyle}
+    .login-container {
+      text-align: center;
+      max-width: 400px;
+      padding: 2rem;
+      background-color: rgba(34, 34, 34, 0.85);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 60px;
+      margin: 0 auto 1rem;
+      overflow: hidden;
+      border: 3px solid #f59a0c;
+      background-color: #f59a0c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+      font-weight: bold;
+      color: #000;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    h1 {
+      color: #f59a0c;
+      font-size: 2rem;
+      margin: 0 0 1rem 0;
+    }
+    p {
+      margin-bottom: 1.5rem;
+    }
+    input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 1rem 0;
+      background-color: #333;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #f59a0c;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #e08900;
+    }
+    #message {
+      color: #ff4d4d;
+      margin-top: 1rem;
+      min-height: 20px;
+    }
+    .bypass-link {
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #888;
+    }
+    .bypass-link a {
+      color: #aaa;
+      text-decoration: none;
+    }
+    .bypass-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="avatar">
+      <div>S</div>
+    </div>
+    <h1>Susibert</h1>
+    <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
+    <form action="/login-check" method="get">
+      <input type="password" name="code" id="accessCode" placeholder="Zugangscode" required>
+      <button type="submit">Enter Susibert</button>
+    </form>
+    <div id="message">${errorText}</div>
+    <div class="bypass-link">
+      <a href="/login-check?code=suuuu">[Direktzugriff für Tests]</a>
+    </div>
+  </div>
+</body>
+</html>`);
 });
 
-// Geschützte Kartenansicht
+// Geschützte Kartenansicht mit Leaflet
 app.get('/map', requireAuth, function(req, res) {
-  res.send('<!DOCTYPE html>\
-<html lang="de">\
-<head>\
-  <meta charset="UTF-8">\
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">\
-  <title>Susibert</title>\
-  <!-- OpenStreetMap-Leaflet -->\
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">\
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>\
-  <style>\
-    body {\
-      font-family: system-ui, -apple-system, sans-serif;\
-      background-color: #1a1a1a;\
-      color: #f5f5f5;\
-      margin: 0;\
-      padding: 0;\
-      overflow-x: hidden;\
-    }\
-    .app-container {\
-      display: flex;\
-      flex-direction: column;\
-      min-height: 100vh;\
-    }\
-    header {\
-      background-color: #222;\
-      padding: 0.75rem 1.5rem;\
-      display: flex;\
-      justify-content: space-between;\
-      align-items: center;\
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);\
-    }\
-    .logo {\
-      display: flex;\
-      align-items: center;\
-      gap: 0.75rem;\
-      color: #f59a0c;\
-      text-decoration: none;\
-    }\
-    .logo-img {\
-      width: 40px;\
-      height: 40px;\
-      border-radius: 20px;\
-      overflow: hidden;\
-      border: 2px solid #f59a0c;\
-    }\
-    .logo-img img {\
-      width: 100%;\
-      height: 100%;\
-      object-fit: cover;\
-    }\
-    .logo-text {\
-      font-size: 1.5rem;\
-      font-weight: bold;\
-      margin: 0;\
-    }\
-    .actions {\
-      display: flex;\
-      gap: 1rem;\
-    }\
-    .button {\
-      background-color: #333;\
-      color: #fff;\
-      border: none;\
-      padding: 8px 16px;\
-      border-radius: 4px;\
-      cursor: pointer;\
-      font-size: 14px;\
-      text-decoration: none;\
-      display: inline-flex;\
-      align-items: center;\
-      gap: 0.5rem;\
-      transition: background-color 0.2s;\
-    }\
-    .button:hover {\
-      background-color: #444;\
-    }\
-    .button.primary {\
-      background-color: #f59a0c;\
-      color: #000;\
-    }\
-    .button.primary:hover {\
-      background-color: #e08900;\
-    }\
-    .main-content {\
-      flex: 1;\
-      display: flex;\
-      position: relative;\
-    }\
-    #map {\
-      flex: 1;\
-      height: calc(100vh - 58px);\
-      z-index: 1;\
-    }\
-    .sidebar {\
-      width: 360px;\
-      background-color: #222;\
-      overflow-y: auto;\
-      padding: 1rem;\
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);\
-      z-index: 2;\
-      max-height: calc(100vh - 58px);\
-    }\
-    .sidebar h2 {\
-      color: #f59a0c;\
-      margin-top: 0;\
-      border-bottom: 1px solid #333;\
-      padding-bottom: 0.5rem;\
-    }\
-    .locations-list {\
-      display: flex;\
-      flex-direction: column;\
-      gap: 1rem;\
-    }\
-    .location-card {\
-      background-color: #333;\
-      border-radius: 8px;\
-      padding: 1rem;\
-      transition: transform 0.2s;\
-      cursor: pointer;\
-    }\
-    .location-card:hover {\
-      transform: translateY(-3px);\
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);\
-    }\
-    .location-card h3 {\
-      margin-top: 0;\
-      margin-bottom: 0.25rem;\
-      color: #f5f5f5;\
-    }\
-    .location-meta {\
-      display: flex;\
-      align-items: center;\
-      gap: 0.5rem;\
-      margin-bottom: 0.75rem;\
-      font-size: 0.85rem;\
-      color: #aaa;\
-    }\
-    .location-image {\
-      width: 100%;\
-      height: 140px;\
-      border-radius: 4px;\
-      object-fit: cover;\
-      margin-top: 0.5rem;\
-    }\
-    .location-description {\
-      margin-top: 0.75rem;\
-      font-size: 0.9rem;\
-      color: #ddd;\
-    }\
-    .location-highlight {\
-      margin-top: 0.5rem;\
-      font-style: italic;\
-      color: #f59a0c;\
-      font-size: 0.85rem;\
-    }\
-    .error-message {\
-      background-color: rgba(255, 80, 80, 0.2);\
-      border: 1px solid #ff5050;\
-      color: #ff5050;\
-      padding: 10px;\
-      border-radius: 4px;\
-      margin: 10px 0;\
-    }\
-    .status-text {\
-      color: #888;\
-      font-size: 0.9rem;\
-      margin: 1rem 0;\
-    }\
-    \
-    /* Modal für Ort Details und Bearbeitung */\
-    .modal {\
-      display: none;\
-      position: fixed;\
-      top: 0;\
-      left: 0;\
-      width: 100%;\
-      height: 100%;\
-      background-color: rgba(0, 0, 0, 0.7);\
-      z-index: 999;\
-      justify-content: center;\
-      align-items: center;\
-    }\
-    .modal-content {\
-      background-color: #222;\
-      border-radius: 8px;\
-      padding: 1.5rem;\
-      width: 90%;\
-      max-width: 600px;\
-      max-height: 90vh;\
-      overflow-y: auto;\
-    }\
-    .modal-header {\
-      display: flex;\
-      justify-content: space-between;\
-      align-items: center;\
-      margin-bottom: 1rem;\
-      border-bottom: 1px solid #333;\
-      padding-bottom: 0.5rem;\
-    }\
-    .modal-header h2 {\
-      margin: 0;\
-      color: #f59a0c;\
-    }\
-    .close-modal {\
-      background: none;\
-      border: none;\
-      color: #f5f5f5;\
-      font-size: 1.5rem;\
-      cursor: pointer;\
-    }\
-    .modal-form label {\
-      display: block;\
-      margin-bottom: 0.25rem;\
-      color: #ddd;\
-    }\
-    .modal-form input,\
-    .modal-form textarea,\
-    .modal-form select {\
-      width: 100%;\
-      padding: 0.75rem;\
-      margin-bottom: 1rem;\
-      background-color: #333;\
-      border: 1px solid #444;\
-      border-radius: 4px;\
-      color: #f5f5f5;\
-    }\
-    .modal-form textarea {\
-      min-height: 100px;\
-      resize: vertical;\
-    }\
-    .modal-actions {\
-      display: flex;\
-      justify-content: flex-end;\
-      gap: 1rem;\
-      margin-top: 1rem;\
-    }\
-    \
-    /* Responsive Anpassungen */\
-    @media (max-width: 768px) {\
-      .main-content {\
-        flex-direction: column;\
-      }\
-      #map {\
-        height: 50vh;\
-      }\
-      .sidebar {\
-        width: 100%;\
-        max-height: 50vh;\
-      }\
-    }\
-    \
-    /* Details Modal */\
-    .detail-image {\
-      width: 100%;\
-      height: auto;\
-      max-height: 300px;\
-      object-fit: cover;\
-      border-radius: 4px;\
-      margin-bottom: 1rem;\
-    }\
-    .detail-content h3 {\
-      color: #f59a0c;\
-      margin-top: 0;\
-    }\
-    .detail-meta {\
-      display: flex;\
-      justify-content: space-between;\
-      margin-bottom: 1rem;\
-      color: #aaa;\
-      font-size: 0.9rem;\
-    }\
-    .detail-actions {\
-      display: flex;\
-      justify-content: space-between;\
-      margin-top: 1.5rem;\
-    }\
-  </style>\
-</head>\
-<body>\
-  <div class="app-container">\
-    <header>\
-      <a href="/map" class="logo">\
-        <div class="logo-img">\
-          <img src="/uploads/couple.png" alt="Susibert" onerror="this.src=\'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20baseProfile%3D%22full%22%20width%3D%2240%22%20height%3D%2240%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f59a0c%22%3E%3C%2Frect%3E%3Ctext%20x%3D%2220%22%20y%3D%2220%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%20font-family%3D%22sans-serif%22%20fill%3D%22%23000%22%3ES%3C%2Ftext%3E%3C%2Fsvg%3E\'">\
-        </div>\
-        <h1 class="logo-text">Susibert</h1>\
-      </a>\
-      <div class="actions">\
-        <button id="addLocationBtn" class="button primary">\
-          <span>Ort hinzufügen</span>\
-        </button>\
-        <a href="/" class="button">Abmelden</a>\
-      </div>\
-    </header>\
-    \
-    <div class="main-content">\
-      <div id="map"></div>\
-      <div class="sidebar">\
-        <h2>Besuchte Orte</h2>\
-        <div id="locations" class="locations-list">\
-          <div class="status-text">Orte werden geladen...</div>\
-        </div>\
-      </div>\
-    </div>\
-  </div>\
-  \
-  <!-- Modal für Ort hinzufügen/bearbeiten -->\
-  <div id="locationModal" class="modal">\
-    <div class="modal-content">\
-      <div class="modal-header">\
-        <h2 id="modalTitle">Ort hinzufügen</h2>\
-        <button class="close-modal" id="closeModal">&times;</button>\
-      </div>\
-      <form id="locationForm" class="modal-form" enctype="multipart/form-data">\
-        <input type="hidden" id="locationId" name="id">\
-        \
-        <label for="name">Name*</label>\
-        <input type="text" id="name" name="name" required placeholder="z.B. Barcelona, Spain">\
-        \
-        <label for="date">Datum</label>\
-        <input type="date" id="date" name="date">\
-        \
-        <label for="description">Beschreibung</label>\
-        <textarea id="description" name="description" placeholder="Was habt ihr dort gemacht?"></textarea>\
-        \
-        <label for="highlight">Highlight</label>\
-        <input type="text" id="highlight" name="highlight" placeholder="Was war besonders beeindruckend?">\
-        \
-        <label for="countryCode">Land</label>\
-        <input type="text" id="countryCode" name="countryCode" placeholder="z.B. DE, FR, ES">\
-        \
-        <label for="latitude">Breitengrad*</label>\
-        <input type="text" id="latitude" name="latitude" required placeholder="z.B. 51.1657">\
-        \
-        <label for="longitude">Längengrad*</label>\
-        <input type="text" id="longitude" name="longitude" required placeholder="z.B. 10.4515">\
-        \
-        <label for="image">Bild</label>\
-        <input type="file" id="image" name="image" accept="image/*">\
-        \
-        <div class="modal-actions">\
-          <button type="button" class="button" id="cancelLocation">Abbrechen</button>\
-          <button type="submit" class="button primary">Speichern</button>\
-        </div>\
-      </form>\
-    </div>\
-  </div>\
-  \
-  <!-- Modal für Ort-Details -->\
-  <div id="detailModal" class="modal">\
-    <div class="modal-content">\
-      <div class="modal-header">\
-        <h2 id="detailTitle">Ort Details</h2>\
-        <button class="close-modal" id="closeDetailModal">&times;</button>\
-      </div>\
-      <div class="detail-content">\
-        <img id="detailImage" src="" alt="" class="detail-image">\
-        <div class="detail-meta">\
-          <span id="detailDate"></span>\
-          <span id="detailCountry"></span>\
-        </div>\
-        <p id="detailDescription"></p>\
-        <div id="detailHighlightBox">\
-          <h3>Highlight</h3>\
-          <p id="detailHighlight"></p>\
-        </div>\
-        <div class="detail-actions">\
-          <button class="button" id="showOnMapBtn">Auf Karte anzeigen</button>\
-          <button class="button" id="deleteLocationBtn">Löschen</button>\
-        </div>\
-      </div>\
-    </div>\
-  </div>\
-\
-  <script>\
-    // Globale Variablen\
-    var map;\
-    var markers = [];\
-    var currentLocation = null;\
-    var editMode = false;\
-    var tempMarker = null;\
-    \
-    // Warte, bis das Dokument vollständig geladen ist\
-    window.addEventListener("DOMContentLoaded", function() {\
-      console.log("Seite geladen, initialisiere Anwendung...");\
-      \
-      // DOM-Elemente\
-      var locationModal = document.getElementById("locationModal");\
-      var detailModal = document.getElementById("detailModal");\
-      var locationForm = document.getElementById("locationForm");\
-      var addLocationBtn = document.getElementById("addLocationBtn");\
-      var closeModal = document.getElementById("closeModal");\
-      var closeDetailModal = document.getElementById("closeDetailModal");\
-      var cancelLocation = document.getElementById("cancelLocation");\
-      var showOnMapBtn = document.getElementById("showOnMapBtn");\
-      var deleteLocationBtn = document.getElementById("deleteLocationBtn");\
-      \
-      // Modal-Funktionen\
-      function showLocationModal() {\
-        locationModal.style.display = "flex";\
-      }\
-      \
-      function hideLocationModal() {\
-        locationModal.style.display = "none";\
-        locationForm.reset();\
-        if (tempMarker && map) {\
-          map.removeLayer(tempMarker);\
-          tempMarker = null;\
-        }\
-      }\
-      \
-      function showLocationDetails(location) {\
-        currentLocation = location;\
-        \
-        document.getElementById("detailTitle").textContent = location.name;\
-        document.getElementById("detailDate").textContent = location.date || "";\
-        document.getElementById("detailCountry").textContent = location.countryCode || "";\
-        document.getElementById("detailDescription").textContent = location.description || "";\
-        \
-        var detailImage = document.getElementById("detailImage");\
-        if (location.image) {\
-          detailImage.src = location.image;\
-          detailImage.style.display = "block";\
-          \
-          // Fehlerbehandlung für Bilder\
-          detailImage.onerror = function() {\
-            detailImage.style.display = "none";\
-          };\
-        } else {\
-          detailImage.style.display = "none";\
-        }\
-        \
-        var highlightBox = document.getElementById("detailHighlightBox");\
-        var highlightText = document.getElementById("detailHighlight");\
-        if (location.highlight) {\
-          highlightText.textContent = location.highlight;\
-          highlightBox.style.display = "block";\
-        } else {\
-          highlightBox.style.display = "none";\
-        }\
-        \
-        detailModal.style.display = "flex";\
-      }\
-      \
-      function hideDetailModal() {\
-        detailModal.style.display = "none";\
-        currentLocation = null;\
-      }\
-      \
-      // Event Listeners\
-      addLocationBtn.addEventListener("click", function() {\
-        document.getElementById("modalTitle").textContent = "Ort hinzufügen";\
-        document.getElementById("locationId").value = "";\
-        editMode = true;\
-        showLocationModal();\
-      });\
-      \
-      closeModal.addEventListener("click", hideLocationModal);\
-      cancelLocation.addEventListener("click", hideLocationModal);\
-      \
-      closeDetailModal.addEventListener("click", hideDetailModal);\
-      \
-      showOnMapBtn.addEventListener("click", function() {\
-        if (currentLocation && map) {\
-          var lat = parseFloat(currentLocation.latitude);\
-          var lng = parseFloat(currentLocation.longitude);\
-          if (!isNaN(lat) && !isNaN(lng)) {\
-            map.setView([lat, lng], 12);\
-          }\
-          hideDetailModal();\
-        }\
-      });\
-      \
-      deleteLocationBtn.addEventListener("click", function() {\
-        if (currentLocation && confirm("Möchtest du diesen Ort wirklich löschen?")) {\
-          deleteLocation(currentLocation.id);\
-        }\
-      });\
-      \
-      // Formular-Handling\
-      locationForm.addEventListener("submit", function(e) {\
-        e.preventDefault();\
-        \
-        var formData = new FormData(locationForm);\
-        \
-        // Zeige Ladeindikator\
-        document.getElementById("modalTitle").textContent = "Speichere Ort...";\
-        \
-        fetch("/api/locations", {\
-          method: "POST",\
-          body: formData\
-        })\
-        .then(function(response) {\
-          if (!response.ok) {\
-            throw new Error("Fehler beim Speichern des Ortes: " + response.status);\
-          }\
-          return response.json();\
-        })\
-        .then(function(location) {\
-          console.log("Ort gespeichert:", location);\
-          hideLocationModal();\
-          loadLocations(); // Orte neu laden\
-        })\
-        .catch(function(error) {\
-          console.error("Fehler:", error);\
-          document.getElementById("modalTitle").textContent = "Fehler beim Speichern";\
-          setTimeout(function() {\
-            document.getElementById("modalTitle").textContent = "Ort hinzufügen";\
-          }, 3000);\
-        });\
-      });\
-      \
-      // Initialisiere Karte\
-      try {\
-        initMap();\
-      } catch (e) {\
-        console.error("Fehler bei der Karteninitialisierung:", e);\
-        document.getElementById("map").innerHTML = \
-          \'<div class="error-message">Fehler beim Laden der Karte: \' + e.message + \'</div>\';\
-      }\
-      \
-      // Lade Orte\
-      loadLocations();\
-    });\
-    \
-    // Funktion zum Initialisieren der Karte\
-    function initMap() {\
-      try {\
-        // Erstelle die Karte\
-        map = L.map("map").setView([51.1657, 10.4515], 6);\
-        \
-        // Event-Listener für Klicks auf die Karte (im Edit-Modus)\
-        map.on("click", function(e) {\
-          if (editMode) {\
-            var lat = e.latlng.lat;\
-            var lng = e.latlng.lng;\
-            \
-            // Setze die Koordinaten im Formular\
-            document.getElementById("latitude").value = lat.toFixed(6);\
-            document.getElementById("longitude").value = lng.toFixed(6);\
-            \
-            // Füge temporären Marker hinzu\
-            if (tempMarker) {\
-              map.removeLayer(tempMarker);\
-            }\
-            \
-            tempMarker = L.marker([lat, lng]).addTo(map);\
-            tempMarker.bindPopup("Neuer Ort").openPopup();\
-          }\
-        });\
-        \
-        // Füge den Kartenstil hinzu\
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {\
-          attribution: \'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>\',\
-          subdomains: "abcd",\
-          maxZoom: 19\
-        }).addTo(map);\
-        \
-        console.log("Karte erfolgreich initialisiert");\
-      } catch (error) {\
-        console.error("Fehler bei der Karteninitialisierung:", error);\
-        throw error;\
-      }\
-    }\
-    \
-    // Funktion zum Laden der Locations\
-    function loadLocations() {\
-      var locationsContainer = document.getElementById("locations");\
-      locationsContainer.innerHTML = \'<div class="status-text">Orte werden geladen...</div>\';\
-      \
-      // Lösche bestehende Marker\
-      try {\
-        if (markers.length > 0 && map) {\
-          for (var i = 0; i < markers.length; i++) {\
-            if (map) map.removeLayer(markers[i]);\
-          }\
-          markers = [];\
-        }\
-      } catch (e) {\
-        console.error("Fehler beim Entfernen der Marker:", e);\
-      }\
-      \
-      fetch("/api/locations")\
-        .then(function(response) {\
-          if (!response.ok) {\
-            throw new Error("HTTP Fehler " + response.status);\
-          }\
-          return response.json();\
-        })\
-        .then(function(locations) {\
-          console.log("Orte geladen:", locations.length);\
-          \
-          // Locations anzeigen\
-          locationsContainer.innerHTML = "";\
-          \
-          if (locations.length === 0) {\
-            locationsContainer.innerHTML = "<p>Keine Orte gefunden</p>";\
-            return;\
-          }\
-          \
-          var bounds = [];\
-          \
-          for (var i = 0; i < locations.length; i++) {\
-            var loc = locations[i];\
-            \
-            try {\
-              // Orte auf der Karte anzeigen, aber nur wenn map existiert\
-              if (map) {\
-                var lat = parseFloat(loc.latitude);\
-                var lng = parseFloat(loc.longitude);\
-                \
-                if (!isNaN(lat) && !isNaN(lng)) {\
-                  bounds.push([lat, lng]);\
-                  \
-                  // Marker mit orangenem Gradient erstellen\
-                  for (var j = 0; j < 5; j++) {\
-                    var radius = 50000 * (1 - j/5);\
-                    var opacity = 0.05 + (j / 5) * 0.3;\
-                    \
-                    var circle = L.circle([lat, lng], {\
-                      radius: radius,\
-                      color: "transparent",\
-                      fillColor: "#f59a0c",\
-                      fillOpacity: opacity\
-                    }).addTo(map);\
-                    \
-                    markers.push(circle);\
-                  }\
-                  \
-                  // Hauptmarker hinzufügen\
-                  var marker = L.marker([lat, lng]).addTo(map);\
-                  marker.bindPopup("<b>" + loc.name + "</b><br>" + loc.date);\
-                  \
-                  // Klick-Handler für Marker\
-                  (function(location) {\
-                    marker.on("click", function() {\
-                      showLocationDetails(location);\
-                    });\
-                  })(loc);\
-                  \
-                  markers.push(marker);\
-                }\
-              }\
-            } catch (e) {\
-              console.error("Fehler beim Anzeigen des Markers:", e);\
-            }\
-            \
-            // Location-Karte erstellen\
-            var card = document.createElement("div");\
-            card.className = "location-card";\
-            \
-            var imageHtml = "";\
-            if (loc.image) {\
-              imageHtml = "<img src=\\"" + loc.image + "\\" alt=\\"" + loc.name + "\\" class=\\"location-image\\" onerror=\\"this.style.display=\'none\';\\">";\
-            }\
-            \
-            var cardHtml = \
-              "<h3>" + loc.name + "</h3>" +\
-              "<div class=\\"location-meta\\">" +\
-                "<span>" + (loc.date || "") + "</span>" +\
-                (loc.countryCode ? "<span>" + loc.countryCode + "</span>" : "") +\
-              "</div>" +\
-              imageHtml;\
-              \
-            if (loc.description) {\
-              cardHtml += "<div class=\\"location-description\\">" + loc.description + "</div>";\
-            }\
-              \
-            if (loc.highlight) {\
-              cardHtml += "<div class=\\"location-highlight\\">" + loc.highlight + "</div>";\
-            }\
-            \
-            card.innerHTML = cardHtml;\
-            \
-            // Karte klickbar machen\
-            (function(location) {\
-              card.addEventListener("click", function() {\
-                showLocationDetails(location);\
-              });\
-            })(loc);\
-            \
-            locationsContainer.appendChild(card);\
-          }\
-          \
-          // Kartenansicht an alle Marker anpassen\
-          if (bounds.length > 0 && map) {\
-            try {\
-              map.fitBounds(bounds, { padding: [50, 50] });\
-            } catch (e) {\
-              console.error("Fehler beim Anpassen der Kartenansicht:", e);\
-            }\
-          }\
-        })\
-        .catch(function(error) {\
-          console.error("Fehler beim Laden der Locations:", error);\
-          locationsContainer.innerHTML = \
-            \'<div class="error-message">Fehler beim Laden der Orte: \' + error.message + \'</div>\';\
-        });\
-    }\
-    \
-    // Funktion zum Löschen eines Ortes\
-    function deleteLocation(id) {\
-      fetch("/api/locations/" + id, {\
-        method: "DELETE"\
-      })\
-      .then(function(response) {\
-        if (!response.ok) {\
-          throw new Error("Fehler beim Löschen des Ortes: " + response.status);\
-        }\
-        return response.json();\
-      })\
-      .then(function(data) {\
-        console.log("Ort gelöscht:", data);\
-        document.getElementById("detailModal").style.display = "none";\
-        loadLocations(); // Orte neu laden\
-      })\
-      .catch(function(error) {\
-        console.error("Fehler:", error);\
-        alert("Fehler beim Löschen des Ortes: " + error.message);\
-      });\
-    }\
-  </script>\
-</body>\
-</html>');
+  if (!dbConnected) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html lang="de">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Susibert</title>
+        <style>
+          body { font-family: sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 20px; }
+          h1 { color: #f59a0c; }
+          .error { background: #ff5555; color: white; padding: 10px; border-radius: 5px; }
+          a { color: #f59a0c; }
+        </style>
+      </head>
+      <body>
+        <h1>Susibert</h1>
+        <div class="error">
+          <p>Datenbankverbindung nicht verfügbar. Bitte versuche es später erneut.</p>
+        </div>
+        <p><a href="/">Zurück zur Anmeldung</a></p>
+      </body>
+      </html>
+    `);
+  }
+
+  // HTML für die Kartenansicht
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="de">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Susibert</title>
+      <!-- Leaflet CSS -->
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+      <style>
+        body {
+          font-family: system-ui, -apple-system, sans-serif;
+          background-color: #1a1a1a;
+          color: #f5f5f5;
+          margin: 0;
+          padding: 0;
+          height: 100vh;
+        }
+        
+        /* Verbesserte Header-Styling */
+        .header {
+          background-color: #222;
+          padding: 10px 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          position: relative;
+          z-index: 1000;
+        }
+        
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #f59a0c;
+          text-decoration: none;
+        }
+        
+        .logo-circle {
+          width: 36px;
+          height: 36px;
+          background-color: #f59a0c;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          color: #000;
+          font-size: 18px;
+        }
+        
+        h1 {
+          margin: 0;
+          font-size: 1.3rem;
+          color: #f59a0c;
+        }
+        
+        .app-container {
+          display: flex;
+          height: calc(100vh - 56px); /* abzüglich Header-Höhe */
+        }
+        
+        .location-list {
+          width: 300px;
+          background-color: #222;
+          overflow-y: auto;
+          padding: 15px;
+          display: none; /* standardmäßig ausgeblendet auf mobilen Geräten */
+        }
+        
+        .map-container {
+          flex-grow: 1;
+          position: relative;
+        }
+        
+        #map {
+          height: 100%;
+          width: 100%;
+          background-color: #333;
+        }
+        
+        /* Verbesserte Button-Styling */
+        .button {
+          background-color: #333;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 4px;
+          text-decoration: none;
+          transition: background-color 0.2s;
+          font-size: 0.9rem;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+        }
+        
+        .button:hover {
+          background-color: #444;
+        }
+        
+        .button.primary {
+          background-color: #f59a0c;
+          color: black;
+        }
+        
+        .button.primary:hover {
+          background-color: #e08900;
+        }
+
+        .button.danger {
+          background-color: #d33;
+          color: white;
+        }
+        
+        .button.danger:hover {
+          background-color: #c22;
+        }
+        
+        /* Location Card */
+        .location-card {
+          background-color: #333;
+          border-radius: 8px;
+          margin-bottom: 15px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+        
+        .location-card:hover {
+          transform: translateY(-2px);
+        }
+        
+        .location-card img {
+          width: 100%;
+          height: 140px;
+          object-fit: cover;
+        }
+        
+        .location-card-content {
+          padding: 10px;
+        }
+        
+        .location-card h3 {
+          margin: 0 0 5px;
+          color: #f59a0c;
+          font-size: 1rem;
+        }
+        
+        .location-meta {
+          font-size: 0.8rem;
+          color: #aaa;
+          margin-bottom: 5px;
+        }
+        
+        /* Location Detail Popup */
+        .location-detail {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 90%;
+          max-width: 500px;
+          background-color: #222;
+          border-radius: 8px;
+          box-shadow: 0 0 20px rgba(0,0,0,0.5);
+          z-index: 2000;
+          display: none;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+        
+        .location-detail-header {
+          padding: 15px;
+          background-color: #333;
+          border-top-left-radius: 8px;
+          border-top-right-radius: 8px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .location-detail-content {
+          padding: 15px;
+        }
+        
+        .location-detail-content img {
+          width: 100%;
+          max-height: 300px;
+          object-fit: cover;
+          border-radius: 4px;
+          margin-bottom: 15px;
+        }
+        
+        .location-detail h2 {
+          margin: 0;
+          color: #f59a0c;
+        }
+        
+        .location-close {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 1.5rem;
+          cursor: pointer;
+        }
+
+        .location-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 15px;
+          padding: 0 15px 15px;
+        }
+        
+        /* Form zum Hinzufügen neuer Orte */
+        .add-location-form {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 90%;
+          max-width: 500px;
+          background-color: #222;
+          border-radius: 8px;
+          box-shadow: 0 0 20px rgba(0,0,0,0.5);
+          z-index: 2000;
+          display: none;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+        
+        .form-header {
+          padding: 15px;
+          background-color: #333;
+          border-top-left-radius: 8px;
+          border-top-right-radius: 8px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .form-content {
+          padding: 15px;
+        }
+        
+        .form-group {
+          margin-bottom: 15px;
+        }
+        
+        .form-group label {
+          display: block;
+          margin-bottom: 5px;
+        }
+        
+        .form-control {
+          width: 100%;
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid #444;
+          background-color: #333;
+          color: white;
+          box-sizing: border-box;
+        }
+        
+        textarea.form-control {
+          min-height: 80px;
+          resize: vertical;
+        }
+        
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 15px;
+        }
+        
+        /* Overlay für Popups */
+        .overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0,0,0,0.5);
+          z-index: 1500;
+          display: none;
+        }
+        
+        /* Edit-Mode Button */
+        .edit-toggle {
+          position: absolute;
+          bottom: 20px;
+          left: 20px;
+          z-index: 1000;
+          padding: 10px 15px;
+        }
+
+        .admin-link {
+          margin-left: 10px;
+          font-size: 0.8em;
+          opacity: 0.7;
+        }
+        
+        /* Responsive Design */
+        @media (min-width: 768px) {
+          .location-list {
+            display: block;
+          }
+          
+          .toggle-list-button {
+            display: none;
+          }
+        }
+        
+        @media (max-width: 767px) {
+          .toggle-list-button {
+            display: inline-flex;
+          }
+          
+          .location-list.active {
+            display: block;
+            position: absolute;
+            top: 56px;
+            left: 0;
+            height: calc(100% - 56px);
+            z-index: 1000;
+            width: 80%;
+            max-width: 300px;
+          }
+        }
+
+        /* Confirmation Dialog */
+        .confirm-dialog {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 300px;
+          background-color: #333;
+          border-radius: 8px;
+          box-shadow: 0 0 20px rgba(0,0,0,0.5);
+          z-index: 2100;
+          display: none;
+          padding: 20px;
+          text-align: center;
+        }
+        
+        .confirm-dialog p {
+          margin-top: 0;
+          margin-bottom: 20px;
+        }
+        
+        .confirm-dialog-buttons {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+        }
+
+        /* Error message styling */
+        .error-message {
+          background-color: rgba(255, 0, 0, 0.1);
+          border: 1px solid #aa0000;
+          color: #ff4d4d;
+          padding: 10px;
+          border-radius: 4px;
+          margin-bottom: 15px;
+          display: none;
+        }
+
+        .success-message {
+          background-color: rgba(0, 255, 0, 0.1);
+          border: 1px solid #00aa00;
+          color: #00cc00;
+          padding: 10px;
+          border-radius: 4px;
+          margin-bottom: 15px;
+          display: none;
+        }
+
+        .required-mark {
+          color: #f59a0c;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <a href="/map" class="logo">
+          <div class="logo-circle">S</div>
+          <h1>Susibert</h1>
+        </a>
+        <div>
+          <button class="button toggle-list-button" id="toggleListBtn">
+            <span>Orte anzeigen</span>
+          </button>
+          <button class="button primary" id="toggleEditMode">
+            <span>Bearbeiten</span>
+          </button>
+          <a href="/logout" class="button">Abmelden</a>
+          <a href="/admin" class="admin-link">Admin</a>
+        </div>
+      </div>
+      
+      <div class="app-container">
+        <div class="location-list" id="locationList">
+          <h2>Besuchte Orte</h2>
+          <div id="locationCards"></div>
+        </div>
+        
+        <div class="map-container">
+          <div id="map"></div>
+          <div class="edit-mode-info" style="display: none; position: absolute; bottom: 70px; left: 20px; background: rgba(34,34,34,0.8); padding: 10px; border-radius: 5px; z-index: 1000;">
+            Bearbeitungsmodus aktiv. Klicke auf die Karte, um einen neuen Ort hinzuzufügen.
+          </div>
+        </div>
+      </div>
+      
+      <div class="overlay" id="overlay"></div>
+      
+      <!-- Location Detail Popup -->
+      <div class="location-detail" id="locationDetail">
+        <div class="location-detail-header">
+          <h2 id="detailTitle">Ortsname</h2>
+          <button class="location-close" id="closeDetailBtn">&times;</button>
+        </div>
+        <div class="location-detail-content" id="detailContent">
+          <!-- Wird dynamisch gefüllt -->
+        </div>
+        <div class="location-actions">
+          <button class="button danger" id="deleteLocationBtn">Löschen</button>
+        </div>
+      </div>
+      
+      <!-- Add Location Form -->
+      <div class="add-location-form" id="addLocationForm">
+        <div class="form-header">
+          <h2>Neuen Ort hinzufügen</h2>
+          <button class="location-close" id="closeFormBtn">&times;</button>
+        </div>
+        <div class="form-content">
+          <div id="errorMessage" class="error-message"></div>
+          <div id="successMessage" class="success-message"></div>
+          
+          <form id="newLocationForm" enctype="multipart/form-data">
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
+            
+            <div class="form-group">
+              <label for="name">Titel <span class="required-mark">*</span></label>
+              <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="description">Beschreibung (optional)</label>
+              <textarea class="form-control" id="description" name="description"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="image">Bild <span class="required-mark">*</span></label>
+              <input type="file" class="form-control" id="image" name="image" accept=".jpg,.jpeg,.png,.heic" required>
+              <small style="color:#aaa; display:block; margin-top:5px">JPG, PNG oder HEIC (max. 20MB)</small>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="button" id="cancelLocationBtn">Abbrechen</button>
+              <button type="submit" class="button primary">Speichern</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Confirmation Dialog -->
+      <div class="confirm-dialog" id="confirmDialog">
+        <p id="confirmMessage">Möchtest du diesen Ort wirklich löschen?</p>
+        <div class="confirm-dialog-buttons">
+          <button class="button" id="cancelConfirmBtn">Abbrechen</button>
+          <button class="button danger" id="confirmActionBtn">Löschen</button>
+        </div>
+      </div>
+      
+      <!-- Leaflet JS -->
+      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+      <script>
+        // DOM-Elemente
+        const map = document.getElementById('map');
+        const locationList = document.getElementById('locationList');
+        const locationCards = document.getElementById('locationCards');
+        const locationDetail = document.getElementById('locationDetail');
+        const detailTitle = document.getElementById('detailTitle');
+        const detailContent = document.getElementById('detailContent');
+        const addLocationForm = document.getElementById('addLocationForm');
+        const overlay = document.getElementById('overlay');
+        const toggleListBtn = document.getElementById('toggleListBtn');
+        const toggleEditModeBtn = document.getElementById('toggleEditMode');
+        const closeDetailBtn = document.getElementById('closeDetailBtn');
+        const closeFormBtn = document.getElementById('closeFormBtn');
+        const cancelLocationBtn = document.getElementById('cancelLocationBtn');
+        const newLocationForm = document.getElementById('newLocationForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+        const editModeInfo = document.querySelector('.edit-mode-info');
+        const deleteLocationBtn = document.getElementById('deleteLocationBtn');
+        const confirmDialog = document.getElementById('confirmDialog');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+        const confirmActionBtn = document.getElementById('confirmActionBtn');
+        
+        // Zustandsvariablen
+        let isEditMode = false;
+        let locations = [];
+        let leafletMap = null;
+        let markers = [];
+        let currentLocationId = null;
+        
+        // Toggle-Funktionen
+        function toggleLocationList() {
+          locationList.classList.toggle('active');
+        }
+        
+        function toggleEditMode() {
+          isEditMode = !isEditMode;
+          toggleEditModeBtn.innerHTML = isEditMode ? '<span>Beenden</span>' : '<span>Bearbeiten</span>';
+          editModeInfo.style.display = isEditMode ? 'block' : 'none';
+        }
+        
+        // Formatiert das Datum als Monat/Jahr
+        function formatMonthYear(dateString) {
+          if (!dateString) return '';
+          
+          const date = new Date(dateString);
+          const month = date.getMonth() + 1;
+          const year = date.getFullYear();
+          
+          // Erstelle Format MM.YYYY
+          return month + '.' + year;
+        }
+        
+        // Popup-Funktionen
+        function showLocationDetail(location) {
+          currentLocationId = location.id;
+          detailTitle.textContent = location.name;
+          
+          let content = '';
+          
+          // Zuerst das Bild, wenn vorhanden
+          if (location.image) {
+            content += \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`;
+          }
+          
+          // Dann die Beschreibung, wenn vorhanden
+          if (location.description) {
+            content += \`<p>\${location.description}</p>\`;
+          }
+          
+          detailContent.innerHTML = content;
+          locationDetail.style.display = 'block';
+          overlay.style.display = 'block';
+        }
+        
+        function hideLocationDetail() {
+          locationDetail.style.display = 'none';
+          overlay.style.display = 'none';
+          currentLocationId = null;
+        }
+        
+        function showAddLocationForm(lat, lng) {
+          // Form zurücksetzen
+          newLocationForm.reset();
+          errorMessage.style.display = 'none';
+          successMessage.style.display = 'none';
+          
+          // Koordinaten setzen
+          latitudeInput.value = lat;
+          longitudeInput.value = lng;
+          
+          // Anzeigen
+          addLocationForm.style.display = 'block';
+          overlay.style.display = 'block';
+        }
+        
+        function hideAddLocationForm() {
+          addLocationForm.style.display = 'none';
+          overlay.style.display = 'none';
+        }
+
+        // Bestätigungsdialog anzeigen
+        function showConfirmDialog(message, actionCallback) {
+          confirmMessage.textContent = message;
+          confirmDialog.style.display = 'block';
+          overlay.style.display = 'block';
+          
+          // Event-Handler für Bestätigung
+          confirmActionBtn.onclick = function() {
+            hideConfirmDialog();
+            actionCallback();
+          };
+        }
+        
+        function hideConfirmDialog() {
+          confirmDialog.style.display = 'none';
+          overlay.style.display = 'none';
+        }
+        
+        // Karte initialisieren
+        function initializeMap(locations) {
+          try {
+            // Karte erstellen
+            leafletMap = L.map('map').setView([30, 5], 2);
+            
+            // Kartenlayer hinzufügen (dunkler Stil)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+              subdomains: 'abcd',
+              maxZoom: 19
+            }).addTo(leafletMap);
+            
+            // Marker hinzufügen
+            addMarkersToMap(locations);
+            
+            // Klick-Event für die Karte
+            leafletMap.on('click', function(e) {
+              if (isEditMode) {
+                showAddLocationForm(e.latlng.lat, e.latlng.lng);
+              }
+            });
+            
+            // Karte auf alle Marker zentrieren, wenn vorhanden
+            if (markers.length > 0) {
+              const group = L.featureGroup(markers);
+              leafletMap.fitBounds(group.getBounds(), { padding: [50, 50] });
+            }
+          } catch (error) {
+            console.error('Fehler bei der Karteninitialisierung:', error);
+            map.innerHTML = '<div style="padding: 20px; text-align: center;"><p>Fehler beim Laden der Karte: ' + error.message + '</p></div>';
+          }
+        }
+        
+        // Marker zur Karte hinzufügen
+        function addMarkersToMap(locations) {
+          // Bestehende Marker entfernen
+          markers.forEach(marker => leafletMap.removeLayer(marker));
+          markers = [];
+          
+          // Neue Marker hinzufügen
+          locations.forEach(location => {
+            try {
+              const lat = parseFloat(location.latitude);
+              const lng = parseFloat(location.longitude);
+              
+              if (isNaN(lat) || isNaN(lng)) {
+                console.error('Ungültige Koordinaten für:', location.name);
+                return;
+              }
+              
+              // Benutzerdefiniertes Icon für Marker
+              const icon = L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="background-color: #f59a0c; border-radius: 50%; width: 12px; height: 12px; border: 2px solid #fff;"></div>',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+              });
+              
+              // Marker-Radius (Hervorhebungseffekt)
+              const radius = L.circle([lat, lng], {
+                radius: 50000, // 50km
+                color: '#f59a0c',
+                fillColor: '#f59a0c',
+                fillOpacity: 0.2,
+                weight: 0
+              }).addTo(leafletMap);
+              
+              // Marker mit Popup
+              const marker = L.marker([lat, lng], { icon: icon }).addTo(leafletMap);
+              marker.bindPopup(location.name);
+              
+              // Click-Event für Marker
+              marker.on('click', function() {
+                showLocationDetail(location);
+              });
+              
+              markers.push(marker);
+              markers.push(radius);
+            } catch (error) {
+              console.error('Fehler beim Hinzufügen des Markers:', error);
+            }
+          });
+        }
+        
+        // Orte laden
+        function loadLocations() {
+          fetch('/api/locations')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Fehler beim Laden der Orte');
+              }
+              return response.json();
+            })
+            .then(data => {
+              locations = data;
+              renderLocationList(locations);
+              initializeMap(locations);
+            })
+            .catch(error => {
+              console.error('Fehler beim Laden der Orte:', error);
+              locationCards.innerHTML = '<p>Fehler beim Laden der Orte: ' + error.message + '</p>';
+            });
+        }
+        
+        // Orte in der Seitenleiste anzeigen
+        function renderLocationList(locations) {
+          if (locations.length === 0) {
+            locationCards.innerHTML = '<p>Keine Orte gefunden.</p>';
+            return;
+          }
+          
+          let html = '';
+          locations.forEach(location => {
+            const imageHtml = location.image 
+              ? \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`
+              : '';
+            
+            html += \`
+              <div class="location-card" data-id="\${location.id}">
+                \${imageHtml}
+                <div class="location-card-content">
+                  <h3>\${location.name}</h3>
+                </div>
+              </div>
+            \`;
+          });
+          
+          locationCards.innerHTML = html;
+          
+          // Event-Listener für Karten
+          document.querySelectorAll('.location-card').forEach(card => {
+            card.addEventListener('click', function() {
+              const id = parseInt(this.getAttribute('data-id'));
+              const location = locations.find(loc => loc.id === id);
+              if (location) {
+                showLocationDetail(location);
+                
+                // Wenn Karte initialisiert wurde, zentriere sie auf den Ort
+                if (leafletMap) {
+                  leafletMap.setView([location.latitude, location.longitude], 10);
+                }
+              }
+            });
+          });
+        }
+        
+        // Neuen Ort speichern
+        function saveLocation(formData) {
+          // Nachrichten zurücksetzen
+          errorMessage.style.display = 'none';
+          successMessage.style.display = 'none';
+          successMessage.textContent = 'Speichere Ort...';
+          successMessage.style.display = 'block';
+          
+          fetch('/api/locations', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(data => {
+                throw new Error(data.error || \`HTTP-Fehler: \${response.status}\`);
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            successMessage.textContent = 'Ort erfolgreich gespeichert!';
+            
+            // Neuen Ort zur Liste hinzufügen und Marker erstellen
+            locations.unshift(data);
+            renderLocationList(locations);
+            
+            if (leafletMap) {
+              addMarkersToMap(locations);
+            }
+            
+            // Form nach kurzer Verzögerung schließen
+            setTimeout(() => {
+              hideAddLocationForm();
+            }, 1500);
+          })
+          .catch(error => {
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = 'Fehler beim Speichern: ' + error.message;
+            console.error('Fehler beim Speichern:', error);
+          });
+        }
+
+        // Ort löschen
+        function deleteLocation(id) {
+          fetch(\`/api/locations/\${id}\`, {
+            method: 'DELETE'
+          })
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(data => {
+                throw new Error(data.error || \`HTTP-Fehler: \${response.status}\`);
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Ort aus der lokalen Liste entfernen
+            locations = locations.filter(loc => loc.id !== id);
+            renderLocationList(locations);
+            
+            if (leafletMap) {
+              addMarkersToMap(locations);
+            }
+            
+            // Detail-Popup schließen
+            hideLocationDetail();
+          })
+          .catch(error => {
+            console.error('Fehler beim Löschen des Ortes:', error);
+            alert('Fehler beim Löschen: ' + error.message);
+          });
+        }
+        
+        // Event-Listener
+        document.addEventListener('DOMContentLoaded', function() {
+          // Orte laden
+          loadLocations();
+          
+          // Toggle Location List
+          toggleListBtn.addEventListener('click', toggleLocationList);
+          
+          // Toggle Edit Mode
+          toggleEditModeBtn.addEventListener('click', toggleEditMode);
+          
+          // Close-Buttons
+          closeDetailBtn.addEventListener('click', hideLocationDetail);
+          closeFormBtn.addEventListener('click', hideAddLocationForm);
+          cancelLocationBtn.addEventListener('click', hideAddLocationForm);
+          
+          // Form-Handling
+          newLocationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveLocation(new FormData(this));
+          });
+
+          // Delete Location Button
+          deleteLocationBtn.addEventListener('click', function() {
+            if (currentLocationId) {
+              showConfirmDialog('Möchtest du diesen Ort wirklich löschen?', function() {
+                deleteLocation(currentLocationId);
+              });
+            }
+          });
+
+          // Cancel Confirm Button
+          cancelConfirmBtn.addEventListener('click', hideConfirmDialog);
+          
+          // Klick auf Overlay schließt alle Popups
+          overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+              hideLocationDetail();
+              hideAddLocationForm();
+              hideConfirmDialog();
+            }
+          });
+        });
+      </script>
+    </body>
+    </html>
+  `);
 });
 
 // Fehler-Route für nicht vorhandene Pfade
