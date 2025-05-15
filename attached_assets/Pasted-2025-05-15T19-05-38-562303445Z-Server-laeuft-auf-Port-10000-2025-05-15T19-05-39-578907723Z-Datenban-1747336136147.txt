@@ -1,0 +1,50 @@
+2025-05-15T19:05:38.562303445Z Server laeuft auf Port 10000
+2025-05-15T19:05:39.578907723Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-15T19:05:39.578Z }
+2025-05-15T19:05:39.703263623Z Tabelle locations existiert: true
+2025-05-15T19:05:39.703446037Z Datenbankverbindung Status: true
+2025-05-15T19:05:39.703549829Z Prüfe auf fehlende Thumbnails für bestehende Orte...
+2025-05-15T19:05:39.762392668Z Fehler beim Generieren der Thumbnails: error: column "image_data" does not exist
+2025-05-15T19:05:39.762409258Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:05:39.762412658Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:05:39.762415109Z     at async generateAllMissingThumbnails (/opt/render/project/src/dist/index.js:213:20) {
+2025-05-15T19:05:39.762418418Z   length: 110,
+2025-05-15T19:05:39.762420829Z   severity: 'ERROR',
+2025-05-15T19:05:39.762422999Z   code: '42703',
+2025-05-15T19:05:39.762425099Z   detail: undefined,
+2025-05-15T19:05:39.762427209Z   hint: undefined,
+2025-05-15T19:05:39.762429259Z   position: '12',
+2025-05-15T19:05:39.762431959Z   internalPosition: undefined,
+2025-05-15T19:05:39.762434089Z   internalQuery: undefined,
+2025-05-15T19:05:39.762436159Z   where: undefined,
+2025-05-15T19:05:39.762438259Z   schema: undefined,
+2025-05-15T19:05:39.762440409Z   table: undefined,
+2025-05-15T19:05:39.762442489Z   column: undefined,
+2025-05-15T19:05:39.762444559Z   dataType: undefined,
+2025-05-15T19:05:39.762446669Z   constraint: undefined,
+2025-05-15T19:05:39.762448799Z   file: 'parse_relation.c',
+2025-05-15T19:05:39.762450949Z   line: '3722',
+2025-05-15T19:05:39.762453029Z   routine: 'errorMissingColumn'
+2025-05-15T19:05:39.762455199Z }
+2025-05-15T19:05:48.191446621Z ==> Your service is live 🎉
+2025-05-15T19:07:19.618900171Z Fehler beim Abrufen der Orte: error: column "title" does not exist
+2025-05-15T19:07:19.618922632Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:07:19.618927252Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:07:19.618931682Z     at async /opt/render/project/src/dist/index.js:1713:20 {
+2025-05-15T19:07:19.618935182Z   length: 105,
+2025-05-15T19:07:19.618939252Z   severity: 'ERROR',
+2025-05-15T19:07:19.618942662Z   code: '42703',
+2025-05-15T19:07:19.618946082Z   detail: undefined,
+2025-05-15T19:07:19.618949432Z   hint: undefined,
+2025-05-15T19:07:19.618952812Z   position: '12',
+2025-05-15T19:07:19.618956712Z   internalPosition: undefined,
+2025-05-15T19:07:19.618960202Z   internalQuery: undefined,
+2025-05-15T19:07:19.618963562Z   where: undefined,
+2025-05-15T19:07:19.618967522Z   schema: undefined,
+2025-05-15T19:07:19.618970903Z   table: undefined,
+2025-05-15T19:07:19.618974343Z   column: undefined,
+2025-05-15T19:07:19.618977693Z   dataType: undefined,
+2025-05-15T19:07:19.618981063Z   constraint: undefined,
+2025-05-15T19:07:19.618984463Z   file: 'parse_relation.c',
+2025-05-15T19:07:19.618987903Z   line: '3722',
+2025-05-15T19:07:19.618991293Z   routine: 'errorMissingColumn'
+2025-05-15T19:07:19.618994693Z }
