@@ -109,13 +109,30 @@ app.use('/uploads', express.static(uploadsDir));
 // Datenbank-Verbindung
 async function connectToDatabase() {
   try {
-    const connectionString = process.env.DATABASE_URL || 
-                            (process.env.SUPABASE_URL && process.env.SUPABASE_PASSWORD) ? 
-                            process.env.SUPABASE_URL.replace('[YOUR-PASSWORD]', process.env.SUPABASE_PASSWORD) : 
-                            null;
+    // Debugging-Info für Render
+    console.log('Umgebungsvariablen (ohne Werte):', {
+      DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+      SUPABASE_URL_EXISTS: !!process.env.SUPABASE_URL,
+      SUPABASE_PASSWORD_EXISTS: !!process.env.SUPABASE_PASSWORD,
+      NODE_ENV: process.env.NODE_ENV
+    });
     
+    let connectionString = process.env.DATABASE_URL;
+    
+    // Wenn DATABASE_URL nicht existiert, versuche Supabase-URL zu erstellen
+    if (!connectionString && process.env.SUPABASE_URL && process.env.SUPABASE_PASSWORD) {
+      try {
+        connectionString = process.env.SUPABASE_URL.replace('[YOUR-PASSWORD]', process.env.SUPABASE_PASSWORD);
+        console.log('Supabase-URL wurde erstellt');
+      } catch (urlError) {
+        console.error('Fehler beim Erstellen der Supabase-URL:', urlError);
+        return false;
+      }
+    }
+    
+    // Sicherheitsprüfung für Datenbankkonfiguration auf Render
     if (!connectionString) {
-      console.error('Keine Datenbankverbindung konfiguriert. Bitte DATABASE_URL oder SUPABASE_URL und SUPABASE_PASSWORD angeben.');
+      console.error('Keine Datenbankverbindung konfiguriert. DATABASE_URL, SUPABASE_URL und SUPABASE_PASSWORD überprüfen.');
       return false;
     }
     
