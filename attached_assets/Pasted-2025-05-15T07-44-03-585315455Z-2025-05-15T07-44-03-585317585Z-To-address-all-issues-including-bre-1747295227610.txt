@@ -1,0 +1,50 @@
+2025-05-15T07:44:03.585315455Z 
+2025-05-15T07:44:03.585317585Z To address all issues (including breaking changes), run:
+2025-05-15T07:44:03.585320345Z   npm audit fix --force
+2025-05-15T07:44:03.585322375Z 
+2025-05-15T07:44:03.585325005Z Run `npm audit` for details.
+2025-05-15T07:44:03.637760315Z + echo 'Prüfe Verzeichnisstruktur...'
+2025-05-15T07:44:03.637762925Z Prüfe Verzeichnisstruktur...
+2025-05-15T07:44:03.637779756Z + mkdir -p dist
+2025-05-15T07:44:03.63975421Z + mkdir -p dist/uploads
+2025-05-15T07:44:03.641618183Z + echo 'Kopiere Wartungsserver-Datei...'
+2025-05-15T07:44:03.641620623Z Kopiere Wartungsserver-Datei...
+2025-05-15T07:44:03.641630313Z + '[' '!' -f dist/index.js ']'
+2025-05-15T07:44:03.641633343Z + cp -v server.js dist/index.js
+2025-05-15T07:44:03.643521336Z 'server.js' -> 'dist/index.js'
+2025-05-15T07:44:03.643732761Z + echo 'Erstelle package.json Backup...'
+2025-05-15T07:44:03.643738121Z + cp package.json package.json.original
+2025-05-15T07:44:03.643740191Z Erstelle package.json Backup...
+2025-05-15T07:44:03.645662575Z + cat
+2025-05-15T07:44:03.648447668Z + echo '=== Build abgeschlossen ==='
+2025-05-15T07:44:03.648452248Z === Build abgeschlossen ===
+2025-05-15T07:44:04.867113893Z ==> Uploading build...
+2025-05-15T07:44:23.754669156Z ==> Uploaded in 11.3s. Compression took 7.6s
+2025-05-15T07:44:23.811700931Z ==> Build successful 🎉
+2025-05-15T07:44:26.099885068Z ==> Deploying...
+2025-05-15T07:44:47.52888566Z ==> Your service is live 🎉
+2025-05-15T07:46:30.682216756Z   name: 'test numero last',
+2025-05-15T07:46:30.682219616Z   description: 'dammmmn boi'
+2025-05-15T07:46:30.682222416Z }
+2025-05-15T07:46:30.682225566Z Bildpfad: image-1747295190381-400021909.png
+2025-05-15T07:46:31.110904087Z Fehler beim Erstellen des Standorts in DB: error: null value in column "country_code" of relation "locations" violates not-null constraint
+2025-05-15T07:46:31.110945548Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T07:46:31.110955988Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+2025-05-15T07:46:31.110961428Z   length: 356,
+2025-05-15T07:46:31.110967258Z   severity: 'ERROR',
+2025-05-15T07:46:31.110971078Z   code: '23502',
+2025-05-15T07:46:31.110976908Z   detail: 'Failing row contains (29, test numero last, 2025-05-15T07:46:30.682+00:00, dammmmn boi, , 49.61070993807422, 15.468750000000002, null, image-1747295190381-400021909.png).',
+2025-05-15T07:46:31.110980808Z   hint: undefined,
+2025-05-15T07:46:31.110984498Z   position: undefined,
+2025-05-15T07:46:31.110988998Z   internalPosition: undefined,
+2025-05-15T07:46:31.110992728Z   internalQuery: undefined,
+2025-05-15T07:46:31.110996678Z   where: undefined,
+2025-05-15T07:46:31.111000328Z   schema: 'public',
+2025-05-15T07:46:31.111004018Z   table: 'locations',
+2025-05-15T07:46:31.111008218Z   column: 'country_code',
+2025-05-15T07:46:31.111012058Z   dataType: undefined,
+2025-05-15T07:46:31.111015918Z   constraint: undefined,
+2025-05-15T07:46:31.111019638Z   file: 'execMain.c',
+2025-05-15T07:46:31.111023289Z   line: '2006',
+2025-05-15T07:46:31.111026999Z   routine: 'ExecConstraints'
+2025-05-15T07:46:31.111030719Z }

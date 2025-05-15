@@ -691,30 +691,33 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
     // Setze aktuelles Datum
     const currentDate = new Date();
     
-    // SQL-Query zur Erstellung eines neuen Standorts mit explizitem leeren String für highlight
-    pool.query(
-      'INSERT INTO locations (name, date, description, latitude, longitude, image, highlight) ' +
-      'VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [name, currentDate, description, latitude, longitude, imagePath, ''] // Leerer String für highlight
+    // Einfacher Insert mit expliziten Werten für alle benötigten Felder
+    pool.query(`
+      INSERT INTO locations 
+        (name, date, description, latitude, longitude, image, highlight, country_code) 
+      VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8) 
+      RETURNING *`,
+      [name, currentDate, description, latitude, longitude, imagePath, '', ''] // Leere Strings für highlight und country_code
     )
-      .then(function(result) {
-        if (result.rows.length === 0) {
-          throw new Error('Fehler beim Erstellen des Standorts');
-        }
-        
-        console.log('Ort erstellt:', result.rows[0]);
-        
-        // Bereite die Antwort vor mit vollständiger Bild-URL
-        var location = result.rows[0];
-        var baseUrl = req.protocol + '://' + req.get('host');
-        location.image = baseUrl + '/uploads/' + location.image;
-        
-        res.status(201).json(location);
-      })
-      .catch(function(error) {
-        console.error('Fehler beim Erstellen des Standorts in DB:', error);
-        res.status(500).json({ error: 'Datenbankfehler', details: error.message });
-      });
+    .then(function(result) {
+      if (result.rows.length === 0) {
+        throw new Error('Fehler beim Erstellen des Standorts');
+      }
+      
+      console.log('Ort erstellt:', result.rows[0]);
+      
+      // Bereite die Antwort vor mit vollständiger Bild-URL
+      var location = result.rows[0];
+      var baseUrl = req.protocol + '://' + req.get('host');
+      location.image = baseUrl + '/uploads/' + location.image;
+      
+      res.status(201).json(location);
+    })
+    .catch(function(error) {
+      console.error('Fehler beim Erstellen des Standorts in DB:', error);
+      res.status(500).json({ error: 'Datenbankfehler', details: error.message });
+    });
   } catch (error) {
     console.error('Allgemeiner Fehler:', error);
     res.status(500).json({ error: 'Serverfehler', details: error.message });

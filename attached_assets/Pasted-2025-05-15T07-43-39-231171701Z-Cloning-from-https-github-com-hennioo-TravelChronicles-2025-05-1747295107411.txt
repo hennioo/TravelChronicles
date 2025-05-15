@@ -1,0 +1,64 @@
+2025-05-15T07:43:39.231171701Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-15T07:43:41.832815593Z ==> Checking out commit f6941a10ce6f27ebcc7d861b547c2b0cb857ab65 in branch main
+2025-05-15T07:43:43.645375027Z ==> Downloading cache...
+2025-05-15T07:44:01.644358089Z ==> Using Node.js version 22.14.0 (default)
+2025-05-15T07:44:01.673877329Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-15T07:44:01.885740537Z ==> Using Bun version 1.1.0 (default)
+2025-05-15T07:44:01.885787828Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-15T07:44:01.939891135Z ==> Running build command './build-render.sh'...
+2025-05-15T07:44:01.945898392Z + echo '=== Minimaler Build für Render ==='
+2025-05-15T07:44:01.945911462Z + echo 'Installiere benötigte Pakete...'
+2025-05-15T07:44:01.945914912Z === Minimaler Build für Render ===
+2025-05-15T07:44:01.945916012Z + npm install express pg multer
+2025-05-15T07:44:01.945922602Z Installiere benötigte Pakete...
+2025-05-15T07:43:56.505697476Z ==> Transferred 189MB in 8s. Extraction took 4s.
+2025-05-15T07:44:03.566379656Z 
+2025-05-15T07:44:03.566405556Z up to date, audited 609 packages in 2s
+2025-05-15T07:44:03.566440867Z 
+2025-05-15T07:44:03.566486458Z 174 packages are looking for funding
+2025-05-15T07:44:03.566490738Z   run `npm fund` for details
+2025-05-15T07:44:03.585281044Z 
+2025-05-15T07:44:03.585305705Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-15T07:44:03.585308085Z 
+2025-05-15T07:44:03.585311275Z To address issues that do not require attention, run:
+2025-05-15T07:44:03.585313445Z   npm audit fix
+2025-05-15T07:44:03.585315455Z 
+2025-05-15T07:44:03.585317585Z To address all issues (including breaking changes), run:
+2025-05-15T07:44:03.585320345Z   npm audit fix --force
+2025-05-15T07:44:03.585322375Z 
+2025-05-15T07:44:03.585325005Z Run `npm audit` for details.
+2025-05-15T07:44:03.637760315Z + echo 'Prüfe Verzeichnisstruktur...'
+2025-05-15T07:44:03.637762925Z Prüfe Verzeichnisstruktur...
+2025-05-15T07:44:03.637779756Z + mkdir -p dist
+2025-05-15T07:44:03.63975421Z + mkdir -p dist/uploads
+2025-05-15T07:44:03.641618183Z + echo 'Kopiere Wartungsserver-Datei...'
+2025-05-15T07:44:03.641620623Z Kopiere Wartungsserver-Datei...
+2025-05-15T07:44:03.641630313Z + '[' '!' -f dist/index.js ']'
+2025-05-15T07:44:03.641633343Z + cp -v server.js dist/index.js
+2025-05-15T07:44:03.643521336Z 'server.js' -> 'dist/index.js'
+2025-05-15T07:44:03.643732761Z + echo 'Erstelle package.json Backup...'
+2025-05-15T07:44:03.643738121Z + cp package.json package.json.original
+2025-05-15T07:44:03.643740191Z Erstelle package.json Backup...
+2025-05-15T07:44:03.645662575Z + cat
+2025-05-15T07:44:03.648447668Z + echo '=== Build abgeschlossen ==='
+2025-05-15T07:44:03.648452248Z === Build abgeschlossen ===
+2025-05-15T07:44:04.867113893Z ==> Uploading build...
+2025-05-15T07:44:26.099885068Z ==> Deploying...
+2025-05-15T07:44:23.754669156Z ==> Uploaded in 11.3s. Compression took 7.6s
+2025-05-15T07:44:23.811700931Z ==> Build successful 🎉
+2025-05-15T07:44:45.707016827Z ==> Running 'npm start'
+2025-05-15T07:44:45.929193292Z 
+2025-05-15T07:44:45.929216373Z > rest-express@1.0.0 start
+2025-05-15T07:44:45.929220253Z > NODE_ENV=production node dist/index.js
+2025-05-15T07:44:45.929221913Z 
+2025-05-15T07:44:46.161004524Z Uploads-Verzeichnis existiert: /opt/render/project/src/dist/uploads
+2025-05-15T07:44:46.161259888Z Verbinde mit Datenbank über DATABASE_URL...
+2025-05-15T07:44:46.225473074Z Susibert Server läuft auf Port 10000
+2025-05-15T07:44:46.225501044Z Umgebung: production
+2025-05-15T07:44:46.225506584Z Datenbankverbindung: Nicht verbunden
+2025-05-15T07:44:46.225788878Z Datum/Zeit: 2025-05-15T07:44:46.225Z
+2025-05-15T07:44:47.52888566Z ==> Your service is live 🎉
+2025-05-15T07:44:47.045347174Z Datenbankverbindung erfolgreich: { now: 2025-05-15T07:44:47.006Z }
+2025-05-15T07:44:47.045376635Z Prüfe Tabellenstruktur...
+2025-05-15T07:44:47.17401874Z Die Spalte "highlight" akzeptiert bereits NULL-Werte oder existiert nicht.
+2025-05-15T07:44:47.174045011Z Datenbankstruktur aktualisiert.
