@@ -6,7 +6,7 @@ echo "=== Minimaler Build für Render ==="
 
 # 1. Installiere Express und weitere benötigte Pakete
 echo "Installiere benötigte Pakete..."
-npm install express pg multer
+npm install express pg multer sharp
 
 # 2. Stelle sicher, dass alle benötigten Verzeichnisse existieren
 echo "Prüfe Verzeichnisstruktur..."
@@ -91,7 +91,8 @@ cat > package.json << 'EOF'
   "dependencies": {
     "express": "^4.18.3",
     "pg": "^8.11.3",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.2"
   }
 }
 EOF

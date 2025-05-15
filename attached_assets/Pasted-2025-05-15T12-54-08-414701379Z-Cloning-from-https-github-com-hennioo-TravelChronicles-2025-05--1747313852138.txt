@@ -1,0 +1,233 @@
+2025-05-15T12:54:08.414701379Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-15T12:54:12.159483186Z ==> Checking out commit e2da73875cffcd5eeb0c62f17bab2d08405b9288 in branch main
+2025-05-15T12:54:13.469428093Z ==> Downloading cache...
+2025-05-15T12:54:26.808615594Z ==> Transferred 219MB in 8s. Extraction took 4s.
+2025-05-15T12:55:00.128425305Z ==> Using Node.js version 22.14.0 (default)
+2025-05-15T12:55:00.154976249Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-15T12:55:00.300668715Z ==> Using Bun version 1.1.0 (default)
+2025-05-15T12:55:00.300686195Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-15T12:55:00.353910256Z ==> Running build command './build-render.sh'...
+2025-05-15T12:55:00.359958094Z === Minimaler Build für Render ===
+2025-05-15T12:55:00.359962345Z + echo '=== Minimaler Build für Render ==='
+2025-05-15T12:55:00.359978015Z Installiere benötigte Pakete...
+2025-05-15T12:55:00.359991475Z + echo 'Installiere benötigte Pakete...'
+2025-05-15T12:55:00.359996685Z + npm install express pg multer
+2025-05-15T12:55:02.219171787Z 
+2025-05-15T12:55:02.219198708Z up to date, audited 619 packages in 2s
+2025-05-15T12:55:02.219245699Z 
+2025-05-15T12:55:02.21929447Z 179 packages are looking for funding
+2025-05-15T12:55:02.21930776Z   run `npm fund` for details
+2025-05-15T12:55:02.247038569Z 
+2025-05-15T12:55:02.24706461Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-15T12:55:02.24706772Z 
+2025-05-15T12:55:02.247071Z To address issues that do not require attention, run:
+2025-05-15T12:55:02.24707396Z   npm audit fix
+2025-05-15T12:55:02.24707634Z 
+2025-05-15T12:55:02.24707901Z To address all issues (including breaking changes), run:
+2025-05-15T12:55:02.24708214Z   npm audit fix --force
+2025-05-15T12:55:02.24708455Z 
+2025-05-15T12:55:02.24708781Z Run `npm audit` for details.
+2025-05-15T12:55:02.319931758Z + echo 'Prüfe Verzeichnisstruktur...'
+2025-05-15T12:55:02.319931788Z Prüfe Verzeichnisstruktur...
+2025-05-15T12:55:02.319950418Z + mkdir -p dist
+2025-05-15T12:55:02.321859579Z + mkdir -p dist/uploads
+2025-05-15T12:55:02.323498694Z + mkdir -p dist/public
+2025-05-15T12:55:02.325154179Z + mkdir -p dist/public/uploads
+2025-05-15T12:55:02.326699202Z Kopiere Server-Dateien...
+2025-05-15T12:55:02.326707702Z + echo 'Kopiere Server-Dateien...'
+2025-05-15T12:55:02.326715882Z + cp -v server.js dist/index.js
+2025-05-15T12:55:02.328355097Z 'server.js' -> 'dist/index.js'
+2025-05-15T12:55:02.328544901Z + cp -v server.js render-final.js
+2025-05-15T12:55:02.330425701Z 'server.js' -> 'render-final.js'
+2025-05-15T12:55:02.330669146Z + cp -v server.js final-server.js
+2025-05-15T12:55:02.332358712Z 'server.js' -> 'final-server.js'
+2025-05-15T12:55:02.332572357Z + cp -v server.js final-render.js
+2025-05-15T12:55:02.334091899Z 'server.js' -> 'final-render.js'
+2025-05-15T12:55:02.334297363Z + cp -v server.js map-render.js
+2025-05-15T12:55:02.335986209Z 'server.js' -> 'map-render.js'
+2025-05-15T12:55:02.336177473Z + cp -v server.js simple-final.js
+2025-05-15T12:55:02.337944831Z 'server.js' -> 'simple-final.js'
+2025-05-15T12:55:02.338147035Z + cp -v server.js fixed-render.js
+2025-05-15T12:55:02.339692728Z 'server.js' -> 'fixed-render.js'
+2025-05-15T12:55:02.339929113Z + echo 'Kopiere JavaScript-Module...'
+2025-05-15T12:55:02.339936643Z + cp -v new-map-view.js dist/new-map-view.js
+2025-05-15T12:55:02.339954054Z Kopiere JavaScript-Module...
+2025-05-15T12:55:02.341708941Z 'new-map-view.js' -> 'dist/new-map-view.js'
+2025-05-15T12:55:02.341979297Z + cp -v map-layout.js dist/map-layout.js
+2025-05-15T12:55:02.343724643Z 'map-layout.js' -> 'dist/map-layout.js'
+2025-05-15T12:55:02.344133772Z + cp -v completely-new-server.js final-map-render.js final-render.js final-server.js final-version.js fix-server.js fixed-render.js map-layout.js map-render.js new-map-view.js postcss.config.js render-compatible.js render-final.js render-fixed.js render-simple.js server-final.js server-fix.js server-fixed.js server-original.js server-render.js server-sidebar.js server-with-upload.js server.js setup-database.js simple-final.js simple-server.js simplemap.js start.js supabase-direct-test.js supabase-test.js ultra-simple.js update-connection.js dist/
+2025-05-15T12:55:02.347972084Z 'completely-new-server.js' -> 'dist/completely-new-server.js'
+2025-05-15T12:55:02.347983054Z 'final-map-render.js' -> 'dist/final-map-render.js'
+2025-05-15T12:55:02.347986214Z 'final-render.js' -> 'dist/final-render.js'
+2025-05-15T12:55:02.347989314Z 'final-server.js' -> 'dist/final-server.js'
+2025-05-15T12:55:02.347992424Z 'final-version.js' -> 'dist/final-version.js'
+2025-05-15T12:55:02.347995264Z 'fix-server.js' -> 'dist/fix-server.js'
+2025-05-15T12:55:02.347998164Z 'fixed-render.js' -> 'dist/fixed-render.js'
+2025-05-15T12:55:02.348001014Z 'map-layout.js' -> 'dist/map-layout.js'
+2025-05-15T12:55:02.348003865Z 'map-render.js' -> 'dist/map-render.js'
+2025-05-15T12:55:02.348007125Z 'new-map-view.js' -> 'dist/new-map-view.js'
+2025-05-15T12:55:02.348009745Z 'postcss.config.js' -> 'dist/postcss.config.js'
+2025-05-15T12:55:02.348012355Z 'render-compatible.js' -> 'dist/render-compatible.js'
+2025-05-15T12:55:02.348015035Z 'render-final.js' -> 'dist/render-final.js'
+2025-05-15T12:55:02.348017815Z 'render-fixed.js' -> 'dist/render-fixed.js'
+2025-05-15T12:55:02.348021025Z 'render-simple.js' -> 'dist/render-simple.js'
+2025-05-15T12:55:02.348023725Z 'server-final.js' -> 'dist/server-final.js'
+2025-05-15T12:55:02.348026415Z 'server-fix.js' -> 'dist/server-fix.js'
+2025-05-15T12:55:02.348028955Z 'server-fixed.js' -> 'dist/server-fixed.js'
+2025-05-15T12:55:02.348031585Z 'server-original.js' -> 'dist/server-original.js'
+2025-05-15T12:55:02.348034165Z 'server-render.js' -> 'dist/server-render.js'
+2025-05-15T12:55:02.348036715Z 'server-sidebar.js' -> 'dist/server-sidebar.js'
+2025-05-15T12:55:02.348039325Z 'server-with-upload.js' -> 'dist/server-with-upload.js'
+2025-05-15T12:55:02.348041995Z 'server.js' -> 'dist/server.js'
+2025-05-15T12:55:02.348044515Z 'setup-database.js' -> 'dist/setup-database.js'
+2025-05-15T12:55:02.348047146Z 'simple-final.js' -> 'dist/simple-final.js'
+2025-05-15T12:55:02.348049786Z 'simple-server.js' -> 'dist/simple-server.js'
+2025-05-15T12:55:02.348052346Z 'simplemap.js' -> 'dist/simplemap.js'
+2025-05-15T12:55:02.348055086Z 'start.js' -> 'dist/start.js'
+2025-05-15T12:55:02.348057836Z 'supabase-direct-test.js' -> 'dist/supabase-direct-test.js'
+2025-05-15T12:55:02.348060416Z 'supabase-test.js' -> 'dist/supabase-test.js'
+2025-05-15T12:55:02.348062996Z 'ultra-simple.js' -> 'dist/ultra-simple.js'
+2025-05-15T12:55:02.348065516Z 'update-connection.js' -> 'dist/update-connection.js'
+2025-05-15T12:55:02.348185068Z + echo RENDER=true
+2025-05-15T12:55:02.34826456Z + echo NODE_ENV=production
+2025-05-15T12:55:02.34828256Z + echo 'export RENDER=true'
+2025-05-15T12:55:02.348385403Z + echo 'export NODE_ENV=production'
+2025-05-15T12:55:02.348407353Z Kopiere Uploads-Verzeichnis...
+2025-05-15T12:55:02.348421013Z + echo 'Kopiere Uploads-Verzeichnis...'
+2025-05-15T12:55:02.348427454Z + mkdir -p dist/uploads
+2025-05-15T12:55:02.3501452Z + mkdir -p dist/public/uploads
+2025-05-15T12:55:02.351793475Z + mkdir -p public/uploads
+2025-05-15T12:55:02.353575623Z + cp -rv uploads/couple.jpg uploads/couple.png uploads/image-1746715946699-229679471.jpeg uploads/image-1746719888023-255077677.jpeg uploads/image-1746719966214-617047451.jpeg uploads/image-1746720109804-581960354.jpeg uploads/image-1746739478073-3247104.jpeg uploads/image-1746773246208-555042628.jpeg dist/uploads/
+2025-05-15T12:55:02.371580165Z 'uploads/couple.jpg' -> 'dist/uploads/couple.jpg'
+2025-05-15T12:55:02.371594056Z 'uploads/couple.png' -> 'dist/uploads/couple.png'
+2025-05-15T12:55:02.371596676Z 'uploads/image-1746715946699-229679471.jpeg' -> 'dist/uploads/image-1746715946699-229679471.jpeg'
+2025-05-15T12:55:02.371599746Z 'uploads/image-1746719888023-255077677.jpeg' -> 'dist/uploads/image-1746719888023-255077677.jpeg'
+2025-05-15T12:55:02.371601536Z 'uploads/image-1746719966214-617047451.jpeg' -> 'dist/uploads/image-1746719966214-617047451.jpeg'
+2025-05-15T12:55:02.371603326Z 'uploads/image-1746720109804-581960354.jpeg' -> 'dist/uploads/image-1746720109804-581960354.jpeg'
+2025-05-15T12:55:02.371605146Z 'uploads/image-1746739478073-3247104.jpeg' -> 'dist/uploads/image-1746739478073-3247104.jpeg'
+2025-05-15T12:55:02.371606876Z 'uploads/image-1746773246208-555042628.jpeg' -> 'dist/uploads/image-1746773246208-555042628.jpeg'
+2025-05-15T12:55:02.371998484Z + cp -rv uploads/couple.jpg uploads/couple.png uploads/image-1746715946699-229679471.jpeg uploads/image-1746719888023-255077677.jpeg uploads/image-1746719966214-617047451.jpeg uploads/image-1746720109804-581960354.jpeg uploads/image-1746739478073-3247104.jpeg uploads/image-1746773246208-555042628.jpeg dist/public/uploads/
+2025-05-15T12:55:02.390675921Z 'uploads/couple.jpg' -> 'dist/public/uploads/couple.jpg'
+2025-05-15T12:55:02.390691372Z 'uploads/couple.png' -> 'dist/public/uploads/couple.png'
+2025-05-15T12:55:02.390696052Z 'uploads/image-1746715946699-229679471.jpeg' -> 'dist/public/uploads/image-1746715946699-229679471.jpeg'
+2025-05-15T12:55:02.390697932Z 'uploads/image-1746719888023-255077677.jpeg' -> 'dist/public/uploads/image-1746719888023-255077677.jpeg'
+2025-05-15T12:55:02.390699822Z 'uploads/image-1746719966214-617047451.jpeg' -> 'dist/public/uploads/image-1746719966214-617047451.jpeg'
+2025-05-15T12:55:02.390701472Z 'uploads/image-1746720109804-581960354.jpeg' -> 'dist/public/uploads/image-1746720109804-581960354.jpeg'
+2025-05-15T12:55:02.390703122Z 'uploads/image-1746739478073-3247104.jpeg' -> 'dist/public/uploads/image-1746739478073-3247104.jpeg'
+2025-05-15T12:55:02.390704822Z 'uploads/image-1746773246208-555042628.jpeg' -> 'dist/public/uploads/image-1746773246208-555042628.jpeg'
+2025-05-15T12:55:02.39107672Z + cp -rv uploads/couple.jpg uploads/couple.png uploads/image-1746715946699-229679471.jpeg uploads/image-1746719888023-255077677.jpeg uploads/image-1746719966214-617047451.jpeg uploads/image-1746720109804-581960354.jpeg uploads/image-1746739478073-3247104.jpeg uploads/image-1746773246208-555042628.jpeg public/uploads/
+2025-05-15T12:55:02.40946996Z 'uploads/couple.jpg' -> 'public/uploads/couple.jpg'
+2025-05-15T12:55:02.409489561Z 'uploads/couple.png' -> 'public/uploads/couple.png'
+2025-05-15T12:55:02.409493461Z 'uploads/image-1746715946699-229679471.jpeg' -> 'public/uploads/image-1746715946699-229679471.jpeg'
+2025-05-15T12:55:02.409495501Z 'uploads/image-1746719888023-255077677.jpeg' -> 'public/uploads/image-1746719888023-255077677.jpeg'
+2025-05-15T12:55:02.409497191Z 'uploads/image-1746719966214-617047451.jpeg' -> 'public/uploads/image-1746719966214-617047451.jpeg'
+2025-05-15T12:55:02.409499351Z 'uploads/image-1746720109804-581960354.jpeg' -> 'public/uploads/image-1746720109804-581960354.jpeg'
+2025-05-15T12:55:02.409502731Z 'uploads/image-1746739478073-3247104.jpeg' -> 'public/uploads/image-1746739478073-3247104.jpeg'
+2025-05-15T12:55:02.409505561Z 'uploads/image-1746773246208-555042628.jpeg' -> 'public/uploads/image-1746773246208-555042628.jpeg'
+2025-05-15T12:55:02.409849328Z + cp -rv uploads/couple.jpg uploads/couple.png uploads/image-1746715946699-229679471.jpeg uploads/image-1746719888023-255077677.jpeg uploads/image-1746719966214-617047451.jpeg uploads/image-1746720109804-581960354.jpeg uploads/image-1746739478073-3247104.jpeg uploads/image-1746773246208-555042628.jpeg dist/
+2025-05-15T12:55:02.427300269Z 'uploads/couple.jpg' -> 'dist/couple.jpg'
+2025-05-15T12:55:02.42731649Z 'uploads/couple.png' -> 'dist/couple.png'
+2025-05-15T12:55:02.42732004Z 'uploads/image-1746715946699-229679471.jpeg' -> 'dist/image-1746715946699-229679471.jpeg'
+2025-05-15T12:55:02.4273225Z 'uploads/image-1746719888023-255077677.jpeg' -> 'dist/image-1746719888023-255077677.jpeg'
+2025-05-15T12:55:02.42732485Z 'uploads/image-1746719966214-617047451.jpeg' -> 'dist/image-1746719966214-617047451.jpeg'
+2025-05-15T12:55:02.42732712Z 'uploads/image-1746720109804-581960354.jpeg' -> 'dist/image-1746720109804-581960354.jpeg'
+2025-05-15T12:55:02.42732934Z 'uploads/image-1746739478073-3247104.jpeg' -> 'dist/image-1746739478073-3247104.jpeg'
+2025-05-15T12:55:02.42733173Z 'uploads/image-1746773246208-555042628.jpeg' -> 'dist/image-1746773246208-555042628.jpeg'
+2025-05-15T12:55:02.427671917Z + cp -rv uploads/couple.jpg uploads/couple.png uploads/image-1746715946699-229679471.jpeg uploads/image-1746719888023-255077677.jpeg uploads/image-1746719966214-617047451.jpeg uploads/image-1746720109804-581960354.jpeg uploads/image-1746739478073-3247104.jpeg uploads/image-1746773246208-555042628.jpeg ./
+2025-05-15T12:55:02.445891354Z 'uploads/couple.jpg' -> './couple.jpg'
+2025-05-15T12:55:02.445908485Z 'uploads/couple.png' -> './couple.png'
+2025-05-15T12:55:02.445911155Z 'uploads/image-1746715946699-229679471.jpeg' -> './image-1746715946699-229679471.jpeg'
+2025-05-15T12:55:02.445913005Z 'uploads/image-1746719888023-255077677.jpeg' -> './image-1746719888023-255077677.jpeg'
+2025-05-15T12:55:02.445917725Z 'uploads/image-1746719966214-617047451.jpeg' -> './image-1746719966214-617047451.jpeg'
+2025-05-15T12:55:02.445919465Z 'uploads/image-1746720109804-581960354.jpeg' -> './image-1746720109804-581960354.jpeg'
+2025-05-15T12:55:02.445921095Z 'uploads/image-1746739478073-3247104.jpeg' -> './image-1746739478073-3247104.jpeg'
+2025-05-15T12:55:02.445922825Z 'uploads/image-1746773246208-555042628.jpeg' -> './image-1746773246208-555042628.jpeg'
+2025-05-15T12:55:02.446230881Z + echo 'Kopierte Dateien in dist/uploads:'
+2025-05-15T12:55:02.446309933Z + ls -la dist/uploads/
+2025-05-15T12:55:02.448889678Z + echo 'Kopierte Dateien in public/uploads:'
+2025-05-15T12:55:02.448913578Z + ls -la public/uploads/
+2025-05-15T12:55:02.450893361Z + cp -v uploads/couple.jpg dist/
+2025-05-15T12:55:02.456189523Z 'uploads/couple.jpg' -> 'dist/couple.jpg'
+2025-05-15T12:55:02.45650101Z + cp -v uploads/couple.png dist/
+2025-05-15T12:55:02.459121386Z 'uploads/couple.png' -> 'dist/couple.png'
+2025-05-15T12:55:02.459356431Z + cp -v uploads/couple.jpg ./
+2025-05-15T12:55:02.464306326Z 'uploads/couple.jpg' -> './couple.jpg'
+2025-05-15T12:55:02.46451677Z + cp -v uploads/couple.png ./
+2025-05-15T12:55:02.467127256Z 'uploads/couple.png' -> './couple.png'
+2025-05-15T12:55:02.46732419Z + chmod -R 755 dist/uploads/
+2025-05-15T12:55:02.468718609Z + chmod -R 755 dist/public/uploads/
+2025-05-15T12:55:02.470127249Z + chmod -R 755 public/uploads/
+2025-05-15T12:55:02.471691633Z + chmod -R 755 dist/couple.jpg dist/couple.png
+2025-05-15T12:55:02.473120003Z + echo 'Erstelle package.json Backup...'
+2025-05-15T12:55:02.473121763Z Erstelle package.json Backup...
+2025-05-15T12:55:02.473136933Z + cp package.json package.json.original
+2025-05-15T12:55:02.474968752Z + cat
+2025-05-15T12:55:02.477168469Z Erstelle Symlinks für häufige Bildpfade...
+2025-05-15T12:55:02.477189039Z + echo 'Erstelle Symlinks für häufige Bildpfade...'
+2025-05-15T12:55:02.477195479Z + ln -sf ./uploads /opt/render/project/src/uploads
+2025-05-15T12:55:02.479421717Z + ln -sf ./uploads /opt/render/project/src/dist/uploads
+2025-05-15T12:55:02.480806046Z + mkdir -p /opt/render/project/src/uploads
+2025-05-15T12:55:02.482465401Z + mkdir -p /opt/render/project/src/dist/uploads
+2025-05-15T12:55:02.484039735Z + cp -v uploads/couple.jpg /opt/render/project/src/uploads/
+2025-05-15T12:55:02.485827103Z Konnte couple.jpg nicht in /opt/render/project/src/uploads/ kopieren
+2025-05-15T12:55:02.485827883Z + echo 'Konnte couple.jpg nicht in /opt/render/project/src/uploads/ kopieren'
+2025-05-15T12:55:02.485839953Z + cp -v uploads/couple.png /opt/render/project/src/uploads/
+2025-05-15T12:55:02.48756097Z + echo 'Konnte couple.png nicht in /opt/render/project/src/uploads/ kopieren'
+2025-05-15T12:55:02.48757096Z + cp -v uploads/couple.jpg /opt/render/project/src/dist/uploads/
+2025-05-15T12:55:02.48758454Z Konnte couple.png nicht in /opt/render/project/src/uploads/ kopieren
+2025-05-15T12:55:02.492780141Z 'uploads/couple.jpg' -> '/opt/render/project/src/dist/uploads/couple.jpg'
+2025-05-15T12:55:02.493020666Z + cp -v uploads/couple.png /opt/render/project/src/dist/uploads/
+2025-05-15T12:55:02.495629381Z 'uploads/couple.png' -> '/opt/render/project/src/dist/uploads/couple.png'
+2025-05-15T12:55:02.495906077Z + echo 'Erstelle .htaccess für Bild-Fallbacks...'
+2025-05-15T12:55:02.495907007Z Erstelle .htaccess für Bild-Fallbacks...
+2025-05-15T12:55:02.495920237Z + cat
+2025-05-15T12:55:02.497428809Z === Build abgeschlossen ===
+2025-05-15T12:55:02.49743218Z + echo '=== Build abgeschlossen ==='
+2025-05-15T12:55:03.934524443Z ==> Uploading build...
+2025-05-15T12:55:23.161576314Z ==> Uploaded in 14.9s. Compression took 4.3s
+2025-05-15T12:55:23.244608738Z ==> Build successful 🎉
+2025-05-15T12:55:28.706692288Z ==> Deploying...
+2025-05-15T12:56:38.644234001Z ==> Running 'npm start'
+2025-05-15T12:56:38.958451883Z 
+2025-05-15T12:56:38.958475793Z > rest-express@1.0.0 start
+2025-05-15T12:56:38.958480774Z > NODE_ENV=production node dist/index.js
+2025-05-15T12:56:38.958482574Z 
+2025-05-15T12:56:39.038692056Z /opt/render/project/src/dist/index.js:590
+2025-05-15T12:56:39.038707057Z       </body>
+2025-05-15T12:56:39.038709827Z       ^
+2025-05-15T12:56:39.038711967Z 
+2025-05-15T12:56:39.038714337Z SyntaxError: Unexpected token '<'
+2025-05-15T12:56:39.038718047Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-15T12:56:39.038722177Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-15T12:56:39.038724507Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-15T12:56:39.038726927Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-15T12:56:39.038729297Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-15T12:56:39.038731567Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-15T12:56:39.038734067Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-15T12:56:39.038737637Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-15T12:56:39.038744797Z     at node:internal/main/run_main_module:36:49
+2025-05-15T12:56:39.038746977Z 
+2025-05-15T12:56:39.038749358Z Node.js v22.14.0
+2025-05-15T12:56:40.942266446Z ==> Exited with status 1
+2025-05-15T12:56:40.959404763Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-15T12:56:42.684394162Z ==> Running 'npm start'
+2025-05-15T12:56:42.976279873Z 
+2025-05-15T12:56:42.976301894Z > rest-express@1.0.0 start
+2025-05-15T12:56:42.976305734Z > NODE_ENV=production node dist/index.js
+2025-05-15T12:56:42.976343375Z 
+2025-05-15T12:56:43.004109481Z /opt/render/project/src/dist/index.js:590
+2025-05-15T12:56:43.004127831Z       </body>
+2025-05-15T12:56:43.004130271Z       ^
+2025-05-15T12:56:43.004131971Z 
+2025-05-15T12:56:43.004133681Z SyntaxError: Unexpected token '<'
+2025-05-15T12:56:43.004136071Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-15T12:56:43.004140421Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-15T12:56:43.004143191Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-15T12:56:43.004145341Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-15T12:56:43.004147441Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-15T12:56:43.004149541Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-15T12:56:43.004151681Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-15T12:56:43.004154331Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-15T12:56:43.004159711Z     at node:internal/main/run_main_module:36:49
+2025-05-15T12:56:43.004161842Z 
+2025-05-15T12:56:43.004164082Z Node.js v22.14.0

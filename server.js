@@ -587,10 +587,6 @@ app.get('/map', requireAuth, function(req, res) {
     host: req.get('host'),
     protocol: req.protocol
   });
-      </body>
-      </html>
-    `);
-  }
 
   // Pfad zum Pärchenbild
   const coupleImageUrl = '/uploads/couple.jpg';
