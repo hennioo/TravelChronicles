@@ -131,6 +131,16 @@ try {
       })
       .then(function() {
         console.log('Datenbankstruktur aktualisiert.');
+        // Prüfe die Anzahl der Einträge und setze ggf. die Sequenz zurück
+        return pool.query('SELECT COUNT(*) FROM locations');
+      })
+      .then(function(result) {
+        const count = parseInt(result.rows[0].count);
+        if (count === 0) {
+          console.log('Tabelle ist leer, setze ID-Sequenz zurück');
+          return pool.query("SELECT setval('locations_id_seq', 1, false)");
+        }
+        return Promise.resolve();
       })
       .catch(function(err) {
         console.error('Fehler bei der Datenbankaktualisierung:', err);
@@ -605,11 +615,35 @@ app.get('/admin/clear', requireAuth, function(req, res) {
     return res.status(503).json({ error: 'Datenbank nicht verbunden' });
   }
 
+  // Lösche alle Bilder (außer couple.jpg)
+  try {
+    const files = fs.readdirSync(uploadsDir);
+    let deletedCount = 0;
+    
+    for (const file of files) {
+      if (file !== 'couple.jpg' && file !== 'couple.png') {
+        const filePath = path.join(uploadsDir, file);
+        fs.unlinkSync(filePath);
+        deletedCount++;
+      }
+    }
+    console.log(`Alle Bilder gelöscht (außer couple.jpg)`);
+  } catch (err) {
+    console.error('Fehler beim Löschen der Bilder:', err);
+  }
+
+  // Lösche alle Datensätze UND setze die Sequenz zurück
   pool.query('DELETE FROM locations')
     .then(function() {
+      // Zurücksetzen der Sequenz auf 1
+      return pool.query("SELECT setval('locations_id_seq', 1, false)");
+    })
+    .then(function() {
+      console.log('Datenbank und Sequenzen zurückgesetzt');
       res.redirect('/admin?cleared=true');
     })
     .catch(function(error) {
+      console.error('Fehler beim Zurücksetzen der Datenbank:', error);
       res.status(500).send(`
         <h1>Fehler</h1>
         <p>Fehler beim Leeren der Datenbank: ${error.message}</p>
@@ -776,8 +810,8 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
       
       // Bereite die Antwort vor mit vollständiger Bild-URL
       var location = result.rows[0];
-      var baseUrl = req.protocol + '://' + req.get('host');
-      location.image = baseUrl + '/uploads/' + location.image;
+      // Verwende immer die feste Produktions-URL für Bilder
+      location.image = 'https://susio.site/uploads/' + location.image;
       
       res.status(201).json(location);
     })
