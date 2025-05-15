@@ -1,3 +1,4 @@
+// Einfacher Server für Render.com ohne Template-Strings
 const express = require('express');
 const multer = require('multer');
 const { Pool } = require('pg');
@@ -65,13 +66,9 @@ async function connectToDatabase() {
 // Prüfen, ob die Tabellen existieren
 async function checkTablesExist() {
   try {
-    const result = await pool.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'locations'
-      )
-    `);
+    const result = await pool.query(
+      "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'locations')"
+    );
     return result.rows[0].exists;
   } catch (error) {
     console.error('Fehler beim Prüfen der Tabellen:', error);
@@ -82,19 +79,9 @@ async function checkTablesExist() {
 // Tabellen erstellen, falls sie nicht existieren
 async function createTables() {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS locations (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        latitude DECIMAL(10, 8) NOT NULL,
-        longitude DECIMAL(11, 8) NOT NULL,
-        description TEXT,
-        image_data BYTEA,
-        image_type VARCHAR(50),
-        thumbnail_data BYTEA,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    await pool.query(
+      "CREATE TABLE IF NOT EXISTS locations (id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, latitude DECIMAL(10, 8) NOT NULL, longitude DECIMAL(11, 8) NOT NULL, description TEXT, image_data BYTEA, image_type VARCHAR(50), thumbnail_data BYTEA, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+    );
     return true;
   } catch (error) {
     console.error('Fehler beim Erstellen der Tabellen:', error);
@@ -220,7 +207,7 @@ app.get('/', function(req, res) {
   // Erstellt eine neue Session
   const sessionId = createSession();
   
-  res.send('<!DOCTYPE html>\n' +
+  const htmlContent = '<!DOCTYPE html>\n' +
     '<html lang="de">\n' +
     '<head>\n' +
     '  <meta charset="UTF-8">\n' +
@@ -376,7 +363,9 @@ app.get('/', function(req, res) {
     '    });\n' +
     '  </script>\n' +
     '</body>\n' +
-    '</html>');
+    '</html>';
+    
+  res.send(htmlContent);
 });
 
 // Login-Verarbeitung
@@ -410,7 +399,7 @@ app.get('/logout', (req, res) => {
 app.get('/map', requireAuth, function(req, res) {
   // Prüfe, ob die Datenbankverbindung aktiv ist
   if (!dbConnected) {
-    return res.send('<!DOCTYPE html>\n' +
+    const errorHtml = '<!DOCTYPE html>\n' +
       '<html lang="de">\n' +
       '<head>\n' +
       '  <meta charset="UTF-8">\n' +
@@ -513,15 +502,14 @@ app.get('/map', requireAuth, function(req, res) {
       '    <a href="/" class="btn">Zurück zur Anmeldung</a>\n' +
       '  </div>\n' +
       '</body>\n' +
-      '</html>');
+      '</html>';
+    
+    return res.send(errorHtml);
   }
 
-  // Statische HTML-Seite für die Karte
+  // Statische HTML-Seite für die Karte senden
   res.sendFile(path.join(__dirname, 'map.html'));
 });
-
-// Lade das HTML für die Kartenansicht
-const mapHTML = fs.readFileSync(path.join(__dirname, 'map.html'), { encoding: 'utf8', flag: 'r' });
 
 // API-Endpunkte
 
