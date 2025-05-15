@@ -1,0 +1,40 @@
+2025-05-15T13:54:01.944109484Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-15T13:54:05.740114835Z ==> Checking out commit adfa73670655d922b1b506ff7b6fb72980d07e53 in branch main
+2025-05-15T13:54:07.08401825Z ==> Downloading cache...
+2025-05-15T13:54:19.87734303Z ==> Transferred 219MB in 7s. Extraction took 5s.
+2025-05-15T13:54:26.427349406Z ==> Using Node.js version 22.14.0 (default)
+2025-05-15T13:54:26.454974609Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-15T13:54:26.595858518Z ==> Using Bun version 1.1.0 (default)
+2025-05-15T13:54:26.595879198Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-15T13:54:26.646803792Z ==> Running build command './build-render.sh'...
+2025-05-15T13:54:26.653144588Z + echo '=== Optimierter Build für Render ==='
+2025-05-15T13:54:26.653150898Z === Optimierter Build für Render ===
+2025-05-15T13:54:26.653157848Z + echo 'Installiere benötigte Pakete...'
+2025-05-15T13:54:26.653162768Z Installiere benötigte Pakete...
+2025-05-15T13:54:26.653165488Z + npm install express pg multer sharp fs-extra
+2025-05-15T13:54:28.635388995Z 
+2025-05-15T13:54:28.635410656Z up to date, audited 622 packages in 2s
+2025-05-15T13:54:28.635435767Z 
+2025-05-15T13:54:28.635445597Z 179 packages are looking for funding
+2025-05-15T13:54:28.635448947Z   run `npm fund` for details
+2025-05-15T13:54:28.64969117Z 
+2025-05-15T13:54:28.64970684Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-15T13:54:28.64970965Z 
+2025-05-15T13:54:28.64971285Z To address issues that do not require attention, run:
+2025-05-15T13:54:28.6497154Z   npm audit fix
+2025-05-15T13:54:28.649717721Z 
+2025-05-15T13:54:28.649720161Z To address all issues (including breaking changes), run:
+2025-05-15T13:54:28.649723051Z   npm audit fix --force
+2025-05-15T13:54:28.649725321Z 
+2025-05-15T13:54:28.649728221Z Run `npm audit` for details.
+2025-05-15T13:54:28.706574949Z + echo 'Erstelle Verzeichnisstruktur...'
+2025-05-15T13:54:28.706580669Z Erstelle Verzeichnisstruktur...
+2025-05-15T13:54:28.706592979Z + mkdir -p dist/uploads
+2025-05-15T13:54:28.708704695Z + mkdir -p dist/public/uploads
+2025-05-15T13:54:28.710417799Z + mkdir -p public/uploads
+2025-05-15T13:54:28.712039012Z + echo 'Erstelle einfache Server-Version für Render...'
+2025-05-15T13:54:28.712046832Z Erstelle einfache Server-Version für Render...
+2025-05-15T13:54:28.712049042Z + cp -v simple-render.js dist/index.cjs
+2025-05-15T13:54:28.713822459Z cp: cannot stat 'simple-render.js': No such file or directory
+2025-05-15T13:54:28.714561538Z ==> Build failed 😞
+2025-05-15T13:54:28.714584509Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
