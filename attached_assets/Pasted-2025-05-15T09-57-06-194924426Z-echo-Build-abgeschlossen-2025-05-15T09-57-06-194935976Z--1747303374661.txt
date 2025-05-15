@@ -1,0 +1,50 @@
+2025-05-15T09:57:06.194924426Z + echo '=== Build abgeschlossen ==='
+2025-05-15T09:57:06.194935976Z === Build abgeschlossen ===
+2025-05-15T09:57:07.050271178Z ==> Uploading build...
+2025-05-15T09:57:24.52099339Z ==> Uploaded in 14.0s. Compression took 3.5s
+2025-05-15T09:57:24.591413464Z ==> Build successful 🎉
+2025-05-15T09:57:26.36680758Z ==> Deploying...
+2025-05-15T09:57:45.322746778Z Umgebung: production
+2025-05-15T09:57:45.322750118Z Datenbankverbindung: Nicht verbunden
+2025-05-15T09:57:45.323017106Z Datum/Zeit: 2025-05-15T09:57:45.322Z
+2025-05-15T09:57:45.385265773Z Generiere Login-Seite mit Pärchenbild im Container
+2025-05-15T09:57:47.35338103Z ==> Your service is live 🎉
+2025-05-15T09:57:48.164246835Z Datenbankverbindung erfolgreich: { now: 2025-05-15T09:57:48.126Z }
+2025-05-15T09:57:48.164271896Z Prüfe Tabellenstruktur...
+2025-05-15T09:57:48.28891415Z Aktualisiere "highlight" Spalte um NULL-Werte zu erlauben...
+2025-05-15T09:57:48.344307005Z Datenbankstruktur aktualisiert.
+2025-05-15T09:58:27.20248895Z Generiere Login-Seite mit Pärchenbild im Container
+2025-05-15T09:58:40.512778649Z API: Lade Locations aus der Datenbank...
+2025-05-15T09:58:42.914305407Z Locations geladen, Anzahl: 1
+2025-05-15T09:58:42.914750067Z Location geladen: {
+2025-05-15T09:58:42.914758467Z   id: 30,
+2025-05-15T09:58:42.914762177Z   name: 'im drowning',
+2025-05-15T09:58:42.914766138Z   file: 'image-1747295530988-831430629.png',
+2025-05-15T09:58:42.914770768Z   imagePath: 'http://susio.site/uploads/image-1747295530988-831430629.png'
+2025-05-15T09:58:42.914774128Z }
+2025-05-15T09:59:55.960764168Z API: Lade Locations aus der Datenbank...
+2025-05-15T09:59:56.315077741Z Locations geladen, Anzahl: 1
+2025-05-15T09:59:56.315266554Z Location geladen: {
+2025-05-15T09:59:56.315275755Z   id: 30,
+2025-05-15T09:59:56.315280105Z   name: 'im drowning',
+2025-05-15T09:59:56.315284465Z   file: 'image-1747295530988-831430629.png',
+2025-05-15T09:59:56.315288566Z   imagePath: 'http://susio.site/uploads/image-1747295530988-831430629.png'
+2025-05-15T09:59:56.315292016Z }
+2025-05-15T10:00:25.577439997Z Neuer Ort wird erstellt: [Object: null prototype] {
+2025-05-15T10:00:25.577467709Z   latitude: '44.453388800301774',
+2025-05-15T10:00:25.5774716Z   longitude: '8.712158203125002',
+2025-05-15T10:00:25.57747662Z   name: 'Testung mapping',
+2025-05-15T10:00:25.57748123Z   description: ''
+2025-05-15T10:00:25.57748402Z }
+2025-05-15T10:00:25.577486951Z Bildpfad: image-1747303225123-727284097.jpeg
+2025-05-15T10:00:26.059818776Z Ort erstellt: {
+2025-05-15T10:00:26.059852448Z   id: 31,
+2025-05-15T10:00:26.059876139Z   name: 'Testung mapping',
+2025-05-15T10:00:26.05987976Z   date: '2025-05-15T10:00:25.577+00:00',
+2025-05-15T10:00:26.05988381Z   description: '',
+2025-05-15T10:00:26.05988655Z   highlight: '',
+2025-05-15T10:00:26.05988934Z   latitude: '44.453388800301774',
+2025-05-15T10:00:26.059892481Z   longitude: '8.712158203125002',
+2025-05-15T10:00:26.059895241Z   country_code: '',
+2025-05-15T10:00:26.059897961Z   image: 'image-1747303225123-727284097.jpeg'
+2025-05-15T10:00:26.059900671Z }

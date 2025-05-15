@@ -33,7 +33,7 @@ mkdir -p dist/uploads
 mkdir -p dist/public/uploads
 mkdir -p public/uploads
 
-# Kopiere in alle Verzeichnisse
+# Kopiere in alle möglichen Verzeichnisse
 cp -rv uploads/* dist/uploads/ || echo "Warnung: Konnte nicht in dist/uploads kopieren"
 cp -rv uploads/* dist/public/uploads/ || echo "Warnung: Konnte nicht in dist/public/uploads kopieren"
 cp -rv uploads/* public/uploads/ || echo "Warnung: Konnte nicht in public/uploads kopieren"
@@ -41,9 +41,20 @@ cp -rv uploads/* public/uploads/ || echo "Warnung: Konnte nicht in public/upload
 # Kopiere auch direkt nach /dist, da manche Pfade dort suchen
 cp -rv uploads/* dist/ || echo "Warnung: Konnte nicht direkt in dist/ kopieren"
 
-# Kopiere couple.jpg und couple.png direkt ins Root-Verzeichnis für absoluten Notfall
+# Auch ins Root-Verzeichnis für absolute URLs ohne Präfix
+cp -rv uploads/* ./ || echo "Warnung: Konnte nicht ins Root-Verzeichnis kopieren"
+
+# Erstelle eine Datei mit allen kopierten Dateien zur Diagnose
+echo "Kopierte Dateien in dist/uploads:" > dist/uploads-info.txt
+ls -la dist/uploads/ >> dist/uploads-info.txt
+echo "Kopierte Dateien in public/uploads:" >> dist/uploads-info.txt
+ls -la public/uploads/ >> dist/uploads-info.txt
+
+# Kopiere couple.jpg und couple.png in alle möglichen Verzeichnisse für den absoluten Notfall
 cp -v uploads/couple.jpg dist/ || echo "Warnung: Konnte couple.jpg nicht in dist/ kopieren"
 cp -v uploads/couple.png dist/ || echo "Warnung: Konnte couple.png nicht in dist/ kopieren"
+cp -v uploads/couple.jpg ./ || echo "Warnung: Konnte couple.jpg nicht ins Root-Verzeichnis kopieren"
+cp -v uploads/couple.png ./ || echo "Warnung: Konnte couple.png nicht ins Root-Verzeichnis kopieren"
 
 # Stelle sicher, dass keine Berechtigungsprobleme auftreten
 chmod -R 755 dist/uploads/ || true

@@ -662,6 +662,14 @@ app.get('/api/locations', requireAuth, function(req, res) {
     .then(function(result) {
       console.log("Locations geladen, Anzahl:", result.rows.length);
       
+      // Frontend-Debug-Info: Aktuelle Domain und Pfad
+      console.log("Debug - Host:", req.get('host'), "Protocol:", req.protocol);
+      console.log("Debug - Images Zugangspfade:", {
+        "uploads": process.env.NODE_ENV === 'production' ? '/uploads' : '/uploads',
+        "dist_uploads": '/dist/uploads',
+        "current_dir": __dirname
+      });
+      
       var baseUrl = req.protocol + '://' + req.get('host');
       var locations = [];
       
@@ -670,22 +678,17 @@ app.get('/api/locations', requireAuth, function(req, res) {
         
         // Speichere den Originaldateinamen für den Fallback-Mechanismus
         var originalFilename = row.image || '';
-        var imagePath = originalFilename;
         
-        // Verarbeite den Bildpfad nur für direkte Anzeige (Frontend kümmert sich um Fallbacks)
-        if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('/')) {
-          imagePath = '/uploads/' + imagePath;
-        }
+        // Konstruiere einen relativen Pfad zum Bild für Frontend-Flexibilität
+        var fullImagePath = '/uploads/' + originalFilename;
         
-        if (imagePath && imagePath.startsWith('/')) {
-          imagePath = baseUrl + imagePath;
-        }
-        
+        // Debug-Informationen zum Bild
         console.log('Location geladen:', {
           id: row.id,
           name: row.name,
-          file: originalFilename,
-          imagePath: imagePath
+          original_file: originalFilename,
+          full_path: baseUrl + fullImagePath,
+          creation_date: row.date ? new Date(row.date).toISOString() : 'unknown'
         });
         
         locations.push({
@@ -697,7 +700,8 @@ app.get('/api/locations', requireAuth, function(req, res) {
           latitude: row.latitude || "0",
           longitude: row.longitude || "0",
           countryCode: row.country_code || "",
-          image: originalFilename // Wir senden nur den Dateinamen, die Bildpfade werden im Frontend konstruiert
+          image: originalFilename, // Dateiname für Fallback-Mechanismus
+          imagePath: fullImagePath // Relativer Pfad für direkten Zugriff
         });
       }
       
@@ -1630,18 +1634,30 @@ app.get('/map', requireAuth, function(req, res) {
           currentLocationId = location.id;
           detailTitle.textContent = location.name;
           
-          // Konstruiere den vollständigen Bildpfad
+          // Konstruiere den vollständigen Bildpfad - mehrere Optionen
           const baseUrl = window.location.protocol + '//' + window.location.host;
-          const imagePath = location.image ? (baseUrl + '/uploads/' + location.image) : '';
-          console.log('Zeige Location-Details:', { id: location.id, name: location.name, bildpfad: imagePath });
+          
+          // Verwende imagePath aus der API wenn verfügbar, sonst baue es selbst
+          const imagePath = location.imagePath 
+            ? (baseUrl + location.imagePath) 
+            : (location.image ? (baseUrl + '/uploads/' + location.image) : '');
+          
+          console.log('Zeige Location-Details:', { 
+            id: location.id, 
+            name: location.name, 
+            imagePath: location.imagePath,
+            image: location.image,
+            bildpfad: imagePath 
+          });
           
           let content = '';
           
           // Zuerst das Bild, wenn vorhanden
           if (location.image) {
+            // Lade Originalbild mit ausführlicher Fehlerbehandlung
             content += \`<div class="location-image">
               <img src="\${imagePath}" alt="\${location.name}" 
-                onerror="this.onerror=null; this.style.display='none'; tryAlternativeImagePaths(this, '\${location.image}');">
+                onerror="console.error('Bild konnte nicht geladen werden:', this.src); this.onerror=null; this.style.display='none'; tryAlternativeImagePaths(this, '\${location.image}');">
             </div>\`;
           }
           
@@ -1811,15 +1827,31 @@ app.get('/map', requireAuth, function(req, res) {
             return;
           }
           
+          // Debug-Info für alle geladenen Locations
+          console.log('Alle Locations geladen:', locations.map(loc => ({
+            id: loc.id, 
+            name: loc.name, 
+            image: loc.image,
+            imagePath: loc.imagePath
+          })));
+          
           let html = '';
           locations.forEach(location => {
-            // Basispfad für das Bild
+            // Basispfad für das Bild - verwende bereits konstruierten imagePath oder baue ihn
             const baseUrl = window.location.protocol + '//' + window.location.host;
-            const imagePath = location.image ? (baseUrl + '/uploads/' + location.image) : '';
+            
+            // Verschiedene Bildpfad-Optionen für Fallback
+            const imagePath = location.imagePath || (location.image ? (baseUrl + '/uploads/' + location.image) : '');
+            
+            console.log('Zeige Location in Karte:', {
+              id: location.id,
+              name: location.name,
+              bildpfad: imagePath
+            });
             
             const imageHtml = location.image 
               ? \`<img src="\${imagePath}" alt="\${location.name}" 
-                    onerror="this.onerror=null; tryAlternativeImagePaths(this, '\${location.image}');">\`
+                    onerror="this.onerror=null; console.log('Bild konnte nicht geladen werden:', '\${imagePath}'); tryAlternativeImagePaths(this, '\${location.image}');">\`
               : '';
             
             html += \`
