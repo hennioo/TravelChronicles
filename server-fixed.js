@@ -1174,6 +1174,7 @@ app.get('/map', requireAuth, function(req, res) {
 
   // Neue Layout-Funktion für die Kartenansicht verwenden
   res.send(generateMapHtml(coupleImageUrl));
+  res.send(`
     <!DOCTYPE html>
     <html lang="de">
     <head>

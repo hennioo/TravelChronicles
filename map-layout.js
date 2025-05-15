@@ -1,5 +1,5 @@
 // Neue Kartenansicht mit Sidebar & Detailansicht
-function generateMapView(coupleImageUrl) {
+function generateMapHtml(coupleImageUrl) {
   return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -467,15 +467,6 @@ function generateMapView(coupleImageUrl) {
         zoomControl: true
       });
       
-      // Basiskarten
-      const baseMaps = {
-        "Dunkel": darkLayer,
-        "Hell": lightLayer
-      };
-      
-      // Layer-Control zur Karte hinzufügen
-      L.control.layers(baseMaps).addTo(map);
-      
       // Lade Orte von der API
       fetchLocations();
       
@@ -814,4 +805,4 @@ function generateMapView(coupleImageUrl) {
 </html>`;
 }
 
-module.exports = { generateMapView };
+module.exports = { generateMapHtml };
