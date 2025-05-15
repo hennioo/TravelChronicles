@@ -732,7 +732,7 @@ app.get('/api/locations', async (req, res) => {
         
         // Stelle sicher, dass Bilder im uploads-Verzeichnis sind
         if (!location.image.startsWith('/uploads/')) {
-          location.image = '/uploads/' + location.image.replace(/^\\/+/g, '');
+          location.image = '/uploads/' + location.image.replace(/^\//g, '');
         }
         
         // Setze die vollständige URL für Bilder

@@ -1,0 +1,50 @@
+2025-05-15T10:56:05.854912042Z + echo '=== Build abgeschlossen ==='
+2025-05-15T10:56:05.854918352Z === Build abgeschlossen ===
+2025-05-15T10:56:06.980378625Z ==> Uploading build...
+2025-05-15T10:56:20.491214171Z ==> Uploaded in 10.3s. Compression took 3.2s
+2025-05-15T10:56:20.568596294Z ==> Build successful 🎉
+2025-05-15T10:56:22.176553086Z ==> Deploying...
+2025-05-15T10:56:44.702911656Z ==> Running 'npm start'
+2025-05-15T10:56:44.990583401Z 
+2025-05-15T10:56:44.990603361Z > rest-express@1.0.0 start
+2025-05-15T10:56:44.990607291Z > NODE_ENV=production node dist/index.js
+2025-05-15T10:56:44.990609522Z 
+2025-05-15T10:56:45.017587523Z /opt/render/project/src/dist/index.js:735
+2025-05-15T10:56:45.062839219Z           location.image = '/uploads/' + location.image.replace(/^\\/+/g, '');
+2025-05-15T10:56:45.062897471Z                                                                       ^
+2025-05-15T10:56:45.062900441Z 
+2025-05-15T10:56:45.062903791Z SyntaxError: Invalid regular expression: missing /
+2025-05-15T10:56:45.062905921Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-15T10:56:45.062908361Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-15T10:56:45.062910451Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-15T10:56:45.062912481Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-15T10:56:45.062914621Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-15T10:56:45.062916731Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-15T10:56:45.062918811Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-15T10:56:45.062921551Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-15T10:56:45.062925561Z     at node:internal/main/run_main_module:36:49
+2025-05-15T10:56:45.062927621Z 
+2025-05-15T10:56:45.062929791Z Node.js v22.14.0
+2025-05-15T10:56:48.691067503Z ==> Exited with status 1
+2025-05-15T10:56:48.708325791Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-15T10:56:50.30440003Z ==> Running 'npm start'
+2025-05-15T10:56:50.516930734Z 
+2025-05-15T10:56:50.516958595Z > rest-express@1.0.0 start
+2025-05-15T10:56:50.516966165Z > NODE_ENV=production node dist/index.js
+2025-05-15T10:56:50.516968525Z 
+2025-05-15T10:56:50.597583084Z /opt/render/project/src/dist/index.js:735
+2025-05-15T10:56:50.597602774Z           location.image = '/uploads/' + location.image.replace(/^\\/+/g, '');
+2025-05-15T10:56:50.597605605Z                                                                       ^
+2025-05-15T10:56:50.597607865Z 
+2025-05-15T10:56:50.597610595Z SyntaxError: Invalid regular expression: missing /
+2025-05-15T10:56:50.597612665Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-15T10:56:50.597614685Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-15T10:56:50.597616835Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-15T10:56:50.597619005Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-15T10:56:50.597621105Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-15T10:56:50.597623205Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-15T10:56:50.597625325Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-15T10:56:50.597628035Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-15T10:56:50.597633555Z     at node:internal/main/run_main_module:36:49
+2025-05-15T10:56:50.597635545Z 
+2025-05-15T10:56:50.597637695Z Node.js v22.14.0
