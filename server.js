@@ -117,24 +117,16 @@ async function connectToDatabase() {
       NODE_ENV: process.env.NODE_ENV
     });
     
+    // Direkter Zugriff auf DATABASE_URL, da diese auf Render konfiguriert ist
     let connectionString = process.env.DATABASE_URL;
     
-    // Wenn DATABASE_URL nicht existiert, versuche Supabase-URL zu erstellen
-    if (!connectionString && process.env.SUPABASE_URL && process.env.SUPABASE_PASSWORD) {
-      try {
-        connectionString = process.env.SUPABASE_URL.replace('[YOUR-PASSWORD]', process.env.SUPABASE_PASSWORD);
-        console.log('Supabase-URL wurde erstellt');
-      } catch (urlError) {
-        console.error('Fehler beim Erstellen der Supabase-URL:', urlError);
-        return false;
-      }
-    }
-    
-    // Sicherheitsprüfung für Datenbankkonfiguration auf Render
+    // Sicherheitsprüfung für Datenbankkonfiguration
     if (!connectionString) {
-      console.error('Keine Datenbankverbindung konfiguriert. DATABASE_URL, SUPABASE_URL und SUPABASE_PASSWORD überprüfen.');
+      console.error('Fehler: DATABASE_URL ist nicht konfiguriert');
       return false;
     }
+    
+    console.log('Verbindungsstring-Länge:', connectionString.length, 'Zeichen');
     
     pool = new Pool({
       connectionString,
@@ -479,6 +471,114 @@ app.get('/logout', function(req, res) {
 
 // Geschützte Kartenansicht mit Leaflet
 app.get('/map', requireAuth, function(req, res) {
+  // Prüfe, ob die Datenbankverbindung aktiv ist
+  if (!dbConnected) {
+    return res.send(`<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Susibert - Datenbankfehler</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #1a1a1a;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    .header {
+      background-color: #222;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f59a0c;
+      text-decoration: none;
+    }
+    
+    .logo-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #f59a0c;
+    }
+    
+    .logo-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .error-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .error-message {
+      background-color: #ff5252;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      max-width: 600px;
+    }
+    
+    .btn {
+      background-color: #f59a0c;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/" class="logo">
+      <div class="logo-circle">
+        <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.src='/uploads/couple.png'">
+      </div>
+      <span class="logo-text">Susibert</span>
+    </a>
+  </div>
+  
+  <div class="error-container">
+    <div class="error-message">
+      <h2>Datenbankverbindung nicht verfügbar</h2>
+      <p>Die Verbindung zur Datenbank konnte nicht hergestellt werden. Bitte versuche es später erneut.</p>
+    </div>
+    <a href="/" class="btn">Zurück zur Anmeldung</a>
+  </div>
+</body>
+</html>`);
+  }
+
   // Debug-Ausgabe für den Pfad der Uploads
   console.log('Debug: Map-Seite wird geladen mit Uploads-Verzeichnis:', {
     uploadsDir: uploadsDir,
@@ -487,27 +587,6 @@ app.get('/map', requireAuth, function(req, res) {
     host: req.get('host'),
     protocol: req.protocol
   });
-  if (!dbConnected) {
-    return res.send(`
-      <!DOCTYPE html>
-      <html lang="de">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Susibert</title>
-        <style>
-          body { font-family: sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 20px; }
-          h1 { color: #f59a0c; }
-          .error { background: #ff5555; color: white; padding: 10px; border-radius: 5px; }
-          a { color: #f59a0c; }
-        </style>
-      </head>
-      <body>
-        <h1>Susibert</h1>
-        <div class="error">
-          <p>Datenbankverbindung nicht verfügbar. Bitte versuche es später erneut.</p>
-        </div>
-        <p><a href="/">Zurück zur Anmeldung</a></p>
       </body>
       </html>
     `);
