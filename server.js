@@ -173,6 +173,8 @@ async function createTables() {
         latitude DECIMAL(10, 8) NOT NULL,
         longitude DECIMAL(11, 8) NOT NULL,
         image TEXT,
+        image_data BYTEA,
+        image_type TEXT,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -231,33 +233,12 @@ function requireAuth(req, res, next) {
 // Helper-Funktion für das Löschen eines Ortes
 async function deleteLocation(id, res, redirectUrl = null) {
   try {
-    // Erst Bild-Informationen holen
-    const imageResult = await pool.query('SELECT image FROM locations WHERE id = $1', [id]);
+    // Lösche direkt den Ort aus der Datenbank
+    // Die Bild-Daten werden automatisch mitgelöscht, da sie in derselben Tabelle sind
+    const deleteResult = await pool.query('DELETE FROM locations WHERE id = $1 RETURNING id', [id]);
     
-    if (imageResult.rows.length > 0) {
-      const location = imageResult.rows[0];
-      
-      // Bild löschen, wenn vorhanden
-      if (location.image) {
-        // Nur den Dateinamen extrahieren ohne URL-Pfad
-        const imagePath = location.image.startsWith('/uploads/') 
-          ? path.join(uploadsDir, location.image.substring(9)) 
-          : path.join(uploadsDir, path.basename(location.image));
-        
-        try {
-          if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-            console.log('Bild gelöscht:', imagePath);
-          } else {
-            console.warn('Bild nicht gefunden zum Löschen:', imagePath);
-          }
-        } catch (fileError) {
-          console.error('Fehler beim Löschen des Bildes:', fileError);
-        }
-      }
-      
-      // Jetzt den Datenbankeintrag löschen
-      await pool.query('DELETE FROM locations WHERE id = $1', [id]);
+    if (deleteResult.rows.length > 0) {
+      // Ort wurde erfolgreich gelöscht
       
       if (redirectUrl) {
         return res.redirect(redirectUrl);
@@ -710,6 +691,40 @@ app.get('/admin', requireAuth, function(req, res) {
 
 // API-Endpunkte
 
+// Bild aus der Datenbank abrufen
+app.get('/api/images/:id', async (req, res) => {
+  if (!dbConnected) {
+    return res.status(503).json({ error: 'Datenbank nicht verfügbar' });
+  }
+  
+  try {
+    const id = req.params.id;
+    const result = await pool.query('SELECT image_data, image_type FROM locations WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0 || !result.rows[0].image_data) {
+      // Fallback auf das Pärchenbild, wenn kein Bild gefunden wurde
+      const defaultImagePath = path.join(uploadsDir, 'couple.jpg');
+      if (fs.existsSync(defaultImagePath)) {
+        const defaultImage = fs.readFileSync(defaultImagePath);
+        res.contentType('image/jpeg');
+        return res.send(defaultImage);
+      } else {
+        return res.status(404).send('Bild nicht gefunden');
+      }
+    }
+    
+    // Setze den korrekten Content-Type
+    const imageType = result.rows[0].image_type || 'image/jpeg';
+    res.contentType(imageType);
+    
+    // Sende das Bild als Binärdaten
+    res.send(result.rows[0].image_data);
+  } catch (error) {
+    console.error('Fehler beim Abrufen des Bildes:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Alle Orte abrufen
 app.get('/api/locations', async (req, res) => {
   if (!dbConnected) {
@@ -723,20 +738,10 @@ app.get('/api/locations', async (req, res) => {
     const baseUrl = isProduction ? `https://${PRODUCTION_DOMAIN}` : '';
     
     const locations = result.rows.map(location => {
-      // Wenn ein Bild vorhanden ist und nicht mit http beginnt, füge den Pfad hinzu
-      if (location.image && !location.image.startsWith('http')) {
-        // Falls das Bild nicht mit / beginnt, füge es hinzu
-        if (!location.image.startsWith('/')) {
-          location.image = '/' + location.image;
-        }
-        
-        // Stelle sicher, dass Bilder im uploads-Verzeichnis sind
-        if (!location.image.startsWith('/uploads/')) {
-          location.image = '/uploads/' + location.image.replace(/^\//g, '');
-        }
-        
-        // Setze die vollständige URL für Bilder
-        location.image = baseUrl + location.image;
+      // Bild-URL über den neuen API-Endpunkt
+      if (location.id) {
+        // Verwende den neuen API-Endpunkt für Bilder
+        location.image = `${baseUrl}/api/images/${location.id}`;
       }
       
       return location;
@@ -763,26 +768,40 @@ app.post('/api/locations', requireAuth, upload.single('image'), async (req, res)
       return res.status(400).json({ error: 'Name, Breitengrad und Längengrad sind erforderlich' });
     }
     
-    let imagePath = null;
+    let imageData = null;
+    let imageType = null;
+    let imageName = null;
     
     if (req.file) {
-      // Pfad für die Datenbank relativ zum uploads-Verzeichnis
-      imagePath = '/uploads/' + req.file.filename;
+      // Bild-Daten aus der Datei lesen
+      imageData = fs.readFileSync(req.file.path);
+      imageType = req.file.mimetype;
+      imageName = req.file.filename;
+      
+      // Temporäre Datei löschen, da wir sie in der Datenbank speichern
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        console.warn('Konnte temporäre Datei nicht löschen:', unlinkError);
+      }
     }
     
-    // Einfügen in die Datenbank
+    // Einfügen in die Datenbank mit Bild-Daten
     const result = await pool.query(
-      'INSERT INTO locations (name, description, latitude, longitude, image) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [name, description || null, latitude, longitude, imagePath]
+      'INSERT INTO locations (name, description, latitude, longitude, image, image_data, image_type) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [name, description || null, latitude, longitude, imageName, imageData, imageType]
     );
     
     const newLocation = result.rows[0];
     
-    // Absolute URL für das Bild
-    if (newLocation.image) {
+    // Setze die Bild-URL auf den API-Endpunkt
+    if (newLocation.id) {
       const baseUrl = isProduction ? `https://${PRODUCTION_DOMAIN}` : '';
-      newLocation.image = baseUrl + newLocation.image;
+      newLocation.image = `${baseUrl}/api/images/${newLocation.id}`;
     }
+    
+    // Entferne die großen Binärdaten aus der Antwort
+    delete newLocation.image_data;
     
     res.status(201).json(newLocation);
   } catch (error) {
