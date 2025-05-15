@@ -8,10 +8,12 @@ echo "=== Minimaler Build für Render ==="
 echo "Installiere benötigte Pakete..."
 npm install express pg multer
 
-# 2. Stelle sicher, dass dist-Verzeichnis existiert
+# 2. Stelle sicher, dass alle benötigten Verzeichnisse existieren
 echo "Prüfe Verzeichnisstruktur..."
 mkdir -p dist
 mkdir -p dist/uploads
+mkdir -p dist/public
+mkdir -p dist/public/uploads
 
 # 3. Kopiere unsere Server-Dateien
 echo "Kopiere Server-Dateien..."
@@ -26,7 +28,13 @@ cp -v server.js fixed-render.js
 
 # Stelle sicher, dass Uploads-Verzeichnis existiert und Bilder kopiert sind
 echo "Kopiere Uploads-Verzeichnis..."
+# In beide Verzeichnisse kopieren, um sicherzustellen, dass sie unabhängig vom Pfad gefunden werden
 cp -rv uploads/* dist/uploads/
+cp -rv uploads/* dist/public/uploads/
+
+# Stelle sicher, dass keine Berechtigungsprobleme auftreten
+chmod -R 755 dist/uploads/
+chmod -R 755 dist/public/uploads/
 
 # 4. Benutzerdefinierte package.json für Start-Befehl, falls Procfile ignoriert wird
 echo "Erstelle package.json Backup..."

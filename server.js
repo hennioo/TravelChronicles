@@ -33,8 +33,23 @@ try {
   console.error('Fehler beim Erstellen des Uploads-Verzeichnisses:', error);
 }
 
-// Statische Dateien und Uploads
+// Statische Dateien und Uploads - mehrere Pfade für verschiedene Umgebungen
 app.use('/uploads', express.static(uploadsDir));
+
+// Zusätzliche Pfade für Render-Umgebung (für Fallback)
+if (process.env.RENDER === 'true') {
+  // Wenn auf Render ausgeführt, versuche auch diese Verzeichnisse
+  const distUploadsDir = path.join(__dirname, 'dist', 'uploads');
+  const publicUploadsDir = path.join(__dirname, 'dist', 'public', 'uploads');
+  
+  console.log('Render-Umgebung erkannt. Füge zusätzliche Upload-Pfade hinzu:');
+  console.log('- ' + distUploadsDir);
+  console.log('- ' + publicUploadsDir);
+  
+  app.use('/uploads', express.static(distUploadsDir));
+  app.use('/uploads', express.static(publicUploadsDir));
+  app.use('/public/uploads', express.static(publicUploadsDir));
+}
 
 // Datenbankverbindung initialisieren
 try {
