@@ -1,0 +1,186 @@
+2025-05-15T19:44:31.671265049Z Erstelle Server-Code...
+2025-05-15T19:44:31.671268719Z + echo 'Erstelle Server-Code...'
+2025-05-15T19:44:31.671868565Z + cat
+2025-05-15T19:44:31.675025649Z + echo 'Kopiere Dateien...'
+2025-05-15T19:44:31.675026749Z Kopiere Dateien...
+2025-05-15T19:44:31.675036829Z + mkdir -p dist/uploads
+2025-05-15T19:44:31.676786276Z + cp -rv uploads/couple.jpg uploads/couple.png uploads/image-1746715946699-229679471.jpeg uploads/image-1746719888023-255077677.jpeg uploads/image-1746719966214-617047451.jpeg uploads/image-1746720109804-581960354.jpeg uploads/image-1746739478073-3247104.jpeg uploads/image-1746773246208-555042628.jpeg dist/uploads/
+2025-05-15T19:44:31.693772325Z 'uploads/couple.jpg' -> 'dist/uploads/couple.jpg'
+2025-05-15T19:44:31.693783806Z 'uploads/couple.png' -> 'dist/uploads/couple.png'
+2025-05-15T19:44:31.693787646Z 'uploads/image-1746715946699-229679471.jpeg' -> 'dist/uploads/image-1746715946699-229679471.jpeg'
+2025-05-15T19:44:31.693791276Z 'uploads/image-1746719888023-255077677.jpeg' -> 'dist/uploads/image-1746719888023-255077677.jpeg'
+2025-05-15T19:44:31.693793476Z 'uploads/image-1746719966214-617047451.jpeg' -> 'dist/uploads/image-1746719966214-617047451.jpeg'
+2025-05-15T19:44:31.693795836Z 'uploads/image-1746720109804-581960354.jpeg' -> 'dist/uploads/image-1746720109804-581960354.jpeg'
+2025-05-15T19:44:31.693798676Z 'uploads/image-1746739478073-3247104.jpeg' -> 'dist/uploads/image-1746739478073-3247104.jpeg'
+2025-05-15T19:44:31.693800986Z 'uploads/image-1746773246208-555042628.jpeg' -> 'dist/uploads/image-1746773246208-555042628.jpeg'
+2025-05-15T19:44:31.694024042Z Erstelle package.json...
+2025-05-15T19:44:31.694024222Z + echo 'Erstelle package.json...'
+2025-05-15T19:44:31.694045153Z + cat
+2025-05-15T19:44:31.695941963Z === Build erfolgreich abgeschlossen ===
+2025-05-15T19:44:31.695942963Z + echo '=== Build erfolgreich abgeschlossen ==='
+2025-05-15T19:44:33.250974704Z ==> Uploading build...
+2025-05-15T19:44:46.055164644Z ==> Uploaded in 9.3s. Compression took 3.5s
+2025-05-15T19:44:46.121732017Z ==> Build successful 🎉
+2025-05-15T19:44:48.667289237Z ==> Deploying...
+2025-05-15T19:45:10.654083831Z ==> Your service is live 🎉
+2025-05-15T19:45:12.297549845Z Tabelle locations existiert: true
+2025-05-15T19:45:12.29780886Z Datenbankverbindung Status: true
+2025-05-15T19:45:12.29782964Z Prüfe auf fehlende Thumbnails für bestehende Orte...
+2025-05-15T19:45:12.352274812Z Fehler beim Generieren der Thumbnails: error: column "image_data" does not exist
+2025-05-15T19:45:12.352293543Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:45:12.352297083Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:45:12.352299403Z     at async generateAllMissingThumbnails (/opt/render/project/src/dist/index.js:213:20) {
+2025-05-15T19:45:12.352303943Z   length: 110,
+2025-05-15T19:45:12.352307003Z   severity: 'ERROR',
+2025-05-15T19:45:12.352309363Z   code: '42703',
+2025-05-15T19:45:12.352311453Z   detail: undefined,
+2025-05-15T19:45:12.352313563Z   hint: undefined,
+2025-05-15T19:45:12.352315573Z   position: '12',
+2025-05-15T19:45:12.352318823Z   internalPosition: undefined,
+2025-05-15T19:45:12.352321063Z   internalQuery: undefined,
+2025-05-15T19:45:12.352323103Z   where: undefined,
+2025-05-15T19:45:12.352325193Z   schema: undefined,
+2025-05-15T19:45:12.352327333Z   table: undefined,
+2025-05-15T19:45:12.352329373Z   column: undefined,
+2025-05-15T19:45:12.352331473Z   dataType: undefined,
+2025-05-15T19:45:12.352333493Z   constraint: undefined,
+2025-05-15T19:45:12.352335503Z   file: 'parse_relation.c',
+2025-05-15T19:45:12.352337593Z   line: '3722',
+2025-05-15T19:45:12.352339643Z   routine: 'errorMissingColumn'
+2025-05-15T19:45:12.352341723Z }
+2025-05-15T19:50:07.494040982Z Fehler beim Abrufen der Orte: error: column "title" does not exist
+2025-05-15T19:50:07.494066542Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:50:07.494083162Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:50:07.494088592Z     at async /opt/render/project/src/dist/index.js:1713:20 {
+2025-05-15T19:50:07.494092572Z   length: 105,
+2025-05-15T19:50:07.494097243Z   severity: 'ERROR',
+2025-05-15T19:50:07.494101263Z   code: '42703',
+2025-05-15T19:50:07.494105153Z   detail: undefined,
+2025-05-15T19:50:07.494109243Z   hint: undefined,
+2025-05-15T19:50:07.494112983Z   position: '12',
+2025-05-15T19:50:07.494117493Z   internalPosition: undefined,
+2025-05-15T19:50:07.494121413Z   internalQuery: undefined,
+2025-05-15T19:50:07.494125493Z   where: undefined,
+2025-05-15T19:50:07.494129393Z   schema: undefined,
+2025-05-15T19:50:07.494133153Z   table: undefined,
+2025-05-15T19:50:07.494154414Z   column: undefined,
+2025-05-15T19:50:07.494158864Z   dataType: undefined,
+2025-05-15T19:50:07.494162604Z   constraint: undefined,
+2025-05-15T19:50:07.494166424Z   file: 'parse_relation.c',
+2025-05-15T19:50:07.494170284Z   line: '3722',
+2025-05-15T19:50:07.494174304Z   routine: 'errorMissingColumn'
+2025-05-15T19:50:07.494178134Z }
+2025-05-15T19:50:17.392195133Z ==> Detected service running on port 10000
+2025-05-15T19:50:17.521498679Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-05-15T19:55:27.843390784Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T19:55:27.843422155Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:55:27.843441055Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:55:27.843444195Z     at async /opt/render/project/src/dist/index.js:1763:20 {
+2025-05-15T19:55:27.843446455Z   length: 127,
+2025-05-15T19:55:27.843449195Z   severity: 'ERROR',
+2025-05-15T19:55:27.843451325Z   code: '42703',
+2025-05-15T19:55:27.843453415Z   detail: undefined,
+2025-05-15T19:55:27.843455565Z   hint: undefined,
+2025-05-15T19:55:27.843457715Z   position: '24',
+2025-05-15T19:55:27.843460385Z   internalPosition: undefined,
+2025-05-15T19:55:27.843462445Z   internalQuery: undefined,
+2025-05-15T19:55:27.843464475Z   where: undefined,
+2025-05-15T19:55:27.843466516Z   schema: undefined,
+2025-05-15T19:55:27.843468565Z   table: undefined,
+2025-05-15T19:55:27.843470605Z   column: undefined,
+2025-05-15T19:55:27.843472705Z   dataType: undefined,
+2025-05-15T19:55:27.843474745Z   constraint: undefined,
+2025-05-15T19:55:27.843476776Z   file: 'parse_target.c',
+2025-05-15T19:55:27.843478856Z   line: '1066',
+2025-05-15T19:55:27.843480946Z   routine: 'checkInsertTargets'
+2025-05-15T19:55:27.843483036Z }
+2025-05-15T19:55:35.117566499Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T19:55:35.11759325Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:55:35.11759767Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:55:35.11760175Z     at async /opt/render/project/src/dist/index.js:1763:20 {
+2025-05-15T19:55:35.11760544Z   length: 127,
+2025-05-15T19:55:35.1176097Z   severity: 'ERROR',
+2025-05-15T19:55:35.11761318Z   code: '42703',
+2025-05-15T19:55:35.1176167Z   detail: undefined,
+2025-05-15T19:55:35.11762017Z   hint: undefined,
+2025-05-15T19:55:35.11762367Z   position: '24',
+2025-05-15T19:55:35.1176277Z   internalPosition: undefined,
+2025-05-15T19:55:35.117631111Z   internalQuery: undefined,
+2025-05-15T19:55:35.117634691Z   where: undefined,
+2025-05-15T19:55:35.117638091Z   schema: undefined,
+2025-05-15T19:55:35.117641501Z   table: undefined,
+2025-05-15T19:55:35.117644921Z   column: undefined,
+2025-05-15T19:55:35.117648291Z   dataType: undefined,
+2025-05-15T19:55:35.117652111Z   constraint: undefined,
+2025-05-15T19:55:35.117655541Z   file: 'parse_target.c',
+2025-05-15T19:55:35.117658971Z   line: '1066',
+2025-05-15T19:55:35.117666551Z   routine: 'checkInsertTargets'
+2025-05-15T19:55:35.117670201Z }
+2025-05-15T19:50:07.494040982Z Fehler beim Abrufen der Orte: error: column "title" does not exist
+2025-05-15T19:50:07.494066542Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:50:07.494083162Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:50:07.494088592Z     at async /opt/render/project/src/dist/index.js:1713:20 {
+2025-05-15T19:50:07.494092572Z   length: 105,
+2025-05-15T19:50:07.494097243Z   severity: 'ERROR',
+2025-05-15T19:50:07.494101263Z   code: '42703',
+2025-05-15T19:50:07.494105153Z   detail: undefined,
+2025-05-15T19:50:07.494109243Z   hint: undefined,
+2025-05-15T19:50:07.494112983Z   position: '12',
+2025-05-15T19:50:07.494117493Z   internalPosition: undefined,
+2025-05-15T19:50:07.494121413Z   internalQuery: undefined,
+2025-05-15T19:50:07.494125493Z   where: undefined,
+2025-05-15T19:50:07.494129393Z   schema: undefined,
+2025-05-15T19:50:07.494133153Z   table: undefined,
+2025-05-15T19:50:07.494154414Z   column: undefined,
+2025-05-15T19:50:07.494158864Z   dataType: undefined,
+2025-05-15T19:50:07.494162604Z   constraint: undefined,
+2025-05-15T19:50:07.494166424Z   file: 'parse_relation.c',
+2025-05-15T19:50:07.494170284Z   line: '3722',
+2025-05-15T19:50:07.494174304Z   routine: 'errorMissingColumn'
+2025-05-15T19:50:07.494178134Z }
+2025-05-15T19:50:17.392195133Z ==> Detected service running on port 10000
+2025-05-15T19:50:17.521498679Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-05-15T19:55:27.843390784Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T19:55:27.843422155Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:55:27.843441055Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:55:27.843444195Z     at async /opt/render/project/src/dist/index.js:1763:20 {
+2025-05-15T19:55:27.843446455Z   length: 127,
+2025-05-15T19:55:27.843449195Z   severity: 'ERROR',
+2025-05-15T19:55:27.843451325Z   code: '42703',
+2025-05-15T19:55:27.843453415Z   detail: undefined,
+2025-05-15T19:55:27.843455565Z   hint: undefined,
+2025-05-15T19:55:27.843457715Z   position: '24',
+2025-05-15T19:55:27.843460385Z   internalPosition: undefined,
+2025-05-15T19:55:27.843462445Z   internalQuery: undefined,
+2025-05-15T19:55:27.843464475Z   where: undefined,
+2025-05-15T19:55:27.843466516Z   schema: undefined,
+2025-05-15T19:55:27.843468565Z   table: undefined,
+2025-05-15T19:55:27.843470605Z   column: undefined,
+2025-05-15T19:55:27.843472705Z   dataType: undefined,
+2025-05-15T19:55:27.843474745Z   constraint: undefined,
+2025-05-15T19:55:27.843476776Z   file: 'parse_target.c',
+2025-05-15T19:55:27.843478856Z   line: '1066',
+2025-05-15T19:55:27.843480946Z   routine: 'checkInsertTargets'
+2025-05-15T19:55:27.843483036Z }
+2025-05-15T19:55:35.117566499Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T19:55:35.11759325Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:55:35.11759767Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:55:35.11760175Z     at async /opt/render/project/src/dist/index.js:1763:20 {
+2025-05-15T19:55:35.11760544Z   length: 127,
+2025-05-15T19:55:35.1176097Z   severity: 'ERROR',
+2025-05-15T19:55:35.11761318Z   code: '42703',
+2025-05-15T19:55:35.1176167Z   detail: undefined,
+2025-05-15T19:55:35.11762017Z   hint: undefined,
+2025-05-15T19:55:35.11762367Z   position: '24',
+2025-05-15T19:55:35.1176277Z   internalPosition: undefined,
+2025-05-15T19:55:35.117631111Z   internalQuery: undefined,
+2025-05-15T19:55:35.117634691Z   where: undefined,
+2025-05-15T19:55:35.117638091Z   schema: undefined,
+2025-05-15T19:55:35.117641501Z   table: undefined,
+2025-05-15T19:55:35.117644921Z   column: undefined,
+2025-05-15T19:55:35.117648291Z   dataType: undefined,
+2025-05-15T19:55:35.117652111Z   constraint: undefined,
+2025-05-15T19:55:35.117655541Z   file: 'parse_target.c',
+2025-05-15T19:55:35.117658971Z   line: '1066',
+2025-05-15T19:55:35.117666551Z   routine: 'checkInsertTargets'
+2025-05-15T19:55:35.117670201Z }
