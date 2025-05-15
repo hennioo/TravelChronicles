@@ -175,6 +175,7 @@ async function createTables() {
         image TEXT,
         image_data BYTEA,
         image_type TEXT,
+        thumbnail_data BYTEA,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -689,7 +690,48 @@ app.get('/admin', requireAuth, function(req, res) {
   `);
 });
 
+// Sharp für Bildmanipulation importieren
+const sharp = require('sharp');
+
 // API-Endpunkte
+
+// Thumbnail aus der Datenbank abrufen
+app.get('/api/thumbnails/:id', async (req, res) => {
+  if (!dbConnected) {
+    return res.status(503).json({ error: 'Datenbank nicht verfügbar' });
+  }
+  
+  try {
+    const id = req.params.id;
+    const result = await pool.query('SELECT thumbnail_data, image_type FROM locations WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0 || !result.rows[0].thumbnail_data) {
+      // Fallback auf das Pärchenbild, wenn kein Thumbnail gefunden wurde
+      const defaultImagePath = path.join(uploadsDir, 'couple.jpg');
+      if (fs.existsSync(defaultImagePath)) {
+        // Verkleinertes Thumbnail vom Pärchenbild erstellen
+        const thumbnailBuffer = await sharp(defaultImagePath)
+          .resize(60, 60, { fit: 'cover' })
+          .toBuffer();
+        
+        res.contentType('image/jpeg');
+        return res.send(thumbnailBuffer);
+      } else {
+        return res.status(404).send('Thumbnail nicht gefunden');
+      }
+    }
+    
+    // Setze den korrekten Content-Type
+    const imageType = result.rows[0].image_type || 'image/jpeg';
+    res.contentType(imageType);
+    
+    // Sende das Thumbnail als Binärdaten
+    res.send(result.rows[0].thumbnail_data);
+  } catch (error) {
+    console.error('Fehler beim Abrufen des Thumbnails:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Bild aus der Datenbank abrufen
 app.get('/api/images/:id', async (req, res) => {
@@ -738,10 +780,13 @@ app.get('/api/locations', async (req, res) => {
     const baseUrl = isProduction ? `https://${PRODUCTION_DOMAIN}` : '';
     
     const locations = result.rows.map(location => {
-      // Bild-URL über den neuen API-Endpunkt
+      // Bild-URL und Thumbnail-URL über die API-Endpunkte
       if (location.id) {
-        // Verwende den neuen API-Endpunkt für Bilder
+        // URL für das Vollbild (wird erst geladen, wenn Details angezeigt werden)
         location.image = `${baseUrl}/api/images/${location.id}`;
+        
+        // URL für das Thumbnail (für die Listenansicht)
+        location.thumbnail = `${baseUrl}/api/thumbnails/${location.id}`;
       }
       
       return location;
@@ -769,6 +814,7 @@ app.post('/api/locations', requireAuth, upload.single('image'), async (req, res)
     }
     
     let imageData = null;
+    let thumbnailData = null;
     let imageType = null;
     let imageName = null;
     
@@ -778,6 +824,17 @@ app.post('/api/locations', requireAuth, upload.single('image'), async (req, res)
       imageType = req.file.mimetype;
       imageName = req.file.filename;
       
+      // Thumbnail erstellen (60x60 Pixel)
+      try {
+        thumbnailData = await sharp(req.file.path)
+          .resize(60, 60, { fit: 'cover' })
+          .toBuffer();
+        
+        console.log('Thumbnail erstellt: ' + thumbnailData.length + ' Bytes');
+      } catch (thumbError) {
+        console.error('Fehler beim Erstellen des Thumbnails:', thumbError);
+      }
+      
       // Temporäre Datei löschen, da wir sie in der Datenbank speichern
       try {
         fs.unlinkSync(req.file.path);
@@ -786,22 +843,24 @@ app.post('/api/locations', requireAuth, upload.single('image'), async (req, res)
       }
     }
     
-    // Einfügen in die Datenbank mit Bild-Daten
+    // Einfügen in die Datenbank mit Bild- und Thumbnail-Daten
     const result = await pool.query(
-      'INSERT INTO locations (name, description, latitude, longitude, image, image_data, image_type) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [name, description || null, latitude, longitude, imageName, imageData, imageType]
+      'INSERT INTO locations (name, description, latitude, longitude, image, image_data, image_type, thumbnail_data) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      [name, description || null, latitude, longitude, imageName, imageData, imageType, thumbnailData]
     );
     
     const newLocation = result.rows[0];
     
-    // Setze die Bild-URL auf den API-Endpunkt
+    // Setze die Bild-URL und Thumbnail-URL auf die API-Endpunkte
     if (newLocation.id) {
       const baseUrl = isProduction ? `https://${PRODUCTION_DOMAIN}` : '';
       newLocation.image = `${baseUrl}/api/images/${newLocation.id}`;
+      newLocation.thumbnail = `${baseUrl}/api/thumbnails/${newLocation.id}`;
     }
     
     // Entferne die großen Binärdaten aus der Antwort
     delete newLocation.image_data;
+    delete newLocation.thumbnail_data;
     
     res.status(201).json(newLocation);
   } catch (error) {
