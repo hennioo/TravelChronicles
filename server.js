@@ -687,7 +687,7 @@ app.get('/api/locations', requireAuth, function(req, res) {
         var originalFilename = row.image || '';
         
         // Konstruiere einen relativen Pfad zum Bild für Frontend-Flexibilität
-        var fullImagePath = '/uploads/' + originalFilename;
+        var fullImagePath = 'https://susio.site/uploads/' + originalFilename;
         
         // Debug-Informationen zum Bild
         console.log('Location geladen:', {

@@ -1,0 +1,50 @@
+2025-05-15T10:12:08.3919205Z   current_dir: '/opt/render/project/src/dist'
+2025-05-15T10:12:08.39192539Z }
+2025-05-15T10:12:08.392083944Z Location geladen: {
+2025-05-15T10:12:08.392100954Z   id: 31,
+2025-05-15T10:12:08.392105454Z   name: 'Testung mapping',
+2025-05-15T10:12:08.392109444Z   original_file: 'image-1747303225123-727284097.jpeg',
+2025-05-15T10:12:08.392113724Z   full_path: 'http://susio.site/uploads/image-1747303225123-727284097.jpeg',
+2025-05-15T10:12:08.392117614Z   creation_date: '2025-05-15T10:00:25.577Z'
+2025-05-15T10:12:08.392121234Z }
+2025-05-15T10:12:08.392216137Z Location geladen: {
+2025-05-15T10:12:08.392226267Z   id: 30,
+2025-05-15T10:12:08.392229537Z   name: 'im drowning',
+2025-05-15T10:12:08.392233057Z   original_file: 'image-1747295530988-831430629.png',
+2025-05-15T10:12:08.392236557Z   full_path: 'http://susio.site/uploads/image-1747295530988-831430629.png',
+2025-05-15T10:12:08.392239547Z   creation_date: '2025-05-15T07:52:11.963Z'
+2025-05-15T10:12:08.392242537Z }
+2025-05-15T10:12:31.22302045Z Alle Bilder gelöscht (außer couple.jpg)
+2025-05-15T10:12:35.231565014Z Debug: Map-Seite wird geladen mit Uploads-Verzeichnis: {
+2025-05-15T10:12:35.231585425Z   uploadsDir: '/opt/render/project/src/dist/uploads',
+2025-05-15T10:12:35.231589305Z   dirname: '/opt/render/project/src/dist',
+2025-05-15T10:12:35.231592415Z   env: 'production',
+2025-05-15T10:12:35.231595335Z   host: 'susio.site',
+2025-05-15T10:12:35.231598155Z   protocol: 'http'
+2025-05-15T10:12:35.231600945Z }
+2025-05-15T10:12:35.532480315Z API: Lade Locations aus der Datenbank...
+2025-05-15T10:12:35.588935118Z Locations geladen, Anzahl: 0
+2025-05-15T10:12:35.588966289Z Debug - Host: susio.site Protocol: http
+2025-05-15T10:12:35.58903234Z Debug - Images Zugangspfade: {
+2025-05-15T10:12:35.58903845Z   uploads: '/uploads',
+2025-05-15T10:12:35.58904226Z   dist_uploads: '/dist/uploads',
+2025-05-15T10:12:35.589046391Z   current_dir: '/opt/render/project/src/dist'
+2025-05-15T10:12:35.589049921Z }
+2025-05-15T10:13:12.798632981Z Neuer Ort wird erstellt: [Object: null prototype] {
+2025-05-15T10:13:12.798665441Z   latitude: '35.746512259918504',
+2025-05-15T10:13:12.798669742Z   longitude: '11.953125000000002',
+2025-05-15T10:13:12.798673362Z   name: 'Wieder einen rein nach löschen',
+2025-05-15T10:13:12.798677552Z   description: ''
+2025-05-15T10:13:12.798681092Z }
+2025-05-15T10:13:12.798684402Z Bildpfad: image-1747303991370-209300603.jpeg
+2025-05-15T10:13:13.203692992Z Ort erstellt: {
+2025-05-15T10:13:13.203720233Z   id: 32,
+2025-05-15T10:13:13.203723853Z   name: 'Wieder einen rein nach löschen',
+2025-05-15T10:13:13.203726163Z   date: '2025-05-15T10:13:12.798+00:00',
+2025-05-15T10:13:13.203728883Z   description: '',
+2025-05-15T10:13:13.203731003Z   highlight: '',
+2025-05-15T10:13:13.203733083Z   latitude: '35.746512259918504',
+2025-05-15T10:13:13.203735203Z   longitude: '11.953125000000002',
+2025-05-15T10:13:13.203737393Z   country_code: '',
+2025-05-15T10:13:13.203739733Z   image: 'image-1747303991370-209300603.jpeg'
+2025-05-15T10:13:13.203741863Z }
