@@ -26,6 +26,13 @@ cp -v server.js map-render.js
 cp -v server.js simple-final.js
 cp -v server.js fixed-render.js
 
+# Kopiere auch alle unterstützenden JavaScript-Dateien, die importiert werden
+echo "Kopiere JavaScript-Module..."
+cp -v new-map-view.js dist/new-map-view.js 
+cp -v map-layout.js dist/map-layout.js
+# Andere Module, die importiert werden könnten
+cp -v *.js dist/ || echo "Warnung: Konnte nicht alle JavaScript-Dateien kopieren"
+
 # Setze Umgebungsvariable für Render
 echo "RENDER=true" >> .env
 echo "NODE_ENV=production" >> .env
