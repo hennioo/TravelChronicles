@@ -1,0 +1,50 @@
+2025-05-15T07:01:30.909460662Z + echo '=== Build abgeschlossen ==='
+2025-05-15T07:01:32.439111252Z ==> Uploading build...
+2025-05-15T07:01:53.307680222Z ==> Uploaded in 8.3s. Compression took 12.6s
+2025-05-15T07:01:53.359773183Z ==> Build successful 🎉
+2025-05-15T07:01:55.758982815Z ==> Deploying...
+2025-05-15T07:02:16.167562933Z ==> Running 'npm start'
+2025-05-15T07:02:16.452230797Z 
+2025-05-15T07:02:16.452257397Z > rest-express@1.0.0 start
+2025-05-15T07:02:16.452263188Z > NODE_ENV=production node dist/index.js
+2025-05-15T07:02:16.452266168Z 
+2025-05-15T07:02:16.765981896Z Uploads-Verzeichnis existiert: /opt/render/project/src/dist/uploads
+2025-05-15T07:02:16.766365936Z Verbinde mit Datenbank über DATABASE_URL...
+2025-05-15T07:02:16.776655633Z Susibert Server läuft auf Port 10000
+2025-05-15T07:02:16.776678594Z Umgebung: production
+2025-05-15T07:02:16.776726015Z Datenbankverbindung: Nicht verbunden
+2025-05-15T07:02:16.777030893Z Datum/Zeit: 2025-05-15T07:02:16.776Z
+2025-05-15T07:02:17.613238082Z Datenbankverbindung erfolgreich: { now: 2025-05-15T07:02:17.575Z }
+2025-05-15T07:02:26.409951193Z ==> Your service is live 🎉
+2025-05-15T07:03:45.370773463Z API: Lade Locations aus der Datenbank...
+2025-05-15T07:03:45.780475698Z Locations geladen, Anzahl: 1
+2025-05-15T07:04:22.408304735Z Neuer Ort wird erstellt: [Object: null prototype] {
+2025-05-15T07:04:22.408334576Z   latitude: '31.141129518743234',
+2025-05-15T07:04:22.408339056Z   longitude: '-9.821777343750002',
+2025-05-15T07:04:22.408343807Z   name: 'test numero dos',
+2025-05-15T07:04:22.408347857Z   description: 'helloooooo'
+2025-05-15T07:04:22.408351647Z }
+2025-05-15T07:04:22.408355607Z Bildpfad: image-1747292661617-637304597.png
+2025-05-15T07:04:22.792023317Z Fehler beim Erstellen des Standorts in DB: error: null value in column "highlight" of relation "locations" violates not-null constraint
+2025-05-15T07:04:22.792060237Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T07:04:22.792067218Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+2025-05-15T07:04:22.792071668Z   length: 353,
+2025-05-15T07:04:22.792076608Z   severity: 'ERROR',
+2025-05-15T07:04:22.792081218Z   code: '23502',
+2025-05-15T07:04:22.792088158Z   detail: 'Failing row contains (27, test numero dos, 2025-05-15T07:04:22.408+00:00, helloooooo, null, 31.141129518743234, -9.821777343750002, null, image-1747292661617-637304597.png).',
+2025-05-15T07:04:22.792092938Z   hint: undefined,
+2025-05-15T07:04:22.792097068Z   position: undefined,
+2025-05-15T07:04:22.792102288Z   internalPosition: undefined,
+2025-05-15T07:04:22.792106719Z   internalQuery: undefined,
+2025-05-15T07:04:22.792110899Z   where: undefined,
+2025-05-15T07:04:22.792115069Z   schema: 'public',
+2025-05-15T07:04:22.792119249Z   table: 'locations',
+2025-05-15T07:04:22.792123679Z   column: 'highlight',
+2025-05-15T07:04:22.792127779Z   dataType: undefined,
+2025-05-15T07:04:22.792131809Z   constraint: undefined,
+2025-05-15T07:04:22.792136019Z   file: 'execMain.c',
+2025-05-15T07:04:22.792140069Z   line: '2006',
+2025-05-15T07:04:22.792144109Z   routine: 'ExecConstraints'
+2025-05-15T07:04:22.79214818Z }
+2025-05-15T07:07:23.14270295Z ==> Detected service running on port 10000
+2025-05-15T07:07:23.245208343Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
