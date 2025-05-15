@@ -829,57 +829,37 @@ app.get('/', function(req, res) {
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-image: url("/uploads/couple.jpg");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-    /* Fallback-Hintergrund */
-    body::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
       background-color: #1a532a;
-      z-index: -1;
     }
     .login-container {
       text-align: center;
-      max-width: 400px;
-      padding: 2rem;
-      background-color: rgba(34, 34, 34, 0.85);
+      width: 400px;
+      max-width: 90%;
+      background-color: #222;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 60px;
-      margin: 0 auto 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
       overflow: hidden;
-      border: 3px solid #f59a0c;
-      background-color: #f59a0c;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 60px;
-      font-weight: bold;
-      color: #000;
     }
-    .avatar img {
+    .couple-image {
       width: 100%;
-      height: 100%;
+      max-height: 300px;
+      overflow: hidden;
+    }
+    .couple-image img {
+      width: 100%;
       object-fit: cover;
     }
+    .login-form {
+      padding: 20px;
+    }
     h1 {
-      color: #f59a0c;
+      color: #2196f3;
       font-size: 2rem;
       margin: 0 0 1rem 0;
     }
     p {
       margin-bottom: 1.5rem;
+      font-size: 0.9rem;
     }
     input {
       display: block;
@@ -893,8 +873,8 @@ app.get('/', function(req, res) {
       box-sizing: border-box;
     }
     button {
-      background-color: #f59a0c;
-      color: black;
+      background-color: #2196f3;
+      color: white;
       border: none;
       padding: 10px 20px;
       border-radius: 4px;
@@ -904,20 +884,21 @@ app.get('/', function(req, res) {
       transition: background-color 0.2s;
     }
     button:hover {
-      background-color: #e08900;
+      background-color: #1976d2;
     }
     #message {
       color: #ff4d4d;
       margin-top: 1rem;
+      font-size: 0.8rem;
       min-height: 20px;
     }
     .bypass-link {
       margin-top: 20px;
-      font-size: 0.85rem;
-      color: #888;
+      font-size: 0.8rem;
+      color: #777;
     }
     .bypass-link a {
-      color: #aaa;
+      color: #999;
       text-decoration: none;
     }
     .bypass-link a:hover {
@@ -927,18 +908,20 @@ app.get('/', function(req, res) {
 </head>
 <body>
   <div class="login-container">
-    <div class="avatar">
-      <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.style.display='none'; this.parentNode.innerHTML='S'">
+    <div class="couple-image">
+      <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.style.display='none'; this.parentNode.style.display='none'">
     </div>
-    <h1>Susibert</h1>
-    <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
-    <form action="/login-check" method="get">
-      <input type="password" name="code" id="accessCode" placeholder="Zugangscode" required>
-      <button type="submit">Enter Susibert</button>
-    </form>
-    <div id="message">${errorText}</div>
-    <div class="bypass-link">
-      <a href="/login-check?code=suuuu">[Direktzugriff für Tests]</a>
+    <div class="login-form">
+      <h1>Susibert</h1>
+      <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
+      <form action="/login-check" method="get">
+        <input type="password" name="code" id="accessCode" placeholder="Zugangscode" required>
+        <button type="submit">Enter Susibert</button>
+      </form>
+      <div id="message">${errorText}</div>
+      <div class="bypass-link">
+        <a href="/login-check?code=suuuu">[Direktzugriff für Tests]</a>
+      </div>
     </div>
   </div>
 </body>
