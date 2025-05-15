@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Verbesserter Build-Skript für Render-Deployment
-echo "Starte optimierten Build-Prozess..."
+# Finaler Render-Build-Skript
+echo "Starte optimierten Build-Prozess für Render..."
 
 # NPM-Pakete installieren
 npm install express pg multer sharp dotenv cookie-parser fs-extra
@@ -13,7 +13,7 @@ mkdir -p dist/public/uploads
 
 # Server-Code erstellen
 echo "Erstelle Server-Code..."
-cat better-ui-server.js > dist/index.js
+cat better-ui-server.cjs > dist/index.js
 
 # Dateien kopieren
 echo "Kopiere Dateien..."
