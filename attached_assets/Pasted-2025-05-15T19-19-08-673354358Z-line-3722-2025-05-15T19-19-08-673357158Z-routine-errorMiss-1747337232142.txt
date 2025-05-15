@@ -1,0 +1,50 @@
+2025-05-15T19:19:08.673354358Z   line: '3722',
+2025-05-15T19:19:08.673357158Z   routine: 'errorMissingColumn'
+2025-05-15T19:19:08.673359798Z }
+2025-05-15T19:19:17.28318212Z ==> Your service is live 🎉
+2025-05-15T19:24:16.880661999Z ==> Detected service running on port 10000
+2025-05-15T19:24:16.969864661Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-05-15T19:25:26.758690991Z Fehler beim Abrufen der Orte: error: column "title" does not exist
+2025-05-15T19:25:26.758719131Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:25:26.758723842Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:25:26.758728282Z     at async /opt/render/project/src/dist/index.js:1713:20 {
+2025-05-15T19:25:26.758731902Z   length: 105,
+2025-05-15T19:25:26.758736292Z   severity: 'ERROR',
+2025-05-15T19:25:26.758739702Z   code: '42703',
+2025-05-15T19:25:26.758743672Z   detail: undefined,
+2025-05-15T19:25:26.758747082Z   hint: undefined,
+2025-05-15T19:25:26.758750482Z   position: '12',
+2025-05-15T19:25:26.758754662Z   internalPosition: undefined,
+2025-05-15T19:25:26.758758052Z   internalQuery: undefined,
+2025-05-15T19:25:26.758761422Z   where: undefined,
+2025-05-15T19:25:26.758764862Z   schema: undefined,
+2025-05-15T19:25:26.758768292Z   table: undefined,
+2025-05-15T19:25:26.758771643Z   column: undefined,
+2025-05-15T19:25:26.758775012Z   dataType: undefined,
+2025-05-15T19:25:26.758778363Z   constraint: undefined,
+2025-05-15T19:25:26.758781753Z   file: 'parse_relation.c',
+2025-05-15T19:25:26.758785163Z   line: '3722',
+2025-05-15T19:25:26.758788553Z   routine: 'errorMissingColumn'
+2025-05-15T19:25:26.758792013Z }
+2025-05-15T19:26:07.381608111Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T19:26:07.381632222Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T19:26:07.381653112Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T19:26:07.381657222Z     at async /opt/render/project/src/dist/index.js:1763:20 {
+2025-05-15T19:26:07.381659942Z   length: 127,
+2025-05-15T19:26:07.381663102Z   severity: 'ERROR',
+2025-05-15T19:26:07.381665512Z   code: '42703',
+2025-05-15T19:26:07.381667952Z   detail: undefined,
+2025-05-15T19:26:07.381670642Z   hint: undefined,
+2025-05-15T19:26:07.381673092Z   position: '24',
+2025-05-15T19:26:07.381690783Z   internalPosition: undefined,
+2025-05-15T19:26:07.381693763Z   internalQuery: undefined,
+2025-05-15T19:26:07.381696273Z   where: undefined,
+2025-05-15T19:26:07.381698813Z   schema: undefined,
+2025-05-15T19:26:07.381703703Z   table: undefined,
+2025-05-15T19:26:07.381705963Z   column: undefined,
+2025-05-15T19:26:07.381708703Z   dataType: undefined,
+2025-05-15T19:26:07.381711053Z   constraint: undefined,
+2025-05-15T19:26:07.381713273Z   file: 'parse_target.c',
+2025-05-15T19:26:07.381715423Z   line: '1066',
+2025-05-15T19:26:07.381717733Z   routine: 'checkInsertTargets'
+2025-05-15T19:26:07.381719924Z }
