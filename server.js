@@ -832,6 +832,10 @@ app.get('/', function(req, res) {
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background-image: url('/uploads/couple.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       background-color: #1a532a;
     }
     .login-container {
@@ -842,15 +846,6 @@ app.get('/', function(req, res) {
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
       overflow: hidden;
-    }
-    .couple-image {
-      width: 100%;
-      max-height: 300px;
-      overflow: hidden;
-    }
-    .couple-image img {
-      width: 100%;
-      object-fit: cover;
     }
     .login-form {
       padding: 20px;
@@ -911,9 +906,6 @@ app.get('/', function(req, res) {
 </head>
 <body>
   <div class="login-container">
-    <div class="couple-image">
-      <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.style.display='none'; this.parentNode.style.display='none'">
-    </div>
     <div class="login-form">
       <h1>Susibert</h1>
       <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
