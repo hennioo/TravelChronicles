@@ -863,7 +863,7 @@ app.get('/', function(req, res) {
   let coupleImagePath = '/uploads/couple.jpg'; // Standard-Pfad
   
   // Log für einfacheres Debugging auf Render
-  console.log('Generiere Login-Seite mit Bildhintergrund');
+  console.log('Generiere Login-Seite mit Pärchenbild im Container');
   
   res.send(`<!DOCTYPE html>
 <html lang="de">
@@ -882,18 +882,7 @@ app.get('/', function(req, res) {
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-image: url('${coupleImagePath}');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-color: #1a532a; /* Fallback, falls das Bild nicht geladen werden kann */
-    }
-    
-    /* Fallback für fehlenden Hintergrund */
-    @media (min-width: 1px) {
-      body.no-bg {
-        background-image: none;
-      }
+      background-color: #1a1a1a; /* Schwarzer Hintergrund */
     }
     .login-container {
       text-align: center;
@@ -903,6 +892,20 @@ app.get('/', function(req, res) {
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
       overflow: hidden;
+    }
+    
+    .couple-image {
+      width: 100%;
+      height: 300px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .couple-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
     }
     .login-form {
       padding: 20px;
@@ -963,6 +966,9 @@ app.get('/', function(req, res) {
 </head>
 <body>
   <div class="login-container">
+    <div class="couple-image">
+      <img src="${coupleImagePath}" alt="Pärchenbild" onerror="this.onerror=null; checkAlternativeImages();">
+    </div>
     <div class="login-form">
       <h1>Susibert</h1>
       <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
@@ -977,9 +983,11 @@ app.get('/', function(req, res) {
     </div>
   </div>
   <script>
-    // Überprüft, ob das Hintergrundbild vorhanden ist
-    function checkBackgroundImage() {
-      // Liste möglicher alternativer Pfade
+    // Versuche alternative Bildpfade, falls das Hauptbild nicht lädt
+    function checkAlternativeImages() {
+      console.log('Versuche alternative Bildpfade zu laden...');
+      
+      // Liste möglicher alternativer Pfade für das Pärchenbild
       const imagePaths = [
         '/uploads/couple.jpg',
         '/dist/uploads/couple.jpg',
@@ -987,43 +995,37 @@ app.get('/', function(req, res) {
         '/dist/public/uploads/couple.jpg'
       ];
       
-      // Aktuelle Hintergrundbild-URL aus dem body-Style extrahieren
-      const bodyStyle = window.getComputedStyle(document.body);
-      const currentBgImage = bodyStyle.backgroundImage;
+      // Versuche alle Alternativen
+      const img = document.querySelector('.couple-image img');
+      let imageLoaded = false;
       
-      // Wenn das Bild nicht geladen werden konnte, versuche Alternativen
-      if (currentBgImage === 'none' || !currentBgImage.includes('couple.jpg')) {
-        console.log('Hintergrundbild nicht gefunden, versuche Alternativen...');
+      function tryNextPath(index) {
+        if (index >= imagePaths.length || imageLoaded) return;
         
-        // Versuche alle Alternativen
-        let imageFound = false;
+        img.onload = function() {
+          console.log('Bild erfolgreich geladen von: ' + imagePaths[index]);
+          imageLoaded = true;
+        };
         
-        for (const path of imagePaths) {
-          if (imageFound) break;
-          
-          // Teste, ob das Bild geladen werden kann
-          const testImg = new Image();
-          testImg.onload = function() {
-            console.log('Bild gefunden unter: ' + path);
-            document.body.style.backgroundImage = "url('" + path + "')";
-            imageFound = true;
-          };
-          
-          testImg.src = path;
-        }
+        img.onerror = function() {
+          console.log('Bild konnte nicht geladen werden von: ' + imagePaths[index]);
+          tryNextPath(index + 1);
+        };
         
-        // Nach 2 Sekunden prüfen, ob ein Bild gefunden wurde
-        setTimeout(function() {
-          if (!imageFound) {
-            console.log('Kein Bild gefunden, verwende Fallback-Hintergrundfarbe');
-            document.body.classList.add('no-bg');
-          }
-        }, 2000);
+        img.src = imagePaths[index];
       }
+      
+      // Starte den Versuch mit dem ersten Pfad
+      tryNextPath(0);
     }
     
-    // Führe die Prüfung nach dem vollständigen Laden der Seite aus
-    window.addEventListener('load', checkBackgroundImage);
+    // Prüfe nach dem Laden der Seite, ob das Bild geladen werden konnte
+    window.addEventListener('load', function() {
+      const img = document.querySelector('.couple-image img');
+      if (!img.complete || img.naturalHeight === 0) {
+        checkAlternativeImages();
+      }
+    });
   </script>
 </body>
 </html>`);
@@ -1787,8 +1789,13 @@ app.get('/map', requireAuth, function(req, res) {
           
           let html = '';
           locations.forEach(location => {
+            // Basispfad für das Bild
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const imagePath = location.image ? (baseUrl + '/uploads/' + location.image) : '';
+            
             const imageHtml = location.image 
-              ? \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`
+              ? \`<img src="\${imagePath}" alt="\${location.name}" 
+                    onerror="this.onerror=null; tryAlternativeImagePaths(this, '\${location.image}');">\`
               : '';
             
             html += \`
