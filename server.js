@@ -733,6 +733,35 @@ app.get('/api/thumbnails/:id', async (req, res) => {
   }
 });
 
+// Prüfen und ggf. generieren von Thumbnails für bestehende Orte
+async function ensureThumbnailExists(id, imageData, imageType) {
+  try {
+    // Prüfen, ob bereits ein Thumbnail existiert
+    const thumbResult = await pool.query('SELECT thumbnail_data FROM locations WHERE id = $1', [id]);
+    
+    if (thumbResult.rows.length > 0 && thumbResult.rows[0].thumbnail_data) {
+      // Thumbnail existiert bereits
+      return;
+    }
+    
+    if (!imageData) {
+      console.log(`Kein Bild für Ort ${id} vorhanden, kann kein Thumbnail generieren.`);
+      return;
+    }
+    
+    // Thumbnail mit Sharp generieren
+    const thumbnailBuffer = await sharp(imageData)
+      .resize(60, 60, { fit: 'cover' })
+      .toBuffer();
+    
+    // Thumbnail in der Datenbank speichern
+    await pool.query('UPDATE locations SET thumbnail_data = $1 WHERE id = $2', [thumbnailBuffer, id]);
+    console.log(`Thumbnail für Ort ${id} nachträglich generiert.`);
+  } catch (error) {
+    console.error(`Fehler beim Generieren des Thumbnails für Ort ${id}:`, error);
+  }
+}
+
 // Bild aus der Datenbank abrufen
 app.get('/api/images/:id', async (req, res) => {
   if (!dbConnected) {

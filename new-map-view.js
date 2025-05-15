@@ -531,10 +531,10 @@ function generateMapView(coupleImageUrl) {
         };
         
         let thumbnailHtml = '';
-        if (location.image) {
+        if (location.thumbnail) {
           thumbnailHtml = \`
             <div class="location-thumbnail">
-              <img src="\${location.image}" alt="\${location.name}" onerror="this.src='/uploads/couple.jpg'; this.onerror=null;">
+              <img src="\${location.thumbnail}" alt="\${location.name}" onerror="this.src='/uploads/couple.jpg'; this.onerror=null;">
             </div>
           \`;
         } else {
@@ -600,9 +600,9 @@ function generateMapView(coupleImageUrl) {
           <div>
             <h3 class="popup-title">\${location.name}</h3>
             <p class="popup-date">\${new Date(location.date).toLocaleDateString('de-DE')}</p>
-            \${location.image ? \`
+            \${location.thumbnail ? \`
               <div class="popup-image">
-                <img src="\${location.image}" alt="\${location.name}" onerror="this.src='/uploads/couple.jpg'; this.onerror=null;">
+                <img src="\${location.thumbnail}" alt="\${location.name}" data-full-image="\${location.image}" onerror="this.src='/uploads/couple.jpg'; this.onerror=null;">
               </div>
             \` : ''}
             \${location.description ? \`<p class="popup-description">\${location.description}</p>\` : ''}
