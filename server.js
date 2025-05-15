@@ -1004,7 +1004,11 @@ app.get('/', function(req, res) {
         '/uploads/couple.jpg',
         '/dist/uploads/couple.jpg',
         '/public/uploads/couple.jpg',
-        '/dist/public/uploads/couple.jpg'
+        '/dist/public/uploads/couple.jpg',
+        '/couple.jpg',
+        '/dist/couple.jpg',
+        '../uploads/couple.jpg',
+        './uploads/couple.jpg'
       ];
       
       // Versuche alle Alternativen
