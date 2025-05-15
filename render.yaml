@@ -2,7 +2,7 @@ services:
   - type: web
     name: susibert
     env: node
-    buildCommand: ./build-render.sh
+    buildCommand: chmod +x ./build-render.sh && ./build-render.sh
     startCommand: node start.js
     envVars:
       - key: NODE_ENV

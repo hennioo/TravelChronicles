@@ -13,11 +13,20 @@ echo "Prüfe Verzeichnisstruktur..."
 mkdir -p dist
 mkdir -p dist/uploads
 
-# 3. Kopiere unsere Wartungsserver-Datei falls die vorhandene fehlt
-echo "Kopiere Wartungsserver-Datei..."
-if [ ! -f "dist/index.js" ]; then
-  cp -v server.js dist/index.js
-fi
+# 3. Kopiere unsere Server-Dateien
+echo "Kopiere Server-Dateien..."
+# Immer die aktuelle Version verwenden
+cp -v server.js dist/index.js
+cp -v server.js render-final.js
+cp -v server.js final-server.js
+cp -v server.js final-render.js
+cp -v server.js map-render.js
+cp -v server.js simple-final.js
+cp -v server.js fixed-render.js
+
+# Stelle sicher, dass Uploads-Verzeichnis existiert und Bilder kopiert sind
+echo "Kopiere Uploads-Verzeichnis..."
+cp -rv uploads/* dist/uploads/
 
 # 4. Benutzerdefinierte package.json für Start-Befehl, falls Procfile ignoriert wird
 echo "Erstelle package.json Backup..."

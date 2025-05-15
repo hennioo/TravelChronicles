@@ -1,4 +1,4 @@
-// Finale Version für Render
+// Finale Render-kompatible Version
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
@@ -53,13 +53,34 @@ try {
         console.log('Datenbankverbindung erfolgreich:', result.rows[0]);
         dbConnected = true;
         
-        // Stelle sicher, dass das image-Feld NULL erlaubt
-        return pool.query("ALTER TABLE locations ALTER COLUMN image DROP NOT NULL").catch(err => {
-          console.log('Konnte NOT NULL Constraint nicht entfernen (möglicherweise bereits erledigt):', err.message);
-        });
+        // Modifiziere die Tabelle um fehlende Spalten hinzuzufügen
+        console.log('Prüfe Tabellenstruktur...');
+        
+        // Erste Abfrage: Überprüfe, ob highlight-Spalte ein NOT NULL Constraint hat
+        return pool.query(`
+          SELECT 
+            column_name, is_nullable
+          FROM 
+            information_schema.columns 
+          WHERE 
+            table_name = 'locations' AND 
+            column_name = 'highlight'
+        `);
+      })
+      .then(function(result) {
+        if (result.rows.length > 0 && result.rows[0].is_nullable === 'NO') {
+          console.log('Aktualisiere "highlight" Spalte um NULL-Werte zu erlauben...');
+          return pool.query(`ALTER TABLE locations ALTER COLUMN highlight DROP NOT NULL`);
+        } else {
+          console.log('Die Spalte "highlight" akzeptiert bereits NULL-Werte oder existiert nicht.');
+          return Promise.resolve();
+        }
+      })
+      .then(function() {
+        console.log('Datenbankstruktur aktualisiert.');
       })
       .catch(function(err) {
-        console.error('Fehler bei der Datenbankverbindung:', err);
+        console.error('Fehler bei der Datenbankaktualisierung:', err);
       });
   } else {
     console.log('DATABASE_URL nicht vorhanden, starte im Offline-Modus');
@@ -147,6 +168,10 @@ app.get('/admin', requireAuth, function(req, res) {
     .then(function(result) {
       const locations = result.rows;
       
+      // Nachricht wenn die Datenbank geleert wurde
+      const clearedMessage = req.query.cleared ? '<div style="background-color: rgba(0, 255, 0, 0.1); border: 1px solid #00aa00; color: #00cc00; padding: 10px; border-radius: 4px; margin-bottom: 20px;">Alle Orte wurden erfolgreich gelöscht.</div>' : '';
+      const errorMessage = req.query.error ? `<div style="background-color: rgba(255, 0, 0, 0.1); border: 1px solid #aa0000; color: #ff4d4d; padding: 10px; border-radius: 4px; margin-bottom: 20px;">Fehler: ${req.query.error}</div>` : '';
+      
       res.send(`
         <!DOCTYPE html>
         <html lang="de">
@@ -195,6 +220,9 @@ app.get('/admin', requireAuth, function(req, res) {
               border-radius: 4px;
               text-decoration: none;
               cursor: pointer;
+              border: none;
+              font-size: 14px;
+              font-family: inherit;
             }
             .btn-danger {
               background-color: #d33;
@@ -209,13 +237,86 @@ app.get('/admin', requireAuth, function(req, res) {
               border-radius: 5px;
               margin-bottom: 20px;
             }
+            
+            /* Modaler Dialog */
+            .modal {
+              display: none;
+              position: fixed;
+              z-index: 1000;
+              left: 0;
+              top: 0;
+              width: 100%;
+              height: 100%;
+              background-color: rgba(0,0,0,0.7);
+            }
+            
+            .modal-content {
+              background-color: #333;
+              margin: 15% auto;
+              padding: 20px;
+              border-radius: 8px;
+              width: 80%;
+              max-width: 500px;
+              text-align: center;
+            }
+            
+            .modal-footer {
+              display: flex;
+              justify-content: center;
+              gap: 10px;
+              margin-top: 20px;
+            }
+            
+            .close {
+              color: #aaa;
+              float: right;
+              font-size: 28px;
+              font-weight: bold;
+              cursor: pointer;
+            }
+            
+            .close:hover {
+              color: white;
+            }
+            
+            /* Zusätzliche Stile für die dreifache Bestätigung */
+            .confirmation-step {
+              display: none;
+              margin-top: 15px;
+            }
+            
+            .confirmation-step.active {
+              display: block;
+            }
+            
+            .confirmation-checkbox {
+              margin-bottom: 15px;
+            }
+            
+            .reset-progress {
+              height: 10px;
+              background-color: #444;
+              border-radius: 5px;
+              margin-top: 15px;
+              overflow: hidden;
+            }
+            
+            .reset-progress-bar {
+              height: 100%;
+              background-color: #d33;
+              width: 0%;
+              transition: width 0.3s;
+            }
           </style>
         </head>
         <body>
           <h1>Datenbank-Admin</h1>
           
+          ${clearedMessage}
+          ${errorMessage}
+          
           <a href="/map" class="btn btn-nav">Zurück zur Karte</a>
-          <a href="/admin/clear" class="btn btn-danger btn-nav" onclick="return confirm('Wirklich ALLE Orte löschen?')">Datenbank leeren</a>
+          <button id="resetDbBtn" class="btn btn-danger btn-nav">Datenbank zurücksetzen</button>
           
           <h2>Gespeicherte Orte (${locations.length})</h2>
           
@@ -249,6 +350,160 @@ app.get('/admin', requireAuth, function(req, res) {
               `).join('')}
             </tbody>
           </table>
+          
+          <!-- Modaler Dialog für die dreifache Bestätigung -->
+          <div id="resetModal" class="modal">
+            <div class="modal-content">
+              <span class="close">&times;</span>
+              <h2 style="color: #d33;">Datenbank vollständig zurücksetzen</h2>
+              
+              <div id="step1" class="confirmation-step active">
+                <p><strong>WARNUNG:</strong> Diese Aktion wird <strong>alle</strong> Orte und Bilder unwiderruflich löschen.</p>
+                <p>Diese Aktion kann nicht rückgängig gemacht werden.</p>
+                <div class="modal-footer">
+                  <button class="btn" id="cancelReset">Abbrechen</button>
+                  <button class="btn btn-danger" id="confirmStep1">Weiter</button>
+                </div>
+              </div>
+              
+              <div id="step2" class="confirmation-step">
+                <p><strong>Zweite Warnung:</strong> Du bist dabei, <strong>${locations.length} Orte</strong> zu löschen!</p>
+                <p>Bitte bestätige, dass du dir der Konsequenzen bewusst bist.</p>
+                <div class="confirmation-checkbox">
+                  <input type="checkbox" id="confirmCheckbox">
+                  <label for="confirmCheckbox">Ich verstehe, dass alle Daten verloren gehen werden</label>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn" id="backToStep1">Zurück</button>
+                  <button class="btn btn-danger" id="confirmStep2" disabled>Weiter</button>
+                </div>
+              </div>
+              
+              <div id="step3" class="confirmation-step">
+                <p><strong>Letzte Warnung:</strong> Gib "RESET" ein, um zu bestätigen:</p>
+                <input type="text" id="resetText" placeholder="RESET" style="width: 100%; padding: 8px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 4px;">
+                <div class="reset-progress">
+                  <div class="reset-progress-bar" id="resetProgressBar"></div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn" id="backToStep2">Zurück</button>
+                  <button class="btn btn-danger" id="finalReset" disabled>Datenbank zurücksetzen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <script>
+            // Modal-Elemente
+            const modal = document.getElementById("resetModal");
+            const resetBtn = document.getElementById("resetDbBtn");
+            const span = document.getElementsByClassName("close")[0];
+            const cancelBtn = document.getElementById("cancelReset");
+            
+            // Bestätigungsschritte
+            const step1 = document.getElementById("step1");
+            const step2 = document.getElementById("step2");
+            const step3 = document.getElementById("step3");
+            
+            // Schaltflächen
+            const confirmStep1 = document.getElementById("confirmStep1");
+            const backToStep1 = document.getElementById("backToStep1");
+            const confirmStep2 = document.getElementById("confirmStep2");
+            const backToStep2 = document.getElementById("backToStep2");
+            const finalReset = document.getElementById("finalReset");
+            
+            // Eingabeelemente
+            const confirmCheckbox = document.getElementById("confirmCheckbox");
+            const resetText = document.getElementById("resetText");
+            const resetProgressBar = document.getElementById("resetProgressBar");
+            
+            // Öffne Modal
+            resetBtn.onclick = function() {
+              modal.style.display = "block";
+              showStep(1);
+            }
+            
+            // Schließe Modal
+            span.onclick = closeModal;
+            cancelBtn.onclick = closeModal;
+            
+            function closeModal() {
+              modal.style.display = "none";
+              resetForm();
+            }
+            
+            // Navigiere zwischen Schritten
+            confirmStep1.onclick = function() {
+              showStep(2);
+            }
+            
+            backToStep1.onclick = function() {
+              showStep(1);
+            }
+            
+            confirmStep2.onclick = function() {
+              showStep(3);
+            }
+            
+            backToStep2.onclick = function() {
+              showStep(2);
+            }
+            
+            // Checkbox-Validierung
+            confirmCheckbox.onchange = function() {
+              confirmStep2.disabled = !this.checked;
+            }
+            
+            // Text-Eingabe-Validierung mit Fortschrittsanzeige
+            resetText.oninput = function() {
+              const expectedText = "RESET";
+              const currentText = this.value;
+              const progress = (currentText.length / expectedText.length) * 100;
+              
+              resetProgressBar.style.width = progress + "%";
+              
+              if (currentText === expectedText) {
+                finalReset.disabled = false;
+                resetProgressBar.style.width = "100%";
+              } else {
+                finalReset.disabled = true;
+              }
+            }
+            
+            // Endgültiges Zurücksetzen
+            finalReset.onclick = function() {
+              window.location.href = "/admin/complete-reset";
+            }
+            
+            // Helfer-Funktionen
+            function showStep(stepNumber) {
+              // Verstecke alle Schritte
+              step1.classList.remove("active");
+              step2.classList.remove("active");
+              step3.classList.remove("active");
+              
+              // Zeige aktuellen Schritt
+              if (stepNumber === 1) step1.classList.add("active");
+              if (stepNumber === 2) step2.classList.add("active");
+              if (stepNumber === 3) step3.classList.add("active");
+            }
+            
+            function resetForm() {
+              confirmCheckbox.checked = false;
+              confirmStep2.disabled = true;
+              resetText.value = "";
+              finalReset.disabled = true;
+              resetProgressBar.style.width = "0%";
+              showStep(1);
+            }
+            
+            // Klick außerhalb des Modals schließt es
+            window.onclick = function(event) {
+              if (event.target == modal) {
+                closeModal();
+              }
+            }
+          </script>
         </body>
         </html>
       `);
@@ -259,6 +514,35 @@ app.get('/admin', requireAuth, function(req, res) {
         <p>Fehler beim Laden der Datenbank: ${error.message}</p>
         <a href="/map">Zurück zur Karte</a>
       `);
+    });
+});
+
+// Vollständiger Datenbank-Reset (nach dreifacher Bestätigung)
+app.get('/admin/complete-reset', requireAuth, function(req, res) {
+  if (!dbConnected) {
+    return res.redirect('/admin?error=' + encodeURIComponent('Datenbank nicht verbunden'));
+  }
+
+  pool.query('DELETE FROM locations')
+    .then(function() {
+      // Lösche auch alle Bilddateien im uploads-Verzeichnis, außer couple.jpg
+      try {
+        const files = fs.readdirSync(uploadsDir);
+        for (const file of files) {
+          if (file !== 'couple.jpg') {
+            fs.unlinkSync(path.join(uploadsDir, file));
+          }
+        }
+        console.log('Alle Bilder gelöscht (außer couple.jpg)');
+      } catch (err) {
+        console.error('Fehler beim Löschen der Bilder:', err);
+      }
+      
+      res.redirect('/admin?cleared=true');
+    })
+    .catch(function(error) {
+      console.error('Fehler beim Zurücksetzen der Datenbank:', error);
+      res.redirect('/admin?error=' + encodeURIComponent('Fehler beim Zurücksetzen: ' + error.message));
     });
 });
 
@@ -407,30 +691,33 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
     // Setze aktuelles Datum
     const currentDate = new Date();
     
-    // SQL-Query zur Erstellung eines neuen Standorts (vereinfacht)
-    pool.query(
-      'INSERT INTO locations (name, date, description, latitude, longitude, image) ' +
-      'VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [name, currentDate, description, latitude, longitude, imagePath]
+    // Einfacher Insert mit expliziten Werten für alle benötigten Felder
+    pool.query(`
+      INSERT INTO locations 
+        (name, date, description, latitude, longitude, image, highlight, country_code) 
+      VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8) 
+      RETURNING *`,
+      [name, currentDate, description, latitude, longitude, imagePath, '', ''] // Leere Strings für highlight und country_code
     )
-      .then(function(result) {
-        if (result.rows.length === 0) {
-          throw new Error('Fehler beim Erstellen des Standorts');
-        }
-        
-        console.log('Ort erstellt:', result.rows[0]);
-        
-        // Bereite die Antwort vor mit vollständiger Bild-URL
-        var location = result.rows[0];
-        var baseUrl = req.protocol + '://' + req.get('host');
-        location.image = baseUrl + '/uploads/' + location.image;
-        
-        res.status(201).json(location);
-      })
-      .catch(function(error) {
-        console.error('Fehler beim Erstellen des Standorts in DB:', error);
-        res.status(500).json({ error: 'Datenbankfehler', details: error.message });
-      });
+    .then(function(result) {
+      if (result.rows.length === 0) {
+        throw new Error('Fehler beim Erstellen des Standorts');
+      }
+      
+      console.log('Ort erstellt:', result.rows[0]);
+      
+      // Bereite die Antwort vor mit vollständiger Bild-URL
+      var location = result.rows[0];
+      var baseUrl = req.protocol + '://' + req.get('host');
+      location.image = baseUrl + '/uploads/' + location.image;
+      
+      res.status(201).json(location);
+    })
+    .catch(function(error) {
+      console.error('Fehler beim Erstellen des Standorts in DB:', error);
+      res.status(500).json({ error: 'Datenbankfehler', details: error.message });
+    });
   } catch (error) {
     console.error('Allgemeiner Fehler:', error);
     res.status(500).json({ error: 'Serverfehler', details: error.message });
@@ -527,9 +814,6 @@ app.get('/', function(req, res) {
   } else if (req.query.error === 'wrong-code') {
     errorText = 'Ungültiger Zugangscode. Bitte versuche es erneut.';
   }
-
-  // Pfad zum Pärchenbild
-  const coupleImageUrl = '/uploads/couple.jpg';
   
   res.send(`<!DOCTYPE html>
 <html lang="de">
@@ -548,46 +832,32 @@ app.get('/', function(req, res) {
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-image: url("${coupleImageUrl}");
+      background-image: url('/uploads/couple.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      background-color: #1a532a;
     }
     .login-container {
       text-align: center;
-      max-width: 400px;
-      padding: 2rem;
-      background-color: rgba(34, 34, 34, 0.85);
+      width: 400px;
+      max-width: 90%;
+      background-color: #222;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 60px;
-      margin: 0 auto 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
       overflow: hidden;
-      border: 3px solid #f59a0c;
-      background-color: #f59a0c;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 60px;
-      font-weight: bold;
-      color: #000;
     }
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .login-form {
+      padding: 20px;
     }
     h1 {
-      color: #f59a0c;
+      color: #2196f3;
       font-size: 2rem;
       margin: 0 0 1rem 0;
     }
     p {
       margin-bottom: 1.5rem;
+      font-size: 0.9rem;
     }
     input {
       display: block;
@@ -601,8 +871,8 @@ app.get('/', function(req, res) {
       box-sizing: border-box;
     }
     button {
-      background-color: #f59a0c;
-      color: black;
+      background-color: #2196f3;
+      color: white;
       border: none;
       padding: 10px 20px;
       border-radius: 4px;
@@ -612,20 +882,21 @@ app.get('/', function(req, res) {
       transition: background-color 0.2s;
     }
     button:hover {
-      background-color: #e08900;
+      background-color: #1976d2;
     }
     #message {
       color: #ff4d4d;
       margin-top: 1rem;
+      font-size: 0.8rem;
       min-height: 20px;
     }
     .bypass-link {
       margin-top: 20px;
-      font-size: 0.85rem;
-      color: #888;
+      font-size: 0.8rem;
+      color: #777;
     }
     .bypass-link a {
-      color: #aaa;
+      color: #999;
       text-decoration: none;
     }
     .bypass-link a:hover {
@@ -635,18 +906,17 @@ app.get('/', function(req, res) {
 </head>
 <body>
   <div class="login-container">
-    <div class="avatar">
-      <div>S</div>
-    </div>
-    <h1>Susibert</h1>
-    <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
-    <form action="/login-check" method="get">
-      <input type="password" name="code" id="accessCode" placeholder="Zugangscode" required>
-      <button type="submit">Enter Susibert</button>
-    </form>
-    <div id="message">${errorText}</div>
-    <div class="bypass-link">
-      <a href="/login-check?code=suuuu">[Direktzugriff für Tests]</a>
+    <div class="login-form">
+      <h1>Susibert</h1>
+      <p>Bitte gib den Zugangscode ein, um die Reisekarte zu sehen.</p>
+      <form action="/login-check" method="get">
+        <input type="password" name="code" id="accessCode" placeholder="Zugangscode" required>
+        <button type="submit">Enter Susibert</button>
+      </form>
+      <div id="message">${errorText}</div>
+      <div class="bypass-link">
+        <a href="/login-check?code=suuuu">[Direktzugriff für Tests]</a>
+      </div>
     </div>
   </div>
 </body>
@@ -680,6 +950,9 @@ app.get('/map', requireAuth, function(req, res) {
       </html>
     `);
   }
+
+  // Pfad zum Pärchenbild
+  const coupleImageUrl = '/uploads/couple.jpg';
 
   // HTML für die Kartenansicht
   res.send(`
@@ -724,14 +997,18 @@ app.get('/map', requireAuth, function(req, res) {
         .logo-circle {
           width: 36px;
           height: 36px;
-          background-color: #f59a0c;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: bold;
-          color: #000;
-          font-size: 18px;
+          overflow: hidden;
+          border: 2px solid #f59a0c;
+        }
+        
+        .logo-circle img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
         
         h1 {
@@ -1071,7 +1348,9 @@ app.get('/map', requireAuth, function(req, res) {
     <body>
       <div class="header">
         <a href="/map" class="logo">
-          <div class="logo-circle">S</div>
+          <div class="logo-circle">
+            <img src="${coupleImageUrl}" alt="Pärchenbild" onerror="this.parentNode.innerHTML='S'; this.parentNode.style.backgroundColor='#f59a0c'; this.parentNode.style.color='black';">
+          </div>
           <h1>Susibert</h1>
         </a>
         <div>
