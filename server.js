@@ -1944,6 +1944,48 @@ app.get('/map', requireAuth, function(req, res) {
               hideConfirmDialog();
             }
           });
+
+          // Hilfsfunktion für alternative Bildpfade
+          function tryAlternativeImagePaths(imgElement, originalFilename) {
+            console.log('Versuche alternative Bildpfade für:', originalFilename);
+            
+            // Mögliche Pfade für das Bild
+            const basePaths = [
+              '/uploads/',
+              '/dist/uploads/',
+              './uploads/',
+              '../uploads/',
+              '/'
+            ];
+            
+            // Versuche alle Pfade nacheinander
+            let found = false;
+            
+            function tryNextPath(index) {
+              if (index >= basePaths.length || found) return;
+              
+              const fullPath = basePaths[index] + originalFilename;
+              console.log('Versuche Pfad:', fullPath);
+              
+              const testImg = new Image();
+              testImg.onload = function() {
+                console.log('Bild gefunden unter:', fullPath);
+                imgElement.src = fullPath;
+                imgElement.style.display = 'block';
+                found = true;
+              };
+              
+              testImg.onerror = function() {
+                console.log('Bild nicht gefunden unter:', fullPath);
+                tryNextPath(index + 1);
+              };
+              
+              testImg.src = fullPath;
+            }
+            
+            // Starte mit dem ersten Pfad
+            tryNextPath(0);
+          }
         });
       </script>
     </body>
