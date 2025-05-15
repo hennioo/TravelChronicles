@@ -1,0 +1,93 @@
+2025-05-15T21:44:27.355823118Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-15T21:44:32.343984431Z ==> Checking out commit 0dd25e14bf44a50090e09d427a04a4cbf5d34378 in branch main
+2025-05-15T21:44:33.686665956Z ==> Downloading cache...
+2025-05-15T21:44:46.298875265Z ==> Transferred 219MB in 8s. Extraction took 4s.
+2025-05-15T21:44:52.685893358Z ==> Using Node.js version 22.14.0 (default)
+2025-05-15T21:44:52.713749037Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-15T21:44:52.857890739Z ==> Using Bun version 1.1.0 (default)
+2025-05-15T21:44:52.857913699Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-15T21:44:52.906006324Z ==> Running build command './build-render.sh'...
+2025-05-15T21:44:52.911967302Z + echo '=== Alles-in-einem Build für Render ==='
+2025-05-15T21:44:52.911978993Z + echo 'Installiere benötigte Pakete...'
+2025-05-15T21:44:52.911981583Z + npm install express pg multer sharp fs-extra
+2025-05-15T21:44:52.911990533Z === Alles-in-einem Build für Render ===
+2025-05-15T21:44:52.911999523Z Installiere benötigte Pakete...
+2025-05-15T21:44:54.670283767Z 
+2025-05-15T21:44:54.670306558Z added 1 package, and audited 623 packages in 2s
+2025-05-15T21:44:54.670309348Z 
+2025-05-15T21:44:54.670318088Z 180 packages are looking for funding
+2025-05-15T21:44:54.670321118Z   run `npm fund` for details
+2025-05-15T21:44:54.685923382Z 
+2025-05-15T21:44:54.685945602Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-15T21:44:54.685947793Z 
+2025-05-15T21:44:54.685950293Z To address issues that do not require attention, run:
+2025-05-15T21:44:54.685952413Z   npm audit fix
+2025-05-15T21:44:54.685954073Z 
+2025-05-15T21:44:54.685955813Z To address all issues (including breaking changes), run:
+2025-05-15T21:44:54.685958673Z   npm audit fix --force
+2025-05-15T21:44:54.685960333Z 
+2025-05-15T21:44:54.685962423Z Run `npm audit` for details.
+2025-05-15T21:44:54.744164746Z + echo 'Erstelle Verzeichnisstruktur...'
+2025-05-15T21:44:54.744164746Z Erstelle Verzeichnisstruktur...
+2025-05-15T21:44:54.744185977Z + mkdir -p dist/uploads
+2025-05-15T21:44:54.746327523Z + mkdir -p dist/public/uploads
+2025-05-15T21:44:54.748237884Z + echo 'Erstelle Server-Code...'
+2025-05-15T21:44:54.748245994Z Erstelle Server-Code...
+2025-05-15T21:44:54.749054536Z + cat
+2025-05-15T21:44:54.751923582Z + echo 'Kopiere Dateien...'
+2025-05-15T21:44:54.751924902Z Kopiere Dateien...
+2025-05-15T21:44:54.751940112Z + mkdir -p dist/uploads
+2025-05-15T21:44:54.753566795Z + cp -rv uploads/couple.jpg uploads/couple.png uploads/image-1746715946699-229679471.jpeg uploads/image-1746719888023-255077677.jpeg uploads/image-1746719966214-617047451.jpeg uploads/image-1746720109804-581960354.jpeg uploads/image-1746739478073-3247104.jpeg uploads/image-1746773246208-555042628.jpeg dist/uploads/
+2025-05-15T21:44:54.772703903Z 'uploads/couple.jpg' -> 'dist/uploads/couple.jpg'
+2025-05-15T21:44:54.772713113Z 'uploads/couple.png' -> 'dist/uploads/couple.png'
+2025-05-15T21:44:54.772716263Z 'uploads/image-1746715946699-229679471.jpeg' -> 'dist/uploads/image-1746715946699-229679471.jpeg'
+2025-05-15T21:44:54.772720234Z 'uploads/image-1746719888023-255077677.jpeg' -> 'dist/uploads/image-1746719888023-255077677.jpeg'
+2025-05-15T21:44:54.772722574Z 'uploads/image-1746719966214-617047451.jpeg' -> 'dist/uploads/image-1746719966214-617047451.jpeg'
+2025-05-15T21:44:54.772724814Z 'uploads/image-1746720109804-581960354.jpeg' -> 'dist/uploads/image-1746720109804-581960354.jpeg'
+2025-05-15T21:44:54.772727454Z 'uploads/image-1746739478073-3247104.jpeg' -> 'dist/uploads/image-1746739478073-3247104.jpeg'
+2025-05-15T21:44:54.772729594Z 'uploads/image-1746773246208-555042628.jpeg' -> 'dist/uploads/image-1746773246208-555042628.jpeg'
+2025-05-15T21:44:54.773029482Z + echo 'Erstelle package.json...'
+2025-05-15T21:44:54.773039692Z + cat
+2025-05-15T21:44:54.773079613Z Erstelle package.json...
+2025-05-15T21:44:54.774747717Z === Build erfolgreich abgeschlossen ===
+2025-05-15T21:44:54.774751397Z + echo '=== Build erfolgreich abgeschlossen ==='
+2025-05-15T21:44:55.52873282Z ==> Uploading build...
+2025-05-15T21:45:10.116511214Z ==> Uploaded in 11.3s. Compression took 3.3s
+2025-05-15T21:45:10.188152924Z ==> Build successful 🎉
+2025-05-15T21:45:12.120696314Z ==> Deploying...
+2025-05-15T21:45:31.733453182Z ==> Running 'npm start'
+2025-05-15T21:45:32.043467348Z 
+2025-05-15T21:45:32.043497378Z > travelchronicles@1.0.0 start
+2025-05-15T21:45:32.043503779Z > NODE_ENV=production node dist/index.js
+2025-05-15T21:45:32.043506699Z 
+2025-05-15T21:45:32.448195549Z Server laeuft auf Port 10000
+2025-05-15T21:45:33.250945623Z ==> Your service is live 🎉
+2025-05-15T21:45:35.280049433Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-15T21:45:35.279Z }
+2025-05-15T21:45:35.392142063Z Tabelle locations existiert: true
+2025-05-15T21:45:35.392302157Z Datenbankverbindung Status: true
+2025-05-15T21:45:35.392422109Z Prüfe auf fehlende Thumbnails für bestehende Orte...
+2025-05-15T21:45:35.453358976Z Alle Orte haben bereits Thumbnails
+2025-05-15T21:50:10.688899413Z Fehler beim Hinzufügen des Ortes: error: null value in column "image" of relation "locations" violates not-null constraint
+2025-05-15T21:50:10.688919803Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T21:50:10.688923823Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T21:50:10.688927713Z     at async /opt/render/project/src/dist/index.js:1763:20 {
+2025-05-15T21:50:10.688930584Z   length: 441,
+2025-05-15T21:50:10.688933874Z   severity: 'ERROR',
+2025-05-15T21:50:10.688937014Z   code: '23502',
+2025-05-15T21:50:10.688940534Z   detail: 'Failing row contains (36, damn, null, hello, null, 24.5271348225978, 0.3515625, null, null, \\x89504e470d0a1a0a0000000d494844520000040000000600080200000067e0..., image/png, \\x89504e470d0a1a0a0000000d494844520000003c0000003c0802000000b59e..., 2025-05-15 21:50:10.223635).',
+2025-05-15T21:50:10.688946524Z   hint: undefined,
+2025-05-15T21:50:10.688949334Z   position: undefined,
+2025-05-15T21:50:10.688952964Z   internalPosition: undefined,
+2025-05-15T21:50:10.688956664Z   internalQuery: undefined,
+2025-05-15T21:50:10.688959454Z   where: undefined,
+2025-05-15T21:50:10.688962194Z   schema: 'public',
+2025-05-15T21:50:10.688964984Z   table: 'locations',
+2025-05-15T21:50:10.688967764Z   column: 'image',
+2025-05-15T21:50:10.688970634Z   dataType: undefined,
+2025-05-15T21:50:10.688973365Z   constraint: undefined,
+2025-05-15T21:50:10.688976154Z   file: 'execMain.c',
+2025-05-15T21:50:10.688978925Z   line: '2006',
+2025-05-15T21:50:10.688981695Z   routine: 'ExecConstraints'
+2025-05-15T21:50:10.688984475Z }
+2025-05-15T21:50:41.164055262Z ==> Detected service running on port 10000
+2025-05-15T21:50:41.272827368Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
