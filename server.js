@@ -264,10 +264,48 @@ async function deleteLocation(id, res, redirectUrl = null) {
   }
 }
 
+// Funktion zum Generieren von Thumbnails für alle bestehenden Orte ohne Thumbnails
+async function generateAllMissingThumbnails() {
+  try {
+    if (!dbConnected) {
+      console.log('Datenbank nicht verbunden, überspringe Thumbnail-Generierung');
+      return;
+    }
+    
+    console.log('Prüfe auf fehlende Thumbnails für bestehende Orte...');
+    
+    // Hole alle Orte, die ein Bild aber kein Thumbnail haben
+    const result = await pool.query(
+      'SELECT id, image_data, image_type FROM locations WHERE image_data IS NOT NULL AND thumbnail_data IS NULL'
+    );
+    
+    if (result.rows.length === 0) {
+      console.log('Alle Orte haben bereits Thumbnails');
+      return;
+    }
+    
+    console.log(`${result.rows.length} Orte ohne Thumbnails gefunden, generiere Thumbnails...`);
+    
+    // Generiere Thumbnails für jeden Ort
+    for (const location of result.rows) {
+      await ensureThumbnailExists(location.id, location.image_data, location.image_type);
+    }
+    
+    console.log('Alle fehlenden Thumbnails wurden generiert');
+  } catch (error) {
+    console.error('Fehler beim Generieren der Thumbnails:', error);
+  }
+}
+
 // Verbindung zur Datenbank herstellen
 connectToDatabase().then(connected => {
   dbConnected = connected;
   console.log('Datenbankverbindung Status:', dbConnected);
+  
+  // Nach erfolgreicher Verbindung alle fehlenden Thumbnails generieren
+  if (dbConnected) {
+    generateAllMissingThumbnails();
+  }
 }).catch(error => {
   console.error('Fehler beim Verbinden zur Datenbank:', error);
 });
@@ -787,6 +825,9 @@ app.get('/api/images/:id', async (req, res) => {
     // Setze den korrekten Content-Type
     const imageType = result.rows[0].image_type || 'image/jpeg';
     res.contentType(imageType);
+    
+    // Stelle sicher, dass ein Thumbnail existiert, falls es noch nicht erstellt wurde
+    await ensureThumbnailExists(id, result.rows[0].image_data, imageType);
     
     // Sende das Bild als Binärdaten
     res.send(result.rows[0].image_data);
