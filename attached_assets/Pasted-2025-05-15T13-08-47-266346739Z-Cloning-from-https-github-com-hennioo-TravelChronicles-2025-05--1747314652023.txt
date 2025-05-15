@@ -1,0 +1,108 @@
+2025-05-15T13:08:47.266346739Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-15T13:08:51.482245801Z ==> Checking out commit 614696c32cd60e708dac67d1bcb7a8d6dd9710ce in branch main
+2025-05-15T13:08:52.810073734Z ==> Downloading cache...
+2025-05-15T13:09:05.30412978Z ==> Transferred 219MB in 8s. Extraction took 4s.
+2025-05-15T13:09:11.604797806Z ==> Using Node.js version 22.14.0 (default)
+2025-05-15T13:09:11.632353792Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-15T13:09:11.771704697Z ==> Using Bun version 1.1.0 (default)
+2025-05-15T13:09:11.771721247Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-15T13:09:11.819970743Z ==> Running build command './build-render.sh'...
+2025-05-15T13:09:11.826180549Z + echo '=== Optimierter Build für Render ==='
+2025-05-15T13:09:11.826183049Z === Optimierter Build für Render ===
+2025-05-15T13:09:11.826195059Z + echo 'Installiere benötigte Pakete...'
+2025-05-15T13:09:11.826197999Z + npm install express pg multer sharp fs-extra
+2025-05-15T13:09:11.826205059Z Installiere benötigte Pakete...
+2025-05-15T13:09:13.720515514Z 
+2025-05-15T13:09:13.720543494Z added 3 packages, and audited 622 packages in 2s
+2025-05-15T13:09:13.720547804Z 
+2025-05-15T13:09:13.720559734Z 179 packages are looking for funding
+2025-05-15T13:09:13.720564064Z   run `npm fund` for details
+2025-05-15T13:09:13.734576101Z 
+2025-05-15T13:09:13.734595131Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-15T13:09:13.734597841Z 
+2025-05-15T13:09:13.734601991Z To address issues that do not require attention, run:
+2025-05-15T13:09:13.734604211Z   npm audit fix
+2025-05-15T13:09:13.734606482Z 
+2025-05-15T13:09:13.734608631Z To address all issues (including breaking changes), run:
+2025-05-15T13:09:13.734611822Z   npm audit fix --force
+2025-05-15T13:09:13.734614832Z 
+2025-05-15T13:09:13.734619102Z Run `npm audit` for details.
+2025-05-15T13:09:13.789699643Z + echo 'Erstelle Verzeichnisstruktur...'
+2025-05-15T13:09:13.789699874Z Erstelle Verzeichnisstruktur...
+2025-05-15T13:09:13.789724414Z + mkdir -p dist/uploads
+2025-05-15T13:09:13.791699554Z + mkdir -p dist/public/uploads
+2025-05-15T13:09:13.793533313Z + mkdir -p public/uploads
+2025-05-15T13:09:13.795222269Z Erstelle optimierte Server-Version für Render...
+2025-05-15T13:09:13.795246329Z + echo 'Erstelle optimierte Server-Version für Render...'
+2025-05-15T13:09:13.795746857Z + cat
+2025-05-15T13:09:13.798871695Z + echo 'Kopiere wichtige Dateien...'
+2025-05-15T13:09:13.798872535Z Kopiere wichtige Dateien...
+2025-05-15T13:09:13.798880856Z + mkdir -p dist/uploads
+2025-05-15T13:09:13.800543201Z + cp -rv uploads/couple.jpg uploads/couple.png uploads/image-1746715946699-229679471.jpeg uploads/image-1746719888023-255077677.jpeg uploads/image-1746719966214-617047451.jpeg uploads/image-1746720109804-581960354.jpeg uploads/image-1746739478073-3247104.jpeg uploads/image-1746773246208-555042628.jpeg dist/uploads/
+2025-05-15T13:09:13.820203285Z 'uploads/couple.jpg' -> 'dist/uploads/couple.jpg'
+2025-05-15T13:09:13.820218046Z 'uploads/couple.png' -> 'dist/uploads/couple.png'
+2025-05-15T13:09:13.820224666Z 'uploads/image-1746715946699-229679471.jpeg' -> 'dist/uploads/image-1746715946699-229679471.jpeg'
+2025-05-15T13:09:13.820227855Z 'uploads/image-1746719888023-255077677.jpeg' -> 'dist/uploads/image-1746719888023-255077677.jpeg'
+2025-05-15T13:09:13.820230086Z 'uploads/image-1746719966214-617047451.jpeg' -> 'dist/uploads/image-1746719966214-617047451.jpeg'
+2025-05-15T13:09:13.820232186Z 'uploads/image-1746720109804-581960354.jpeg' -> 'dist/uploads/image-1746720109804-581960354.jpeg'
+2025-05-15T13:09:13.820234846Z 'uploads/image-1746739478073-3247104.jpeg' -> 'dist/uploads/image-1746739478073-3247104.jpeg'
+2025-05-15T13:09:13.820236986Z 'uploads/image-1746773246208-555042628.jpeg' -> 'dist/uploads/image-1746773246208-555042628.jpeg'
+2025-05-15T13:09:13.82052301Z + echo 'Kopiere Pärchenbild...'
+2025-05-15T13:09:13.82052706Z Kopiere Pärchenbild...
+2025-05-15T13:09:13.82053401Z + cp -v uploads/couple.jpg dist/uploads/
+2025-05-15T13:09:13.826251879Z 'uploads/couple.jpg' -> 'dist/uploads/couple.jpg'
+2025-05-15T13:09:13.826463882Z + cp -v uploads/couple.png dist/uploads/
+2025-05-15T13:09:13.829221165Z 'uploads/couple.png' -> 'dist/uploads/couple.png'
+2025-05-15T13:09:13.829444898Z Erstelle package.json für Produktion...
+2025-05-15T13:09:13.829454568Z + echo 'Erstelle package.json für Produktion...'
+2025-05-15T13:09:13.829464069Z + cat
+2025-05-15T13:09:13.831123804Z === Build für Render erfolgreich abgeschlossen ===
+2025-05-15T13:09:13.831125254Z + echo '=== Build für Render erfolgreich abgeschlossen ==='
+2025-05-15T13:09:15.532275442Z ==> Uploading build...
+2025-05-15T13:09:31.785971718Z ==> Deploying...
+2025-05-15T13:09:29.348520444Z ==> Uploaded in 10.4s. Compression took 3.4s
+2025-05-15T13:09:29.409869323Z ==> Build successful 🎉
+2025-05-15T13:09:52.656390841Z ==> Running 'npm start'
+2025-05-15T13:09:52.94125088Z 
+2025-05-15T13:09:52.94127475Z > travelchronicles@1.0.0 start
+2025-05-15T13:09:52.941281891Z > NODE_ENV=production node dist/index.js
+2025-05-15T13:09:52.9412852Z 
+2025-05-15T13:09:52.967479057Z /opt/render/project/src/dist/index.js:791
+2025-05-15T13:09:52.967496517Z           coords.textContent = `${parseFloat(location.latitude).toFixed(4)}, ${parseFloat(location.longitude).toFixed(4)}`;
+2025-05-15T13:09:52.967502697Z                                 ^
+2025-05-15T13:09:52.967505167Z 
+2025-05-15T13:09:52.967507587Z SyntaxError: Unexpected identifier '$'
+2025-05-15T13:09:52.967510807Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-15T13:09:52.967515008Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-15T13:09:52.967518057Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-15T13:09:52.967520948Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-15T13:09:52.967523228Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-15T13:09:52.967525608Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-15T13:09:52.967528418Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-15T13:09:52.967532618Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-15T13:09:52.967535378Z     at node:internal/main/run_main_module:36:49
+2025-05-15T13:09:52.967537728Z 
+2025-05-15T13:09:52.967540258Z Node.js v22.14.0
+2025-05-15T13:10:05.807290061Z ==> Exited with status 1
+2025-05-15T13:10:05.825464749Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-15T13:10:07.239086059Z ==> Running 'npm start'
+2025-05-15T13:10:07.48405129Z 
+2025-05-15T13:10:07.484075291Z > travelchronicles@1.0.0 start
+2025-05-15T13:10:07.484081061Z > NODE_ENV=production node dist/index.js
+2025-05-15T13:10:07.484083781Z 
+2025-05-15T13:10:07.561663238Z /opt/render/project/src/dist/index.js:791
+2025-05-15T13:10:07.561683778Z           coords.textContent = `${parseFloat(location.latitude).toFixed(4)}, ${parseFloat(location.longitude).toFixed(4)}`;
+2025-05-15T13:10:07.561688949Z                                 ^
+2025-05-15T13:10:07.561690799Z 
+2025-05-15T13:10:07.561692679Z SyntaxError: Unexpected identifier '$'
+2025-05-15T13:10:07.561694909Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-15T13:10:07.561698069Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-15T13:10:07.561699809Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-15T13:10:07.561701799Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-15T13:10:07.561703879Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-15T13:10:07.561705599Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-15T13:10:07.561707319Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-15T13:10:07.561709849Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-15T13:10:07.561711559Z     at node:internal/main/run_main_module:36:49
+2025-05-15T13:10:07.561713139Z 
+2025-05-15T13:10:07.561714969Z Node.js v22.14.0

@@ -14,11 +14,18 @@ mkdir -p dist/uploads
 mkdir -p dist/public/uploads
 mkdir -p public/uploads
 
-# 3. Bereinige server.js und erstelle eine optimierte Version
-echo "Erstelle optimierte Server-Version für Render..."
+# 3. Erstelle eine angepasste server.js Version für Render
+echo "Erstelle einfache Server-Version für Render..."
 
-# Erstelle eine vereinfachte Version von server.js für Render
-cat > dist/index.js << 'EOF'
+# Kopiere den einfachen Server und die Map-HTML
+cp -v simple-render.js dist/index.cjs
+mv dist/index.cjs dist/index.js
+cp -v map.html dist/map.html
+
+# Erstelle eine Sicherungskopie, falls die Datei nicht existiert
+if [ ! -f dist/index.js ]; then
+  echo "Erstelle Backup-Server..."
+  cat > dist/index.js << 'EOF'
 const express = require('express');
 const multer = require('multer');
 const { Pool } = require('pg');

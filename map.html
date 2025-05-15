@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Susibert - Weltkarte</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #1a1a1a;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    
+    .header {
+      background-color: #222;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f59a0c;
+      text-decoration: none;
+    }
+    
+    .logo-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #f59a0c;
+    }
+    
+    .logo-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    .sidebar {
+      width: 300px;
+      background-color: #222;
+      border-right: 1px solid #333;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s;
+    }
+    
+    .sidebar-header {
+      padding: 15px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .sidebar-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #f59a0c;
+      margin: 0;
+    }
+    
+    .locations-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    
+    .location-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .location-item:hover {
+      background-color: #2a2a2a;
+    }
+    
+    .location-thumbnail {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid #444;
+    }
+    
+    .location-info {
+      flex: 1;
+    }
+    
+    .location-title {
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+    
+    .location-coords {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+    
+    .sidebar-footer {
+      padding: 15px;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .add-button, .mode-toggle, .logout-button {
+      background-color: #f59a0c;
+      color: black;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    
+    .add-button:hover, .mode-toggle:hover, .logout-button:hover {
+      background-color: #e08a00;
+    }
+    
+    .map-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #map {
+      height: 100%;
+      width: 100%;
+      background-color: #333;
+    }
+    
+    .location-detail {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 320px;
+      background-color: rgba(34, 34, 34, 0.9);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      display: none;
+      max-height: calc(100% - 80px);
+      overflow-y: auto;
+    }
+    
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+    
+    .detail-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #f59a0c;
+      margin: 0;
+    }
+    
+    .detail-close {
+      background: none;
+      border: none;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 1.5rem;
+      line-height: 1;
+      padding: 0;
+    }
+    
+    .detail-image {
+      width: 100%;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+    
+    .detail-coords {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 15px;
+    }
+    
+    .detail-description {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    
+    .detail-actions {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .detail-delete {
+      background-color: #e53935;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .detail-delete:hover {
+      background-color: #c62828;
+    }
+    
+    .leaflet-container {
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .leaflet-popup-content-wrapper {
+      background-color: #222;
+      color: #f5f5f5;
+      border-radius: 8px;
+    }
+    
+    .leaflet-popup-tip {
+      background-color: #222;
+    }
+    
+    .leaflet-popup-content {
+      margin: 12px;
+    }
+    
+    .popup-title {
+      font-weight: bold;
+      color: #f59a0c;
+      margin-bottom: 5px;
+    }
+    
+    .popup-link {
+      color: #f59a0c;
+      text-decoration: none;
+      margin-top: 5px;
+      display: inline-block;
+    }
+    
+    .popup-link:hover {
+      text-decoration: underline;
+    }
+    
+    .hamburger-menu {
+      display: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #f59a0c;
+      font-size: 1.5rem;
+    }
+    
+    .location-form {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 320px;
+      background-color: rgba(34, 34, 34, 0.95);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      display: none;
+    }
+    
+    .form-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #f59a0c;
+      margin: 0 0 15px 0;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 4px;
+      background-color: #333;
+      border: 1px solid #444;
+      color: #f5f5f5;
+    }
+    
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .form-coords {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .form-coords .form-group {
+      flex: 1;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    .form-submit {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .form-cancel {
+      background-color: #757575;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .tooltip {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      z-index: 2000;
+      pointer-events: none;
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        position: absolute;
+        height: calc(100% - 71px);
+        transform: translateX(-100%);
+        z-index: 1000;
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .hamburger-menu {
+        display: block;
+      }
+      
+      .location-detail {
+        width: 280px;
+        right: 10px;
+        top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/" class="logo">
+      <div class="logo-circle">
+        <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.src='/uploads/couple.png'">
+      </div>
+      <span class="logo-text">Susibert</span>
+    </a>
+    <button class="hamburger-menu">☰</button>
+  </div>
+  
+  <div class="content">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">Besuchte Orte</h2>
+      </div>
+      <div class="locations-list" id="locationsList">
+        <!-- Hier werden die Orte dynamisch eingefügt -->
+      </div>
+      <div class="sidebar-footer">
+        <button class="add-button" id="addLocationBtn">Ort hinzufügen</button>
+        <button class="mode-toggle" id="toggleEditMode">Bearbeiten</button>
+        <button class="logout-button" id="logoutBtn">Abmelden</button>
+      </div>
+    </div>
+    
+    <div class="map-container">
+      <div id="map"></div>
+      
+      <div class="location-detail" id="locationDetail">
+        <div class="detail-header">
+          <h3 class="detail-title" id="detailTitle"></h3>
+          <button class="detail-close" id="detailClose">&times;</button>
+        </div>
+        <img class="detail-image" id="detailImage" src="" alt="Ortsbild">
+        <div class="detail-coords" id="detailCoords"></div>
+        <div class="detail-description" id="detailDescription"></div>
+        <div class="detail-actions">
+          <button class="detail-delete" id="detailDelete">Löschen</button>
+        </div>
+      </div>
+      
+      <form class="location-form" id="locationForm" enctype="multipart/form-data">
+        <h3 class="form-title">Neuen Ort hinzufügen</h3>
+        
+        <div class="form-group">
+          <label class="form-label" for="locationTitle">Titel*</label>
+          <input type="text" class="form-input" id="locationTitle" name="title" required>
+        </div>
+        
+        <div class="form-coords">
+          <div class="form-group">
+            <label class="form-label" for="locationLat">Breitengrad</label>
+            <input type="number" step="0.000001" class="form-input" id="locationLat" name="latitude" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="locationLng">Längengrad</label>
+            <input type="number" step="0.000001" class="form-input" id="locationLng" name="longitude" readonly>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="locationDescription">Beschreibung</label>
+          <textarea class="form-textarea" id="locationDescription" name="description"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="locationImage">Bild*</label>
+          <input type="file" class="form-input" id="locationImage" name="image" accept="image/*" required>
+        </div>
+        
+        <input type="hidden" id="sessionIdInput" name="sessionId">
+        
+        <div class="form-actions">
+          <button type="button" class="form-cancel" id="formCancel">Abbrechen</button>
+          <button type="submit" class="form-submit">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip" style="display: none;"></div>
+  
+  <script>
+    // Parameter aus der URL lesen
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('sessionId');
+    document.getElementById('sessionIdInput').value = sessionId;
+    
+    // DOM-Elemente
+    const map = L.map('map').setView([20, 0], 2);
+    const locationsList = document.getElementById('locationsList');
+    const locationDetail = document.getElementById('locationDetail');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailImage = document.getElementById('detailImage');
+    const detailCoords = document.getElementById('detailCoords');
+    const detailDescription = document.getElementById('detailDescription');
+    const detailClose = document.getElementById('detailClose');
+    const detailDelete = document.getElementById('detailDelete');
+    const addLocationBtn = document.getElementById('addLocationBtn');
+    const toggleEditModeBtn = document.getElementById('toggleEditMode');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const locationForm = document.getElementById('locationForm');
+    const formCancel = document.getElementById('formCancel');
+    const hamburgerMenu = document.querySelector('.hamburger-menu');
+    const sidebar = document.querySelector('.sidebar');
+    const tooltip = document.getElementById('tooltip');
+    
+    // Karteneinstellungen
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Variablen
+    let locations = [];
+    let markers = {};
+    let editMode = false;
+    let tempMarker = null;
+    let activeLocationId = null;
+    
+    // Eventlistener
+    detailClose.addEventListener('click', closeLocationDetail);
+    addLocationBtn.addEventListener('click', startAddLocation);
+    formCancel.addEventListener('click', cancelAddLocation);
+    toggleEditModeBtn.addEventListener('click', toggleEditMode);
+    detailDelete.addEventListener('click', deleteActiveLocation);
+    logoutBtn.addEventListener('click', logout);
+    hamburgerMenu.addEventListener('click', toggleSidebar);
+    locationForm.addEventListener('submit', handleFormSubmit);
+    
+    // Initialisierung
+    loadLocations();
+    
+    // Funktionen
+    function loadLocations() {
+      fetch('/api/locations?sessionId=' + sessionId)
+        .then(response => response.json())
+        .then(data => {
+          locations = data;
+          renderLocations();
+          renderMarkersOnMap();
+        })
+        .catch(error => console.error('Fehler beim Laden der Orte:', error));
+    }
+    
+    function renderLocations() {
+      locationsList.innerHTML = '';
+      
+      if (locations.length === 0) {
+        locationsList.innerHTML = '<div class="empty-state" style="padding: 20px; text-align: center; color: #999;">Keine Orte vorhanden.<br>Klicke auf "Ort hinzufügen" um zu starten.</div>';
+        return;
+      }
+      
+      locations.forEach(location => {
+        const item = document.createElement('div');
+        item.className = 'location-item';
+        item.dataset.id = location.id;
+        
+        const thumbnail = document.createElement('img');
+        thumbnail.className = 'location-thumbnail';
+        thumbnail.src = '/api/thumbnails/' + location.id + '?sessionId=' + sessionId;
+        thumbnail.alt = location.title;
+        thumbnail.onerror = function() {
+          this.src = '/uploads/couple.jpg';
+        };
+        
+        const info = document.createElement('div');
+        info.className = 'location-info';
+        
+        const title = document.createElement('div');
+        title.className = 'location-title';
+        title.textContent = location.title;
+        
+        const coords = document.createElement('div');
+        coords.className = 'location-coords';
+        coords.textContent = parseFloat(location.latitude).toFixed(4) + ', ' + parseFloat(location.longitude).toFixed(4);
+        
+        info.appendChild(title);
+        info.appendChild(coords);
+        item.appendChild(thumbnail);
+        item.appendChild(info);
+        
+        item.addEventListener('click', function() {
+          showLocationDetail(location.id);
+        });
+        
+        locationsList.appendChild(item);
+      });
+    }
+    
+    function renderMarkersOnMap() {
+      // Bestehende Marker entfernen
+      Object.values(markers).forEach(marker => map.removeLayer(marker));
+      markers = {};
+      
+      // Neue Marker hinzufügen
+      locations.forEach(location => {
+        const marker = L.marker([location.latitude, location.longitude]).addTo(map);
+        
+        // Popup mit Informationen
+        const popupContent = document.createElement('div');
+        
+        const popupTitle = document.createElement('div');
+        popupTitle.className = 'popup-title';
+        popupTitle.textContent = location.title;
+        
+        const popupLink = document.createElement('a');
+        popupLink.className = 'popup-link';
+        popupLink.textContent = 'Details anzeigen';
+        popupLink.href = '#';
+        popupLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          showLocationDetail(location.id);
+        });
+        
+        popupContent.appendChild(popupTitle);
+        popupContent.appendChild(popupLink);
+        
+        marker.bindPopup(popupContent);
+        
+        // Marker speichern
+        markers[location.id] = marker;
+        
+        // Radius um den Marker zeichnen (50km)
+        const circle = L.circle([location.latitude, location.longitude], {
+          color: '#f59a0c',
+          fillColor: '#f59a0c',
+          fillOpacity: 0.2,
+          radius: 50000  // 50km in Metern
+        }).addTo(map);
+        
+        // Circle zum Marker hinzufügen
+        marker.circle = circle;
+      });
+    }
+    
+    function showLocationDetail(id) {
+      const location = locations.find(loc => loc.id == id);
+      if (!location) return;
+      
+      activeLocationId = id;
+      detailTitle.textContent = location.title;
+      detailImage.src = '/api/images/' + id + '?sessionId=' + sessionId;
+      detailCoords.textContent = 'Koordinaten: ' + parseFloat(location.latitude).toFixed(6) + ', ' + parseFloat(location.longitude).toFixed(6);
+      detailDescription.textContent = location.description || 'Keine Beschreibung vorhanden.';
+      
+      locationDetail.style.display = 'block';
+      
+      // Karte auf den Marker zentrieren
+      map.setView([location.latitude, location.longitude], 10);
+      
+      // Marker hervorheben
+      if (markers[id]) {
+        markers[id].openPopup();
+      }
+      
+      // Bei mobilen Geräten das Seitenmenü schließen
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+      }
+    }
+    
+    function closeLocationDetail() {
+      locationDetail.style.display = 'none';
+      activeLocationId = null;
+    }
+    
+    function startAddLocation() {
+      if (!editMode) {
+        toggleEditMode();
+      }
+      
+      showTooltip('Klicke auf die Karte, um einen Ort zu markieren');
+    }
+    
+    function toggleEditMode() {
+      editMode = !editMode;
+      toggleEditModeBtn.textContent = editMode ? 'Beenden' : 'Bearbeiten';
+      toggleEditModeBtn.style.backgroundColor = editMode ? '#e53935' : '#f59a0c';
+      
+      if (editMode) {
+        map.on('click', handleMapClick);
+        showTooltip('Bearbeitungsmodus aktiviert - Klicke auf die Karte, um einen Ort hinzuzufügen');
+      } else {
+        map.off('click', handleMapClick);
+        if (tempMarker) {
+          map.removeLayer(tempMarker);
+          tempMarker = null;
+        }
+        locationForm.style.display = 'none';
+        hideTooltip();
+      }
+    }
+    
+    function handleMapClick(e) {
+      if (!editMode) return;
+      
+      const latlng = e.latlng;
+      
+      // Wenn bereits ein temporärer Marker existiert, entferne ihn
+      if (tempMarker) {
+        map.removeLayer(tempMarker);
+      }
+      
+      // Neuen temporären Marker setzen
+      tempMarker = L.marker(latlng).addTo(map);
+      
+      // Formular anzeigen und mit Koordinaten füllen
+      document.getElementById('locationLat').value = latlng.lat;
+      document.getElementById('locationLng').value = latlng.lng;
+      locationForm.style.display = 'block';
+      hideTooltip();
+    }
+    
+    function cancelAddLocation() {
+      locationForm.style.display = 'none';
+      
+      if (tempMarker) {
+        map.removeLayer(tempMarker);
+        tempMarker = null;
+      }
+    }
+    
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(locationForm);
+      
+      fetch('/api/locations', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert('Fehler: ' + data.error);
+            return;
+          }
+          
+          // Formular zurücksetzen und ausblenden
+          locationForm.reset();
+          locationForm.style.display = 'none';
+          
+          // Temporären Marker entfernen
+          if (tempMarker) {
+            map.removeLayer(tempMarker);
+            tempMarker = null;
+          }
+          
+          // Liste der Orte neu laden
+          loadLocations();
+        })
+        .catch(error => {
+          console.error('Fehler beim Speichern des Ortes:', error);
+          alert('Fehler beim Speichern: ' + error.message);
+        });
+    }
+    
+    function deleteActiveLocation() {
+      if (!activeLocationId) return;
+      
+      if (!confirm('Möchtest du diesen Ort wirklich löschen?')) {
+        return;
+      }
+      
+      fetch('/api/locations/' + activeLocationId + '?sessionId=' + sessionId, {
+        method: 'DELETE'
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert('Fehler: ' + data.error);
+            return;
+          }
+          
+          // Location Detail schließen
+          closeLocationDetail();
+          
+          // Liste der Orte neu laden
+          loadLocations();
+        })
+        .catch(error => {
+          console.error('Fehler beim Löschen des Ortes:', error);
+          alert('Fehler beim Löschen: ' + error.message);
+        });
+    }
+    
+    function logout() {
+      if (confirm('Möchtest du dich wirklich abmelden?')) {
+        window.location.href = '/logout?sessionId=' + sessionId;
+      }
+    }
+    
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+    }
+    
+    function showTooltip(text) {
+      tooltip.textContent = text;
+      tooltip.style.display = 'block';
+      
+      document.addEventListener('mousemove', moveTooltip);
+      
+      // Tooltip nach 5 Sekunden ausblenden
+      setTimeout(hideTooltip, 5000);
+    }
+    
+    function moveTooltip(e) {
+      tooltip.style.left = (e.pageX + 10) + 'px';
+      tooltip.style.top = (e.pageY + 10) + 'px';
+    }
+    
+    function hideTooltip() {
+      tooltip.style.display = 'none';
+      document.removeEventListener('mousemove', moveTooltip);
+    }
+  </script>
+</body>
+</html>
