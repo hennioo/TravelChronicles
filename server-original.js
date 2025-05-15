@@ -1130,9 +1130,6 @@ app.get('/', function(req, res) {
 </html>`);
 });
 
-// Importiere die neue Kartenansicht
-const { generateMapView } = require('./new-map-view');
-
 // Geschützte Kartenansicht mit Leaflet
 app.get('/map', requireAuth, function(req, res) {
   // Debug-Ausgabe für den Pfad der Uploads
@@ -1172,8 +1169,8 @@ app.get('/map', requireAuth, function(req, res) {
   // Pfad zum Pärchenbild
   const coupleImageUrl = '/uploads/couple.jpg';
 
-  // Die neue React-ähnliche Kartenansicht mit rechter Seitenleiste verwenden
-  res.send(generateMapView(coupleImageUrl));
+  // HTML für die Kartenansicht
+  res.send(`
     <!DOCTYPE html>
     <html lang="de">
     <head>

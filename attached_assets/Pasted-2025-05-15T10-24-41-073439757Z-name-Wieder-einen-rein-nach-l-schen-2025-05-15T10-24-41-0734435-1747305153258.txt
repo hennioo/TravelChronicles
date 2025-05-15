@@ -1,0 +1,104 @@
+2025-05-15T10:24:41.073439757Z   name: 'Wieder einen rein nach löschen',
+2025-05-15T10:24:41.073443597Z   original_file: 'image-1747303991370-209300603.jpeg',
+2025-05-15T10:24:41.073447567Z   full_path: 'http://susio.sitehttps://susio.site/uploads/image-1747303991370-209300603.jpeg',
+2025-05-15T10:24:41.073451438Z   creation_date: '2025-05-15T10:13:12.798Z'
+2025-05-15T10:24:41.073454647Z }
+2025-05-15T10:24:41.335863263Z Error: ELOOP: too many symbolic links encountered, stat '/opt/render/project/src/uploads/uploads/image-1747303991370-209300603.jpeg'
+2025-05-15T10:26:00.37524771Z Debug: Map-Seite wird geladen mit Uploads-Verzeichnis: {
+2025-05-15T10:26:00.37526954Z   uploadsDir: '/opt/render/project/src/dist/uploads',
+2025-05-15T10:26:00.37527447Z   dirname: '/opt/render/project/src/dist',
+2025-05-15T10:26:00.37527877Z   env: 'production',
+2025-05-15T10:26:00.375282341Z   host: 'susio.site',
+2025-05-15T10:26:00.37528603Z   protocol: 'http'
+2025-05-15T10:26:00.375289581Z }
+2025-05-15T10:26:00.654646232Z API: Lade Locations aus der Datenbank...
+2025-05-15T10:26:01.014660995Z Locations geladen, Anzahl: 1
+2025-05-15T10:26:01.014696686Z Debug - Host: susio.site Protocol: http
+2025-05-15T10:26:01.014772438Z Debug - Images Zugangspfade: {
+2025-05-15T10:26:01.014782138Z   uploads: '/uploads',
+2025-05-15T10:26:01.014788088Z   dist_uploads: '/dist/uploads',
+2025-05-15T10:26:01.014794258Z   current_dir: '/opt/render/project/src/dist'
+2025-05-15T10:26:01.014799218Z }
+2025-05-15T10:26:01.014849149Z Location geladen: {
+2025-05-15T10:26:01.01486016Z   id: 33,
+2025-05-15T10:26:01.01486613Z   name: 'Plsss work',
+2025-05-15T10:26:01.01487199Z   original_file: 'image-1747304667164-117667520.jpeg',
+2025-05-15T10:26:01.01487797Z   full_path: 'http://susio.sitehttps://susio.site/uploads/image-1747304667164-117667520.jpeg',
+2025-05-15T10:26:01.01488329Z   creation_date: '2025-05-15T10:24:27.524Z'
+2025-05-15T10:26:01.01488679Z }
+2025-05-15T10:26:01.660511976Z Debug: Map-Seite wird geladen mit Uploads-Verzeichnis: {
+2025-05-15T10:26:01.660529996Z   uploadsDir: '/opt/render/project/src/dist/uploads',
+2025-05-15T10:26:01.660534287Z   dirname: '/opt/render/project/src/dist',
+2025-05-15T10:26:01.660537937Z   env: 'production',
+2025-05-15T10:26:01.660541367Z   host: 'susio.site',
+2025-05-15T10:26:01.660544807Z   protocol: 'http'
+2025-05-15T10:26:01.660550167Z }
+2025-05-15T10:26:01.951026571Z API: Lade Locations aus der Datenbank...
+2025-05-15T10:26:02.001254865Z Locations geladen, Anzahl: 1
+2025-05-15T10:26:02.001301956Z Debug - Host: susio.site Protocol: http
+2025-05-15T10:26:02.001420479Z Debug - Images Zugangspfade: {
+2025-05-15T10:26:02.001431649Z   uploads: '/uploads',
+2025-05-15T10:26:02.001435899Z   dist_uploads: '/dist/uploads',
+2025-05-15T10:26:02.001440289Z   current_dir: '/opt/render/project/src/dist'
+2025-05-15T10:26:02.001443909Z }
+2025-05-15T10:26:02.001532861Z Location geladen: {
+2025-05-15T10:26:02.001543021Z   id: 33,
+2025-05-15T10:26:02.001546611Z   name: 'Plsss work',
+2025-05-15T10:26:02.001550262Z   original_file: 'image-1747304667164-117667520.jpeg',
+2025-05-15T10:26:02.001553842Z   full_path: 'http://susio.sitehttps://susio.site/uploads/image-1747304667164-117667520.jpeg',
+2025-05-15T10:26:02.001556962Z   creation_date: '2025-05-15T10:24:27.524Z'
+2025-05-15T10:26:02.001559892Z }
+2025-05-15T10:27:25.254376142Z Debug: Map-Seite wird geladen mit Uploads-Verzeichnis: {
+2025-05-15T10:27:25.254401502Z   uploadsDir: '/opt/render/project/src/dist/uploads',
+2025-05-15T10:27:25.254416563Z   dirname: '/opt/render/project/src/dist',
+2025-05-15T10:27:25.254419733Z   env: 'production',
+2025-05-15T10:27:25.254422273Z   host: 'susio.site',
+2025-05-15T10:27:25.254424683Z   protocol: 'http'
+2025-05-15T10:27:25.254426803Z }
+2025-05-15T10:27:25.584657843Z API: Lade Locations aus der Datenbank...
+2025-05-15T10:27:27.560268227Z Locations geladen, Anzahl: 1
+2025-05-15T10:27:27.560299518Z Debug - Host: susio.site Protocol: http
+2025-05-15T10:27:27.56041257Z Debug - Images Zugangspfade: {
+2025-05-15T10:27:27.56042027Z   uploads: '/uploads',
+2025-05-15T10:27:27.56042363Z   dist_uploads: '/dist/uploads',
+2025-05-15T10:27:27.56042843Z   current_dir: '/opt/render/project/src/dist'
+2025-05-15T10:27:27.560431841Z }
+2025-05-15T10:27:27.560500302Z Location geladen: {
+2025-05-15T10:27:27.560506632Z   id: 33,
+2025-05-15T10:27:27.560509162Z   name: 'Plsss work',
+2025-05-15T10:27:27.560512542Z   original_file: 'image-1747304667164-117667520.jpeg',
+2025-05-15T10:27:27.560515382Z   full_path: 'http://susio.sitehttps://susio.site/uploads/image-1747304667164-117667520.jpeg',
+2025-05-15T10:27:27.560518292Z   creation_date: '2025-05-15T10:24:27.524Z'
+2025-05-15T10:27:27.560520503Z }
+2025-05-15T10:28:13.076531287Z Generiere Login-Seite mit Pärchenbild im Container
+2025-05-15T10:28:15.089129493Z ==> Detected service running on port 10000
+2025-05-15T10:28:15.22429453Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-05-15T10:28:24.341204853Z Generiere Login-Seite mit Pärchenbild im Container
+2025-05-15T10:28:29.580641688Z Generiere Login-Seite mit Pärchenbild im Container
+2025-05-15T10:28:32.12639502Z Generiere Login-Seite mit Pärchenbild im Container
+2025-05-15T10:28:41.001366537Z Generiere Login-Seite mit Pärchenbild im Container
+2025-05-15T10:28:44.752535259Z Error: ELOOP: too many symbolic links encountered, stat '/opt/render/project/src/uploads/uploads/index.html'
+2025-05-15T10:28:52.320405068Z Error: ELOOP: too many symbolic links encountered, stat '/opt/render/project/src/uploads/uploads/index.html'
+2025-05-15T10:28:52.872145123Z Generiere Login-Seite mit Pärchenbild im Container
+2025-05-15T10:28:59.651021227Z Debug: Map-Seite wird geladen mit Uploads-Verzeichnis: {
+2025-05-15T10:28:59.651052138Z   uploadsDir: '/opt/render/project/src/dist/uploads',
+2025-05-15T10:28:59.651058258Z   dirname: '/opt/render/project/src/dist',
+2025-05-15T10:28:59.651063308Z   env: 'production',
+2025-05-15T10:28:59.651066868Z   host: 'susio.site',
+2025-05-15T10:28:59.651070639Z   protocol: 'http'
+2025-05-15T10:28:59.651074168Z }
+2025-05-15T10:29:00.317217068Z API: Lade Locations aus der Datenbank...
+2025-05-15T10:29:03.181684785Z Locations geladen, Anzahl: 1
+2025-05-15T10:29:03.181738396Z Debug - Host: susio.site Protocol: http
+2025-05-15T10:29:03.181896179Z Debug - Images Zugangspfade: {
+2025-05-15T10:29:03.18190736Z   uploads: '/uploads',
+2025-05-15T10:29:03.18191443Z   dist_uploads: '/dist/uploads',
+2025-05-15T10:29:03.18192142Z   current_dir: '/opt/render/project/src/dist'
+2025-05-15T10:29:03.18192711Z }
+2025-05-15T10:29:03.181972421Z Location geladen: {
+2025-05-15T10:29:03.181981771Z   id: 33,
+2025-05-15T10:29:03.181985761Z   name: 'Plsss work',
+2025-05-15T10:29:03.181990921Z   original_file: 'image-1747304667164-117667520.jpeg',
+2025-05-15T10:29:03.181994891Z   full_path: 'http://susio.sitehttps://susio.site/uploads/image-1747304667164-117667520.jpeg',
+2025-05-15T10:29:03.181998682Z   creation_date: '2025-05-15T10:24:27.524Z'
+2025-05-15T10:29:03.182002202Z }
