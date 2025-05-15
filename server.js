@@ -665,9 +665,12 @@ app.get('/api/locations', requireAuth, function(req, res) {
       
       for (var i = 0; i < result.rows.length; i++) {
         var row = result.rows[i];
-        var imagePath = row.image || '';
         
-        // Verarbeite den Bildpfad
+        // Speichere den Originaldateinamen für den Fallback-Mechanismus
+        var originalFilename = row.image || '';
+        var imagePath = originalFilename;
+        
+        // Verarbeite den Bildpfad nur für direkte Anzeige (Frontend kümmert sich um Fallbacks)
         if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('/')) {
           imagePath = '/uploads/' + imagePath;
         }
@@ -675,6 +678,13 @@ app.get('/api/locations', requireAuth, function(req, res) {
         if (imagePath && imagePath.startsWith('/')) {
           imagePath = baseUrl + imagePath;
         }
+        
+        console.log('Location geladen:', {
+          id: row.id,
+          name: row.name,
+          file: originalFilename,
+          imagePath: imagePath
+        });
         
         locations.push({
           id: row.id,
@@ -685,7 +695,7 @@ app.get('/api/locations', requireAuth, function(req, res) {
           latitude: row.latitude || "0",
           longitude: row.longitude || "0",
           countryCode: row.country_code || "",
-          image: imagePath
+          image: originalFilename // Wir senden nur den Dateinamen, die Bildpfade werden im Frontend konstruiert
         });
       }
       
@@ -1614,11 +1624,19 @@ app.get('/map', requireAuth, function(req, res) {
           currentLocationId = location.id;
           detailTitle.textContent = location.name;
           
+          // Konstruiere den vollständigen Bildpfad
+          const baseUrl = window.location.protocol + '//' + window.location.host;
+          const imagePath = location.image ? (baseUrl + '/uploads/' + location.image) : '';
+          console.log('Zeige Location-Details:', { id: location.id, name: location.name, bildpfad: imagePath });
+          
           let content = '';
           
           // Zuerst das Bild, wenn vorhanden
           if (location.image) {
-            content += \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`;
+            content += \`<div class="location-image">
+              <img src="\${imagePath}" alt="\${location.name}" 
+                onerror="this.onerror=null; this.style.display='none'; tryAlternativeImagePaths(this, '\${location.image}');">
+            </div>\`;
           }
           
           // Dann die Beschreibung, wenn vorhanden
