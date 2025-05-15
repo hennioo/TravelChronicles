@@ -1,0 +1,83 @@
+2025-05-14T22:42:41.506903361Z + npm install express pg multer
+2025-05-14T22:42:41.506911461Z Installiere benötigte Pakete...
+2025-05-14T22:42:43.453286203Z 
+2025-05-14T22:42:43.453309854Z up to date, audited 609 packages in 2s
+2025-05-14T22:42:43.453319184Z 
+2025-05-14T22:42:43.453331054Z 174 packages are looking for funding
+2025-05-14T22:42:43.453334624Z   run `npm fund` for details
+2025-05-14T22:42:43.46864172Z 
+2025-05-14T22:42:43.468665031Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-14T22:42:43.46866842Z 
+2025-05-14T22:42:43.468672361Z To address issues that do not require attention, run:
+2025-05-14T22:42:43.468675761Z   npm audit fix
+2025-05-14T22:42:43.468678671Z 
+2025-05-14T22:42:43.468681441Z To address all issues (including breaking changes), run:
+2025-05-14T22:42:43.468685171Z   npm audit fix --force
+2025-05-14T22:42:43.468687921Z 
+2025-05-14T22:42:43.468691211Z Run `npm audit` for details.
+2025-05-14T22:42:43.523869551Z + echo 'Prüfe Verzeichnisstruktur...'
+2025-05-14T22:42:43.523875021Z Prüfe Verzeichnisstruktur...
+2025-05-14T22:42:43.523886871Z + mkdir -p dist
+2025-05-14T22:42:43.52571938Z + mkdir -p dist/uploads
+2025-05-14T22:42:43.527592408Z + echo 'Kopiere Wartungsserver-Datei...'
+2025-05-14T22:42:43.527601969Z + '[' '!' -f dist/index.js ']'
+2025-05-14T22:42:43.527602499Z Kopiere Wartungsserver-Datei...
+2025-05-14T22:42:43.527604239Z + cp -v server.js dist/index.js
+2025-05-14T22:42:43.529404436Z 'server.js' -> 'dist/index.js'
+2025-05-14T22:42:43.52961641Z + echo 'Erstelle package.json Backup...'
+2025-05-14T22:42:43.52962013Z + cp package.json package.json.original
+2025-05-14T22:42:43.52962043Z Erstelle package.json Backup...
+2025-05-14T22:42:43.531420978Z + cat
+2025-05-14T22:42:43.533091603Z === Build abgeschlossen ===
+2025-05-14T22:42:43.533115004Z + echo '=== Build abgeschlossen ==='
+2025-05-14T22:42:45.190401502Z ==> Uploading build...
+2025-05-14T22:42:56.783974587Z ==> Uploaded in 7.9s. Compression took 3.7s
+2025-05-14T22:42:56.832314112Z ==> Build successful 🎉
+2025-05-14T22:42:59.341097305Z ==> Deploying...
+2025-05-14T22:43:17.579748578Z ==> Running 'npm start'
+2025-05-14T22:43:17.866939064Z 
+2025-05-14T22:43:17.866965694Z > rest-express@1.0.0 start
+2025-05-14T22:43:17.866972465Z > NODE_ENV=production node dist/index.js
+2025-05-14T22:43:17.866974855Z 
+2025-05-14T22:43:18.175698395Z Uploads-Verzeichnis existiert: /opt/render/project/src/dist/uploads
+2025-05-14T22:43:18.175983562Z Verbinde mit Datenbank über DATABASE_URL...
+2025-05-14T22:43:18.188136407Z Susibert Server läuft auf Port 10000
+2025-05-14T22:43:18.188159077Z Umgebung: production
+2025-05-14T22:43:18.188196118Z Datenbankverbindung: Nicht verbunden
+2025-05-14T22:43:18.188532227Z Datum/Zeit: 2025-05-14T22:43:18.188Z
+2025-05-14T22:43:18.999277767Z Datenbankverbindung erfolgreich: { now: 2025-05-14T22:43:18.960Z }
+2025-05-14T22:43:19.11481364Z Tabelle locations existiert: true
+2025-05-14T22:43:20.228396436Z ==> Your service is live 🎉
+2025-05-14T22:44:33.924025656Z API: Lade Locations aus der Datenbank...
+2025-05-14T22:44:34.313802249Z Locations geladen, Anzahl: 8
+2025-05-14T22:45:26.013220674Z Neuer Ort wird erstellt: [Object: null prototype] {
+2025-05-14T22:45:26.013240064Z   latitude: '50.645977340713586',
+2025-05-14T22:45:26.013246014Z   longitude: '8.646240234375002',
+2025-05-14T22:45:26.013251315Z   name: 'helloooo',
+2025-05-14T22:45:26.013255144Z   date: '2025-05-14',
+2025-05-14T22:45:26.013258945Z   countryCode: '',
+2025-05-14T22:45:26.013262735Z   description: '',
+2025-05-14T22:45:26.013266705Z   highlight: ''
+2025-05-14T22:45:26.013270555Z }
+2025-05-14T22:45:26.013284415Z Bildpfad: null
+2025-05-14T22:45:26.404851486Z Fehler beim Erstellen des Standorts in DB: error: null value in column "image" of relation "locations" violates not-null constraint
+2025-05-14T22:45:26.404890928Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-14T22:45:26.404896528Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+2025-05-14T22:45:26.404900778Z   length: 271,
+2025-05-14T22:45:26.404905558Z   severity: 'ERROR',
+2025-05-14T22:45:26.404909688Z   code: '23502',
+2025-05-14T22:45:26.404914388Z   detail: 'Failing row contains (25, helloooo, 2025-05-14, , , 50.645977340713586, 8.646240234375002, , null).',
+2025-05-14T22:45:26.404918588Z   hint: undefined,
+2025-05-14T22:45:26.404922798Z   position: undefined,
+2025-05-14T22:45:26.404927558Z   internalPosition: undefined,
+2025-05-14T22:45:26.404931838Z   internalQuery: undefined,
+2025-05-14T22:45:26.404935439Z   where: undefined,
+2025-05-14T22:45:26.404939139Z   schema: 'public',
+2025-05-14T22:45:26.404943729Z   table: 'locations',
+2025-05-14T22:45:26.404948029Z   column: 'image',
+2025-05-14T22:45:26.404952039Z   dataType: undefined,
+2025-05-14T22:45:26.404955979Z   constraint: undefined,
+2025-05-14T22:45:26.404960069Z   file: 'execMain.c',
+2025-05-14T22:45:26.404964219Z   line: '2006',
+2025-05-14T22:45:26.404967959Z   routine: 'ExecConstraints'
+2025-05-14T22:45:26.4049726Z }
