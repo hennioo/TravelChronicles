@@ -1,0 +1,94 @@
+2025-05-15T14:11:41.18967805Z Server laeuft auf Port 10000
+2025-05-15T14:11:41.616527672Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-15T14:11:41.615Z }
+2025-05-15T14:11:41.670094265Z Tabelle locations existiert: true
+2025-05-15T14:11:41.670324049Z Datenbankverbindung Status: true
+2025-05-15T14:11:41.670419691Z Prüfe auf fehlende Thumbnails für bestehende Orte...
+2025-05-15T14:11:41.722415355Z Fehler beim Generieren der Thumbnails: error: column "image_data" does not exist
+2025-05-15T14:11:41.722430766Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T14:11:41.722434376Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T14:11:41.722436946Z     at async generateAllMissingThumbnails (/opt/render/project/src/dist/index.js:183:20) {
+2025-05-15T14:11:41.722442116Z   length: 110,
+2025-05-15T14:11:41.722445176Z   severity: 'ERROR',
+2025-05-15T14:11:41.722447896Z   code: '42703',
+2025-05-15T14:11:41.722450566Z   detail: undefined,
+2025-05-15T14:11:41.722452956Z   hint: undefined,
+2025-05-15T14:11:41.722455266Z   position: '12',
+2025-05-15T14:11:41.722458146Z   internalPosition: undefined,
+2025-05-15T14:11:41.722460426Z   internalQuery: undefined,
+2025-05-15T14:11:41.722462786Z   where: undefined,
+2025-05-15T14:11:41.722465026Z   schema: undefined,
+2025-05-15T14:11:41.722467356Z   table: undefined,
+2025-05-15T14:11:41.722469676Z   column: undefined,
+2025-05-15T14:11:41.722471947Z   dataType: undefined,
+2025-05-15T14:11:41.722474216Z   constraint: undefined,
+2025-05-15T14:11:41.722476587Z   file: 'parse_relation.c',
+2025-05-15T14:11:41.722478927Z   line: '3722',
+2025-05-15T14:11:41.722481147Z   routine: 'errorMissingColumn'
+2025-05-15T14:11:41.722483467Z }
+2025-05-15T14:11:42.250552021Z ==> Your service is live 🎉
+2025-05-15T14:12:04.800405972Z Fehler beim Abrufen der Orte: error: column "title" does not exist
+2025-05-15T14:12:04.800434823Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T14:12:04.800439693Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T14:12:04.800444133Z     at async /opt/render/project/src/dist/index.js:1421:20 {
+2025-05-15T14:12:04.800447613Z   length: 105,
+2025-05-15T14:12:04.800451483Z   severity: 'ERROR',
+2025-05-15T14:12:04.800455633Z   code: '42703',
+2025-05-15T14:12:04.800458783Z   detail: undefined,
+2025-05-15T14:12:04.800460993Z   hint: undefined,
+2025-05-15T14:12:04.800463173Z   position: '12',
+2025-05-15T14:12:04.800467963Z   internalPosition: undefined,
+2025-05-15T14:12:04.800470183Z   internalQuery: undefined,
+2025-05-15T14:12:04.800472223Z   where: undefined,
+2025-05-15T14:12:04.800474214Z   schema: undefined,
+2025-05-15T14:12:04.800476254Z   table: undefined,
+2025-05-15T14:12:04.800478254Z   column: undefined,
+2025-05-15T14:12:04.800480314Z   dataType: undefined,
+2025-05-15T14:12:04.800482394Z   constraint: undefined,
+2025-05-15T14:12:04.800484424Z   file: 'parse_relation.c',
+2025-05-15T14:12:04.800486774Z   line: '3722',
+2025-05-15T14:12:04.800488954Z   routine: 'errorMissingColumn'
+2025-05-15T14:12:04.800491054Z }
+2025-05-15T14:13:02.669234204Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T14:13:02.669264995Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T14:13:02.669281845Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T14:13:02.669286295Z     at async /opt/render/project/src/dist/index.js:1471:20 {
+2025-05-15T14:13:02.669288655Z   length: 127,
+2025-05-15T14:13:02.669292195Z   severity: 'ERROR',
+2025-05-15T14:13:02.669294655Z   code: '42703',
+2025-05-15T14:13:02.669296745Z   detail: undefined,
+2025-05-15T14:13:02.669298775Z   hint: undefined,
+2025-05-15T14:13:02.669300925Z   position: '24',
+2025-05-15T14:13:02.669303875Z   internalPosition: undefined,
+2025-05-15T14:13:02.669305966Z   internalQuery: undefined,
+2025-05-15T14:13:02.669308015Z   where: undefined,
+2025-05-15T14:13:02.669310075Z   schema: undefined,
+2025-05-15T14:13:02.669312115Z   table: undefined,
+2025-05-15T14:13:02.669314175Z   column: undefined,
+2025-05-15T14:13:02.669316196Z   dataType: undefined,
+2025-05-15T14:13:02.669318276Z   constraint: undefined,
+2025-05-15T14:13:02.669320386Z   file: 'parse_target.c',
+2025-05-15T14:13:02.669322506Z   line: '1066',
+2025-05-15T14:13:02.669324526Z   routine: 'checkInsertTargets'
+2025-05-15T14:13:02.669326596Z }
+2025-05-15T14:13:02.757223906Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T14:13:02.757260216Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T14:13:02.757263867Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T14:13:02.757266727Z     at async /opt/render/project/src/dist/index.js:1471:20 {
+2025-05-15T14:13:02.757269207Z   length: 127,
+2025-05-15T14:13:02.757272556Z   severity: 'ERROR',
+2025-05-15T14:13:02.757274837Z   code: '42703',
+2025-05-15T14:13:02.757277097Z   detail: undefined,
+2025-05-15T14:13:02.757279227Z   hint: undefined,
+2025-05-15T14:13:02.757281447Z   position: '24',
+2025-05-15T14:13:02.757284167Z   internalPosition: undefined,
+2025-05-15T14:13:02.757286537Z   internalQuery: undefined,
+2025-05-15T14:13:02.757288657Z   where: undefined,
+2025-05-15T14:13:02.757290847Z   schema: undefined,
+2025-05-15T14:13:02.757293057Z   table: undefined,
+2025-05-15T14:13:02.757295557Z   column: undefined,
+2025-05-15T14:13:02.757297677Z   dataType: undefined,
+2025-05-15T14:13:02.757299917Z   constraint: undefined,
+2025-05-15T14:13:02.757302307Z   file: 'parse_target.c',
+2025-05-15T14:13:02.757304757Z   line: '1066',
+2025-05-15T14:13:02.757306867Z   routine: 'checkInsertTargets'
+2025-05-15T14:13:02.757309047Z }

@@ -98,12 +98,42 @@ async function checkTablesExist() {
 // Tabellen erstellen, falls sie nicht existieren
 async function createTables() {
   try {
-    await pool.query(
-      "CREATE TABLE IF NOT EXISTS locations (id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, latitude DECIMAL(10, 8) NOT NULL, longitude DECIMAL(11, 8) NOT NULL, description TEXT, image_data BYTEA, image_type VARCHAR(50), thumbnail_data BYTEA, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+    // Wir gehen auf Nummer sicher und prüfen, ob die Tabelle bereits existiert
+    const checkIfExistsResult = await pool.query(
+      "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'locations')"
     );
-    return true;
+    
+    if (checkIfExistsResult.rows[0].exists) {
+      // Tabelle existiert bereits, möglicherweise mit anderer Struktur
+      console.log('Die Tabelle "locations" existiert bereits. Versuche Struktur anzupassen...');
+      
+      // Überprüfe die Struktur und füge fehlende Spalten hinzu
+      // Wir verwenden separate Queries für jede Spalte, um robuster zu sein
+      try {
+        await pool.query("ALTER TABLE locations ADD COLUMN IF NOT EXISTS title VARCHAR(255)");
+        await pool.query("ALTER TABLE locations ADD COLUMN IF NOT EXISTS latitude DECIMAL(10, 8)");
+        await pool.query("ALTER TABLE locations ADD COLUMN IF NOT EXISTS longitude DECIMAL(11, 8)");
+        await pool.query("ALTER TABLE locations ADD COLUMN IF NOT EXISTS description TEXT");
+        await pool.query("ALTER TABLE locations ADD COLUMN IF NOT EXISTS image_data BYTEA");
+        await pool.query("ALTER TABLE locations ADD COLUMN IF NOT EXISTS image_type VARCHAR(50)");
+        await pool.query("ALTER TABLE locations ADD COLUMN IF NOT EXISTS thumbnail_data BYTEA");
+        await pool.query("ALTER TABLE locations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+        console.log('Tabellenstruktur aktualisiert');
+      } catch (alterError) {
+        console.error('Fehler beim Anpassen der Tabellenstruktur:', alterError);
+      }
+      
+      return true;
+    } else {
+      // Tabelle existiert nicht, erstelle neu
+      await pool.query(
+        "CREATE TABLE IF NOT EXISTS locations (id SERIAL PRIMARY KEY, title VARCHAR(255), latitude DECIMAL(10, 8), longitude DECIMAL(11, 8), description TEXT, image_data BYTEA, image_type VARCHAR(50), thumbnail_data BYTEA, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+      );
+      console.log('Neue Tabelle "locations" erstellt');
+      return true;
+    }
   } catch (error) {
-    console.error('Fehler beim Erstellen der Tabellen:', error);
+    console.error('Fehler beim Erstellen/Überprüfen der Tabellen:', error);
     return false;
   }
 }
@@ -412,6 +442,268 @@ app.get('/logout', (req, res) => {
   }
   
   res.redirect('/');
+});
+
+// Admin-Bereich
+app.get('/admin', requireAuth, function(req, res) {
+  const sessionId = req.query.sessionId;
+  
+  const adminHtml = '<!DOCTYPE html>\n' +
+    '<html lang="de">\n' +
+    '<head>\n' +
+    '  <meta charset="UTF-8">\n' +
+    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+    '  <title>Susibert - Admin</title>\n' +
+    '  <style>\n' +
+    '    body {\n' +
+    '      font-family: system-ui, -apple-system, sans-serif;\n' +
+    '      background-color: #1a1a1a;\n' +
+    '      color: #f5f5f5;\n' +
+    '      margin: 0;\n' +
+    '      padding: 0;\n' +
+    '      display: flex;\n' +
+    '      flex-direction: column;\n' +
+    '      min-height: 100vh;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .header {\n' +
+    '      background-color: #222;\n' +
+    '      padding: 15px 20px;\n' +
+    '      display: flex;\n' +
+    '      justify-content: space-between;\n' +
+    '      align-items: center;\n' +
+    '      border-bottom: 1px solid #333;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .logo {\n' +
+    '      display: flex;\n' +
+    '      align-items: center;\n' +
+    '      gap: 10px;\n' +
+    '      color: #f59a0c;\n' +
+    '      text-decoration: none;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .logo-circle {\n' +
+    '      width: 36px;\n' +
+    '      height: 36px;\n' +
+    '      border-radius: 50%;\n' +
+    '      overflow: hidden;\n' +
+    '      border: 2px solid #f59a0c;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .logo-circle img {\n' +
+    '      width: 100%;\n' +
+    '      height: 100%;\n' +
+    '      object-fit: cover;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .logo-text {\n' +
+    '      font-size: 1.5rem;\n' +
+    '      font-weight: bold;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .content {\n' +
+    '      flex: 1;\n' +
+    '      padding: 30px;\n' +
+    '      max-width: 800px;\n' +
+    '      margin: 0 auto;\n' +
+    '      width: 100%;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .admin-title {\n' +
+    '      font-size: 2rem;\n' +
+    '      color: #f59a0c;\n' +
+    '      margin-bottom: 30px;\n' +
+    '      text-align: center;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .admin-section {\n' +
+    '      background-color: #222;\n' +
+    '      border-radius: 8px;\n' +
+    '      padding: 20px;\n' +
+    '      margin-bottom: 30px;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .section-title {\n' +
+    '      font-size: 1.4rem;\n' +
+    '      margin-top: 0;\n' +
+    '      margin-bottom: 15px;\n' +
+    '      color: #f59a0c;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .warning {\n' +
+    '      background-color: rgba(229, 57, 53, 0.2);\n' +
+    '      border: 1px solid #e53935;\n' +
+    '      padding: 15px;\n' +
+    '      border-radius: 6px;\n' +
+    '      margin-bottom: 20px;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .admin-button {\n' +
+    '      background-color: #e53935;\n' +
+    '      color: white;\n' +
+    '      border: none;\n' +
+    '      padding: 10px 15px;\n' +
+    '      border-radius: 4px;\n' +
+    '      cursor: pointer;\n' +
+    '      font-weight: bold;\n' +
+    '      margin-right: 10px;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .admin-button.green {\n' +
+    '      background-color: #4caf50;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .admin-button.orange {\n' +
+    '      background-color: #f59a0c;\n' +
+    '      color: black;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .back-link {\n' +
+    '      display: inline-block;\n' +
+    '      margin-top: 20px;\n' +
+    '      color: #f59a0c;\n' +
+    '      text-decoration: none;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .back-link:hover {\n' +
+    '      text-decoration: underline;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .action-result {\n' +
+    '      display: none;\n' +
+    '      margin-top: 15px;\n' +
+    '      padding: 10px;\n' +
+    '      border-radius: 4px;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .action-result.success {\n' +
+    '      background-color: rgba(76, 175, 80, 0.2);\n' +
+    '      border: 1px solid #4caf50;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .action-result.error {\n' +
+    '      background-color: rgba(229, 57, 53, 0.2);\n' +
+    '      border: 1px solid #e53935;\n' +
+    '    }\n' +
+    '    \n' +
+    '    .hamburger-menu {\n' +
+    '      display: none;\n' +
+    '    }\n' +
+    '    \n' +
+    '    @media (max-width: 768px) {\n' +
+    '      .content {\n' +
+    '        padding: 20px;\n' +
+    '      }\n' +
+    '    }\n' +
+    '  </style>\n' +
+    '</head>\n' +
+    '<body>\n' +
+    '  <div class="header">\n' +
+    '    <a href="/map?sessionId=' + sessionId + '" class="logo">\n' +
+    '      <div class="logo-circle">\n' +
+    '        <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.src=\'/uploads/couple.png\'">\n' +
+    '      </div>\n' +
+    '      <span class="logo-text">Susibert</span>\n' +
+    '    </a>\n' +
+    '  </div>\n' +
+    '  \n' +
+    '  <div class="content">\n' +
+    '    <h1 class="admin-title">Administrator-Bereich</h1>\n' +
+    '    \n' +
+    '    <div class="admin-section">\n' +
+    '      <h2 class="section-title">Datenbank zurücksetzen</h2>\n' +
+    '      <div class="warning">\n' +
+    '        <strong>Warnung:</strong> Diese Aktion löscht alle Orte und Bilder aus der Datenbank. Dieser Vorgang kann nicht rückgängig gemacht werden!\n' +
+    '      </div>\n' +
+    '      <button id="resetDbBtn" class="admin-button">Datenbank zurücksetzen</button>\n' +
+    '      <div id="resetResult" class="action-result"></div>\n' +
+    '    </div>\n' +
+    '    \n' +
+    '    <div class="admin-section">\n' +
+    '      <h2 class="section-title">Thumbnails neu generieren</h2>\n' +
+    '      <p>Wenn Thumbnails für Orte fehlen, können diese mit dieser Funktion neu generiert werden.</p>\n' +
+    '      <button id="generateThumbsBtn" class="admin-button green">Thumbnails generieren</button>\n' +
+    '      <div id="thumbsResult" class="action-result"></div>\n' +
+    '    </div>\n' +
+    '    \n' +
+    '    <a href="/map?sessionId=' + sessionId + '" class="back-link">← Zurück zur Karte</a>\n' +
+    '  </div>\n' +
+    '  \n' +
+    '  <script>\n' +
+    '    // Datenbank zurücksetzen mit dreifacher Bestätigung\n' +
+    '    document.getElementById("resetDbBtn").addEventListener("click", function() {\n' +
+    '      // Erste Bestätigung\n' +
+    '      if (!confirm("Bist du sicher, dass du die Datenbank zurücksetzen möchtest? Dies löscht ALLE Orte!")) {\n' +
+    '        return;\n' +
+    '      }\n' +
+    '      \n' +
+    '      // Zweite Bestätigung\n' +
+    '      if (!confirm("Wirklich sicher? Diese Aktion kann NICHT rückgängig gemacht werden!")) {\n' +
+    '        return;\n' +
+    '      }\n' +
+    '      \n' +
+    '      // Dritte Bestätigung\n' +
+    '      if (!confirm("LETZTE WARNUNG: Alle Daten werden gelöscht. Fortfahren?")) {\n' +
+    '        return;\n' +
+    '      }\n' +
+    '      \n' +
+    '      fetch("/api/admin/reset-database?sessionId=' + sessionId + '", {\n' +
+    '        method: "POST"\n' +
+    '      })\n' +
+    '        .then(response => response.json())\n' +
+    '        .then(data => {\n' +
+    '          const resultElement = document.getElementById("resetResult");\n' +
+    '          \n' +
+    '          if (data.success) {\n' +
+    '            resultElement.textContent = "Datenbank erfolgreich zurückgesetzt.";\n' +
+    '            resultElement.className = "action-result success";\n' +
+    '          } else {\n' +
+    '            resultElement.textContent = "Fehler: " + data.error;\n' +
+    '            resultElement.className = "action-result error";\n' +
+    '          }\n' +
+    '          \n' +
+    '          resultElement.style.display = "block";\n' +
+    '        })\n' +
+    '        .catch(error => {\n' +
+    '          const resultElement = document.getElementById("resetResult");\n' +
+    '          resultElement.textContent = "Fehler: " + error.message;\n' +
+    '          resultElement.className = "action-result error";\n' +
+    '          resultElement.style.display = "block";\n' +
+    '        });\n' +
+    '    });\n' +
+    '    \n' +
+    '    // Thumbnails generieren\n' +
+    '    document.getElementById("generateThumbsBtn").addEventListener("click", function() {\n' +
+    '      fetch("/api/admin/generate-thumbnails?sessionId=' + sessionId + '", {\n' +
+    '        method: "POST"\n' +
+    '      })\n' +
+    '        .then(response => response.json())\n' +
+    '        .then(data => {\n' +
+    '          const resultElement = document.getElementById("thumbsResult");\n' +
+    '          \n' +
+    '          if (data.success) {\n' +
+    '            resultElement.textContent = "Thumbnails wurden erfolgreich generiert.";\n' +
+    '            resultElement.className = "action-result success";\n' +
+    '          } else {\n' +
+    '            resultElement.textContent = "Fehler: " + data.error;\n' +
+    '            resultElement.className = "action-result error";\n' +
+    '          }\n' +
+    '          \n' +
+    '          resultElement.style.display = "block";\n' +
+    '        })\n' +
+    '        .catch(error => {\n' +
+    '          const resultElement = document.getElementById("thumbsResult");\n' +
+    '          resultElement.textContent = "Fehler: " + error.message;\n' +
+    '          resultElement.className = "action-result error";\n' +
+    '          resultElement.style.display = "block";\n' +
+    '        });\n' +
+    '    });\n' +
+    '  </script>\n' +
+    '</body>\n' +
+    '</html>';
+  
+  res.send(adminHtml);
 });
 
 // Geschützte Kartenansicht mit Leaflet
