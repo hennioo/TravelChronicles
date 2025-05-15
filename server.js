@@ -75,18 +75,51 @@ if (!uploadsDir) {
 app.use('/uploads', express.static(uploadsDir));
 
 // Zusätzliche Pfade für Render-Umgebung (für Fallback)
-if (process.env.RENDER === 'true') {
+if (process.env.RENDER === 'true' || process.env.NODE_ENV === 'production') {
   // Wenn auf Render ausgeführt, versuche auch diese Verzeichnisse
   const distUploadsDir = path.join(__dirname, 'dist', 'uploads');
   const publicUploadsDir = path.join(__dirname, 'dist', 'public', 'uploads');
+  const renderUploadsDir = '/opt/render/project/src/uploads';
+  const renderDistUploadsDir = '/opt/render/project/src/dist/uploads';
   
-  console.log('Render-Umgebung erkannt. Füge zusätzliche Upload-Pfade hinzu:');
+  console.log('Render/Produktions-Umgebung erkannt. Füge zusätzliche Upload-Pfade hinzu:');
   console.log('- ' + distUploadsDir);
   console.log('- ' + publicUploadsDir);
+  console.log('- ' + renderUploadsDir);
+  console.log('- ' + renderDistUploadsDir);
   
   app.use('/uploads', express.static(distUploadsDir));
   app.use('/uploads', express.static(publicUploadsDir));
-  app.use('/public/uploads', express.static(publicUploadsDir));
+  app.use('/uploads', express.static(renderUploadsDir));
+  app.use('/uploads', express.static(renderDistUploadsDir));
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+  
+  // Auch direkter Zugriff ohne /uploads-Präfix
+  app.use('/', express.static(distUploadsDir));
+  app.use('/', express.static(renderUploadsDir));
+  
+  // Zusätzliche Route für den direkten Bildzugriff als Fallback
+  app.get('/image/:filename', function(req, res) {
+    const filename = req.params.filename;
+    
+    // Prüfe alle möglichen Orte für die Datei
+    const possiblePaths = [
+      path.join(uploadsDir, filename),
+      path.join(distUploadsDir, filename),
+      path.join(publicUploadsDir, filename),
+      path.join(renderUploadsDir, filename),
+      path.join(renderDistUploadsDir, filename),
+      path.join(__dirname, filename)
+    ];
+    
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        return res.sendFile(p);
+      }
+    }
+    
+    res.status(404).send('Bild nicht gefunden');
+  });
 }
 
 // Datenbankverbindung initialisieren

@@ -89,4 +89,46 @@ cat > package.json << 'EOF'
 }
 EOF
 
+# 5. Zusätzliche Anpassungen für Render-Umgebung
+echo "Erstelle Symlinks für häufige Bildpfade..."
+ln -sf ./uploads /opt/render/project/src/uploads 2>/dev/null || echo "Konnte Symlink für /opt/render/project/src/uploads nicht erstellen"
+ln -sf ./uploads /opt/render/project/src/dist/uploads 2>/dev/null || echo "Konnte Symlink für /opt/render/project/src/dist/uploads nicht erstellen"
+
+# 6. Kopiere couple.jpg und couple.png in absolute Pfade für Render
+mkdir -p /opt/render/project/src/uploads 2>/dev/null || echo "Konnte /opt/render/project/src/uploads nicht erstellen"
+mkdir -p /opt/render/project/src/dist/uploads 2>/dev/null || echo "Konnte /opt/render/project/src/dist/uploads nicht erstellen"
+cp -v uploads/couple.jpg /opt/render/project/src/uploads/ 2>/dev/null || echo "Konnte couple.jpg nicht in /opt/render/project/src/uploads/ kopieren"
+cp -v uploads/couple.png /opt/render/project/src/uploads/ 2>/dev/null || echo "Konnte couple.png nicht in /opt/render/project/src/uploads/ kopieren"
+cp -v uploads/couple.jpg /opt/render/project/src/dist/uploads/ 2>/dev/null || echo "Konnte couple.jpg nicht in /opt/render/project/src/dist/uploads/ kopieren" 
+cp -v uploads/couple.png /opt/render/project/src/dist/uploads/ 2>/dev/null || echo "Konnte couple.png nicht in /opt/render/project/src/dist/uploads/ kopieren"
+
+# 7. Erstelle eine .htaccess-Datei für zusätzliche Konfiguration
+echo "Erstelle .htaccess für Bild-Fallbacks..."
+cat > dist/.htaccess << 'EOF'
+# Aktiviere CORS für Bilder
+<IfModule mod_headers.c>
+    <FilesMatch "\.(jpg|jpeg|png|gif|heic)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>
+
+# Fallback für Bilder
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Wenn Bild nicht in /uploads/ gefunden wurde, versuche andere Pfade
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^uploads/(.+)$ dist/uploads/$1 [L]
+    
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^uploads/(.+)$ dist/public/uploads/$1 [L]
+    
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^uploads/(.+)$ public/uploads/$1 [L]
+    
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^uploads/(.+)$ $1 [L]
+</IfModule>
+EOF
+
 echo "=== Build abgeschlossen ==="
