@@ -1,4 +1,4 @@
-// Finale vereinfachte Version
+// Endgültige Version für Render
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
@@ -52,6 +52,12 @@ try {
       .then(function(result) {
         console.log('Datenbankverbindung erfolgreich:', result.rows[0]);
         dbConnected = true;
+        
+        // Prüfe, ob die Tabellen existieren
+        return pool.query("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'locations')");
+      })
+      .then(function(tabResult) {
+        console.log('Tabelle locations existiert:', tabResult.rows[0].exists);
         
         // Stelle sicher, dass das image-Feld NULL erlaubt
         return pool.query("ALTER TABLE locations ALTER COLUMN image DROP NOT NULL").catch(err => {
@@ -116,169 +122,14 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname).toLowerCase();
+    const ext = path.extname(file.originalname);
     cb(null, 'image-' + uniqueSuffix + ext);
   }
 });
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
-  fileFilter: function(req, file, cb) {
-    // HEIC, PNG und JPG/JPEG zulassen
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.heic'];
-    const ext = path.extname(file.originalname).toLowerCase();
-    
-    if (allowedExtensions.includes(ext)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Nur JPG, PNG und HEIC Bilder sind erlaubt'));
-    }
-  }
-});
-
-// Admin-Route für Datenbankübersicht
-app.get('/admin', requireAuth, function(req, res) {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
-  }
-
-  pool.query('SELECT * FROM locations ORDER BY id DESC')
-    .then(function(result) {
-      const locations = result.rows;
-      
-      res.send(`
-        <!DOCTYPE html>
-        <html lang="de">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Datenbank-Admin - Susibert</title>
-          <style>
-            body {
-              font-family: system-ui, -apple-system, sans-serif;
-              background-color: #1a1a1a;
-              color: #f5f5f5;
-              margin: 0;
-              padding: 20px;
-            }
-            h1 {
-              color: #f59a0c;
-              border-bottom: 1px solid #333;
-              padding-bottom: 10px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 20px;
-            }
-            th, td {
-              border: 1px solid #333;
-              padding: 8px;
-              text-align: left;
-            }
-            th {
-              background-color: #222;
-            }
-            tr:nth-child(even) {
-              background-color: #222;
-            }
-            .actions {
-              display: flex;
-              gap: 10px;
-            }
-            .btn {
-              display: inline-block;
-              padding: 5px 10px;
-              background-color: #f59a0c;
-              color: black;
-              border-radius: 4px;
-              text-decoration: none;
-              cursor: pointer;
-            }
-            .btn-danger {
-              background-color: #d33;
-              color: white;
-            }
-            .btn-nav {
-              margin-right: 10px;
-            }
-            .warning {
-              background-color: rgba(255, 0, 0, 0.1);
-              padding: 10px;
-              border-radius: 5px;
-              margin-bottom: 20px;
-            }
-          </style>
-        </head>
-        <body>
-          <h1>Datenbank-Admin</h1>
-          
-          <a href="/map" class="btn btn-nav">Zurück zur Karte</a>
-          <a href="/admin/clear" class="btn btn-danger btn-nav" onclick="return confirm('Wirklich ALLE Orte löschen?')">Datenbank leeren</a>
-          
-          <h2>Gespeicherte Orte (${locations.length})</h2>
-          
-          ${locations.length === 0 ? '<p>Keine Orte in der Datenbank.</p>' : ''}
-          
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Datum</th>
-                <th>Bild</th>
-                <th>Beschreibung</th>
-                <th>Aktionen</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${locations.map(loc => `
-                <tr>
-                  <td>${loc.id}</td>
-                  <td>${loc.name || ''}</td>
-                  <td>${loc.date ? new Date(loc.date).toLocaleDateString() : '-'}</td>
-                  <td>${loc.image ? 'Ja' : 'Nein'}</td>
-                  <td>${loc.description || '-'}</td>
-                  <td>
-                    <div class="actions">
-                      <a href="/api/locations/${loc.id}/delete" class="btn btn-danger" onclick="return confirm('Diesen Ort löschen?')">Löschen</a>
-                    </div>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </body>
-        </html>
-      `);
-    })
-    .catch(function(error) {
-      res.status(500).send(`
-        <h1>Fehler</h1>
-        <p>Fehler beim Laden der Datenbank: ${error.message}</p>
-        <a href="/map">Zurück zur Karte</a>
-      `);
-    });
-});
-
-// Datenbank leeren
-app.get('/admin/clear', requireAuth, function(req, res) {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verbunden' });
-  }
-
-  pool.query('DELETE FROM locations')
-    .then(function() {
-      res.redirect('/admin?cleared=true');
-    })
-    .catch(function(error) {
-      res.status(500).send(`
-        <h1>Fehler</h1>
-        <p>Fehler beim Leeren der Datenbank: ${error.message}</p>
-        <a href="/admin">Zurück zur Admin-Seite</a>
-      `);
-    });
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
 });
 
 // API-Routen
@@ -351,7 +202,7 @@ app.get('/api/locations', requireAuth, function(req, res) {
         locations.push({
           id: row.id,
           name: row.name || "Unbenannter Ort",
-          date: row.date ? new Date(row.date).toISOString().split('T')[0] : null,
+          date: row.date ? new Date(row.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
           description: row.description || "",
           highlight: row.highlight || "",
           latitude: row.latitude || "0",
@@ -380,38 +231,31 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
     
     // Die Daten aus dem Formular extrahieren
     var name = req.body.name || '';
+    var date = req.body.date || null;
     var description = req.body.description || '';
-    
-    // Koordinaten
+    var highlight = req.body.highlight || '';
     var latitude = req.body.latitude || '';
     var longitude = req.body.longitude || '';
+    var countryCode = req.body.countryCode || '';
     
     // Validierung
     if (!name || name.trim() === '') {
-      return res.status(400).json({ error: 'Titel ist erforderlich' });
+      return res.status(400).json({ error: 'Name ist erforderlich' });
     }
     
     if (!latitude || !longitude) {
-      return res.status(400).json({ error: 'Bitte wähle einen Ort auf der Karte' });
+      return res.status(400).json({ error: 'Breiten- und Längengrad sind erforderlich' });
     }
     
-    // Bild ist jetzt erforderlich
-    if (!req.file) {
-      return res.status(400).json({ error: 'Bitte füge ein Bild hinzu (JPG, PNG oder HEIC)' });
-    }
-    
-    // Speichere das Bild
-    var imagePath = req.file.filename;
+    // Wenn ein Bild hochgeladen wurde, speichere den Pfad
+    var imagePath = req.file ? req.file.filename : null;
     console.log('Bildpfad:', imagePath);
     
-    // Setze aktuelles Datum
-    const currentDate = new Date();
-    
-    // SQL-Query zur Erstellung eines neuen Standorts (vereinfacht)
+    // SQL-Query zur Erstellung eines neuen Standorts
     pool.query(
-      'INSERT INTO locations (name, date, description, latitude, longitude, image) ' +
-      'VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [name, currentDate, description, latitude, longitude, imagePath]
+      'INSERT INTO locations (name, date, description, highlight, latitude, longitude, country_code, image) ' +
+      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      [name, date || new Date(), description, highlight, latitude, longitude, countryCode, imagePath]
     )
       .then(function(result) {
         if (result.rows.length === 0) {
@@ -420,10 +264,12 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
         
         console.log('Ort erstellt:', result.rows[0]);
         
-        // Bereite die Antwort vor mit vollständiger Bild-URL
+        // Bereite die Antwort vor mit vollständiger Bild-URL, falls ein Bild vorhanden ist
         var location = result.rows[0];
-        var baseUrl = req.protocol + '://' + req.get('host');
-        location.image = baseUrl + '/uploads/' + location.image;
+        if (location.image) {
+          var baseUrl = req.protocol + '://' + req.get('host');
+          location.image = baseUrl + '/uploads/' + location.image;
+        }
         
         res.status(201).json(location);
       })
@@ -437,29 +283,19 @@ app.post('/api/locations', requireAuth, upload.single('image'), function(req, re
   }
 });
 
-// Ort löschen (API-Endpunkt)
+// Ort löschen
 app.delete('/api/locations/:id', requireAuth, function(req, res) {
-  deleteLocation(req.params.id, res);
-});
-
-// Ort löschen (Link-Version für einfacheren Aufruf)
-app.get('/api/locations/:id/delete', requireAuth, function(req, res) {
-  deleteLocation(req.params.id, res, '/admin');
-});
-
-// Hilfsfunktion zum Löschen von Orten
-function deleteLocation(id, res, redirectUrl = null) {
   if (!dbConnected) {
     return res.status(503).json({ error: 'Datenbank nicht verbunden' });
   }
 
-  const numId = parseInt(id);
-  if (isNaN(numId)) {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
     return res.status(400).json({ error: 'Ungültige ID' });
   }
 
   // Hole zuerst den Ort, um das Bild zu identifizieren
-  pool.query('SELECT * FROM locations WHERE id = $1', [numId])
+  pool.query('SELECT * FROM locations WHERE id = $1', [id])
     .then(function(result) {
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Ort nicht gefunden' });
@@ -468,7 +304,7 @@ function deleteLocation(id, res, redirectUrl = null) {
       const location = result.rows[0];
       
       // Lösche aus der Datenbank
-      return pool.query('DELETE FROM locations WHERE id = $1', [numId])
+      return pool.query('DELETE FROM locations WHERE id = $1', [id])
         .then(function() {
           // Wenn der Ort ein Bild hatte, lösche es auch (optional)
           if (location.image && !location.image.startsWith('http')) {
@@ -483,23 +319,14 @@ function deleteLocation(id, res, redirectUrl = null) {
             }
           }
           
-          if (redirectUrl) {
-            res.redirect(redirectUrl);
-          } else {
-            res.json({ success: true, message: 'Ort erfolgreich gelöscht' });
-          }
+          res.json({ success: true, message: 'Ort erfolgreich gelöscht' });
         });
     })
     .catch(function(error) {
       console.error('Fehler beim Löschen des Ortes:', error);
-      
-      if (redirectUrl) {
-        res.redirect(redirectUrl + '?error=' + encodeURIComponent('Fehler beim Löschen: ' + error.message));
-      } else {
-        res.status(500).json({ error: 'Datenbankfehler', details: error.message });
-      }
+      res.status(500).json({ error: 'Datenbankfehler', details: error.message });
     });
-}
+});
 
 // Login-Seite
 app.get('/', function(req, res) {
@@ -811,7 +638,7 @@ app.get('/map', requireAuth, function(req, res) {
         
         .location-card img {
           width: 100%;
-          height: 140px;
+          height: 100px;
           object-fit: cover;
         }
         
@@ -864,10 +691,10 @@ app.get('/map', requireAuth, function(req, res) {
         
         .location-detail-content img {
           width: 100%;
-          max-height: 300px;
+          max-height: 250px;
           object-fit: cover;
           border-radius: 4px;
-          margin-bottom: 15px;
+          margin-top: 10px;
         }
         
         .location-detail h2 {
@@ -881,6 +708,11 @@ app.get('/map', requireAuth, function(req, res) {
           color: white;
           font-size: 1.5rem;
           cursor: pointer;
+        }
+        
+        .highlight {
+          color: #f59a0c;
+          font-style: italic;
         }
 
         .location-actions {
@@ -973,12 +805,6 @@ app.get('/map', requireAuth, function(req, res) {
           z-index: 1000;
           padding: 10px 15px;
         }
-
-        .admin-link {
-          margin-left: 10px;
-          font-size: 0.8em;
-          opacity: 0.7;
-        }
         
         /* Responsive Design */
         @media (min-width: 768px) {
@@ -1055,10 +881,6 @@ app.get('/map', requireAuth, function(req, res) {
           margin-bottom: 15px;
           display: none;
         }
-
-        .required-mark {
-          color: #f59a0c;
-        }
       </style>
     </head>
     <body>
@@ -1075,7 +897,6 @@ app.get('/map', requireAuth, function(req, res) {
             <span>Bearbeiten</span>
           </button>
           <a href="/logout" class="button">Abmelden</a>
-          <a href="/admin" class="admin-link">Admin</a>
         </div>
       </div>
       
@@ -1124,19 +945,33 @@ app.get('/map', requireAuth, function(req, res) {
             <input type="hidden" id="longitude" name="longitude">
             
             <div class="form-group">
-              <label for="name">Titel <span class="required-mark">*</span></label>
+              <label for="name">Name*</label>
               <input type="text" class="form-control" id="name" name="name" required>
             </div>
             
             <div class="form-group">
-              <label for="description">Beschreibung (optional)</label>
+              <label for="date">Datum (Monat/Jahr)</label>
+              <input type="month" class="form-control" id="date" name="date">
+            </div>
+            
+            <div class="form-group">
+              <label for="countryCode">Land (Ländercode)</label>
+              <input type="text" class="form-control" id="countryCode" name="countryCode" placeholder="z.B. DE, FR, ES">
+            </div>
+            
+            <div class="form-group">
+              <label for="description">Beschreibung</label>
               <textarea class="form-control" id="description" name="description"></textarea>
             </div>
             
             <div class="form-group">
-              <label for="image">Bild <span class="required-mark">*</span></label>
-              <input type="file" class="form-control" id="image" name="image" accept=".jpg,.jpeg,.png,.heic" required>
-              <small style="color:#aaa; display:block; margin-top:5px">JPG, PNG oder HEIC (max. 20MB)</small>
+              <label for="highlight">Highlight</label>
+              <input type="text" class="form-control" id="highlight" name="highlight">
+            </div>
+            
+            <div class="form-group">
+              <label for="image">Bild (optional)</label>
+              <input type="file" class="form-control" id="image" name="image" accept="image/*">
             </div>
             
             <div class="form-actions">
@@ -1222,14 +1057,24 @@ app.get('/map', requireAuth, function(req, res) {
           
           let content = '';
           
-          // Zuerst das Bild, wenn vorhanden
-          if (location.image) {
-            content += \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`;
+          if (location.date) {
+            content += \`<div class="location-meta">Datum: \${formatMonthYear(location.date)}</div>\`;
           }
           
-          // Dann die Beschreibung, wenn vorhanden
+          if (location.countryCode) {
+            content += \`<div class="location-meta">Land: \${location.countryCode}</div>\`;
+          }
+          
           if (location.description) {
             content += \`<p>\${location.description}</p>\`;
+          }
+          
+          if (location.highlight) {
+            content += \`<p class="highlight">Highlight: \${location.highlight}</p>\`;
+          }
+          
+          if (location.image) {
+            content += \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`;
           }
           
           detailContent.innerHTML = content;
@@ -1252,6 +1097,11 @@ app.get('/map', requireAuth, function(req, res) {
           // Koordinaten setzen
           latitudeInput.value = lat;
           longitudeInput.value = lng;
+          
+          // Aktuelles Datum als Voreinstellung (Monat/Jahr)
+          const today = new Date();
+          const monthYear = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+          document.getElementById('date').value = monthYear;
           
           // Anzeigen
           addLocationForm.style.display = 'block';
@@ -1395,6 +1245,7 @@ app.get('/map', requireAuth, function(req, res) {
           
           let html = '';
           locations.forEach(location => {
+            const date = location.date ? formatMonthYear(location.date) : '';
             const imageHtml = location.image 
               ? \`<img src="\${location.image}" alt="\${location.name}" onerror="this.style.display='none'">\`
               : '';
@@ -1404,6 +1255,10 @@ app.get('/map', requireAuth, function(req, res) {
                 \${imageHtml}
                 <div class="location-card-content">
                   <h3>\${location.name}</h3>
+                  <div class="location-meta">
+                    \${date}
+                    \${location.countryCode ? ' · ' + location.countryCode : ''}
+                  </div>
                 </div>
               </div>
             \`;
