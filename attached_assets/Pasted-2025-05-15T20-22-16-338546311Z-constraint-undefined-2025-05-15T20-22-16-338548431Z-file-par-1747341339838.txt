@@ -1,0 +1,52 @@
+2025-05-15T20:22:16.338546311Z   constraint: undefined,
+2025-05-15T20:22:16.338548431Z   file: 'parse_relation.c',
+2025-05-15T20:22:16.3385505Z   line: '3722',
+2025-05-15T20:22:16.338552631Z   routine: 'errorMissingColumn'
+2025-05-15T20:22:16.338554641Z }
+2025-05-15T20:22:24.202858479Z ==> Your service is live 🎉
+2025-05-15T20:25:49.203812029Z Fehler beim Abrufen der Orte: error: column "title" does not exist
+2025-05-15T20:25:49.20383645Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T20:25:49.20384132Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T20:25:49.20387034Z     at async /opt/render/project/src/dist/index.js:1713:20 {
+2025-05-15T20:25:49.203892621Z   length: 105,
+2025-05-15T20:25:49.203897221Z   severity: 'ERROR',
+2025-05-15T20:25:49.203900851Z   code: '42703',
+2025-05-15T20:25:49.203904481Z   detail: undefined,
+2025-05-15T20:25:49.203908061Z   hint: undefined,
+2025-05-15T20:25:49.203911511Z   position: '12',
+2025-05-15T20:25:49.203915321Z   internalPosition: undefined,
+2025-05-15T20:25:49.203918771Z   internalQuery: undefined,
+2025-05-15T20:25:49.203922212Z   where: undefined,
+2025-05-15T20:25:49.203925621Z   schema: undefined,
+2025-05-15T20:25:49.203929032Z   table: undefined,
+2025-05-15T20:25:49.203932492Z   column: undefined,
+2025-05-15T20:25:49.203937392Z   dataType: undefined,
+2025-05-15T20:25:49.203940922Z   constraint: undefined,
+2025-05-15T20:25:49.203944432Z   file: 'parse_relation.c',
+2025-05-15T20:25:49.203947882Z   line: '3722',
+2025-05-15T20:25:49.203951272Z   routine: 'errorMissingColumn'
+2025-05-15T20:25:49.203954722Z }
+2025-05-15T20:26:41.161426098Z Fehler beim Hinzufügen des Ortes: error: column "title" of relation "locations" does not exist
+2025-05-15T20:26:41.161453199Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T20:26:41.161457609Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T20:26:41.161475069Z     at async /opt/render/project/src/dist/index.js:1763:20 {
+2025-05-15T20:26:41.161477649Z   length: 127,
+2025-05-15T20:26:41.16148033Z   severity: 'ERROR',
+2025-05-15T20:26:41.161482479Z   code: '42703',
+2025-05-15T20:26:41.16148495Z   detail: undefined,
+2025-05-15T20:26:41.16148705Z   hint: undefined,
+2025-05-15T20:26:41.16148955Z   position: '24',
+2025-05-15T20:26:41.16149335Z   internalPosition: undefined,
+2025-05-15T20:26:41.1614955Z   internalQuery: undefined,
+2025-05-15T20:26:41.1614977Z   where: undefined,
+2025-05-15T20:26:41.16149987Z   schema: undefined,
+2025-05-15T20:26:41.16150194Z   table: undefined,
+2025-05-15T20:26:41.16150398Z   column: undefined,
+2025-05-15T20:26:41.16150601Z   dataType: undefined,
+2025-05-15T20:26:41.16150816Z   constraint: undefined,
+2025-05-15T20:26:41.16151028Z   file: 'parse_target.c',
+2025-05-15T20:26:41.16151237Z   line: '1066',
+2025-05-15T20:26:41.16151444Z   routine: 'checkInsertTargets'
+2025-05-15T20:26:41.16151658Z }
+2025-05-15T20:27:23.448516842Z ==> Detected service running on port 10000
+2025-05-15T20:27:23.558444744Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding

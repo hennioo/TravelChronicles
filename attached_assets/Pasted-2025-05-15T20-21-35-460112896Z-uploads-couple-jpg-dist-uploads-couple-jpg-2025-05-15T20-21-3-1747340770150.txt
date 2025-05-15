@@ -1,0 +1,50 @@
+2025-05-15T20:21:35.460112896Z 'uploads/couple.jpg' -> 'dist/uploads/couple.jpg'
+2025-05-15T20:21:35.460126847Z 'uploads/couple.png' -> 'dist/uploads/couple.png'
+2025-05-15T20:21:35.460131647Z 'uploads/image-1746715946699-229679471.jpeg' -> 'dist/uploads/image-1746715946699-229679471.jpeg'
+2025-05-15T20:21:35.460137437Z 'uploads/image-1746719888023-255077677.jpeg' -> 'dist/uploads/image-1746719888023-255077677.jpeg'
+2025-05-15T20:21:35.460141197Z 'uploads/image-1746719966214-617047451.jpeg' -> 'dist/uploads/image-1746719966214-617047451.jpeg'
+2025-05-15T20:21:35.460144737Z 'uploads/image-1746720109804-581960354.jpeg' -> 'dist/uploads/image-1746720109804-581960354.jpeg'
+2025-05-15T20:21:35.460148417Z 'uploads/image-1746739478073-3247104.jpeg' -> 'dist/uploads/image-1746739478073-3247104.jpeg'
+2025-05-15T20:21:35.460151567Z 'uploads/image-1746773246208-555042628.jpeg' -> 'dist/uploads/image-1746773246208-555042628.jpeg'
+2025-05-15T20:21:35.460391261Z Erstelle package.json...
+2025-05-15T20:21:35.460407911Z + echo 'Erstelle package.json...'
+2025-05-15T20:21:35.460424681Z + cat
+2025-05-15T20:21:35.462158139Z === Build erfolgreich abgeschlossen ===
+2025-05-15T20:21:35.462185999Z + echo '=== Build erfolgreich abgeschlossen ==='
+2025-05-15T20:21:37.205992646Z ==> Uploading build...
+2025-05-15T20:21:50.861831022Z ==> Uploaded in 10.0s. Compression took 3.7s
+2025-05-15T20:21:50.922092074Z ==> Build successful 🎉
+2025-05-15T20:21:53.408477138Z ==> Deploying...
+2025-05-15T20:22:14.398242491Z ==> Running 'npm start'
+2025-05-15T20:22:14.680312991Z 
+2025-05-15T20:22:14.680333421Z > travelchronicles@1.0.0 start
+2025-05-15T20:22:14.680337481Z > NODE_ENV=production node dist/index.js
+2025-05-15T20:22:14.680339111Z 
+2025-05-15T20:22:15.0807707Z Server laeuft auf Port 10000
+2025-05-15T20:22:16.084844434Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-15T20:22:16.084Z }
+2025-05-15T20:22:16.228780377Z Tabelle locations existiert: true
+2025-05-15T20:22:16.22893932Z Datenbankverbindung Status: true
+2025-05-15T20:22:16.229055593Z Prüfe auf fehlende Thumbnails für bestehende Orte...
+2025-05-15T20:22:16.296774807Z Fehler beim Generieren der Thumbnails: error: column "image_data" does not exist
+2025-05-15T20:22:16.338480409Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-05-15T20:22:16.338504999Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-15T20:22:16.33850786Z     at async generateAllMissingThumbnails (/opt/render/project/src/dist/index.js:213:20) {
+2025-05-15T20:22:16.33851418Z   length: 110,
+2025-05-15T20:22:16.33851691Z   severity: 'ERROR',
+2025-05-15T20:22:16.3385191Z   code: '42703',
+2025-05-15T20:22:16.33852156Z   detail: undefined,
+2025-05-15T20:22:16.33852379Z   hint: undefined,
+2025-05-15T20:22:16.33852593Z   position: '12',
+2025-05-15T20:22:16.33852998Z   internalPosition: undefined,
+2025-05-15T20:22:16.3385323Z   internalQuery: undefined,
+2025-05-15T20:22:16.33853472Z   where: undefined,
+2025-05-15T20:22:16.33853712Z   schema: undefined,
+2025-05-15T20:22:16.33853946Z   table: undefined,
+2025-05-15T20:22:16.3385421Z   column: undefined,
+2025-05-15T20:22:16.33854422Z   dataType: undefined,
+2025-05-15T20:22:16.338546311Z   constraint: undefined,
+2025-05-15T20:22:16.338548431Z   file: 'parse_relation.c',
+2025-05-15T20:22:16.3385505Z   line: '3722',
+2025-05-15T20:22:16.338552631Z   routine: 'errorMissingColumn'
+2025-05-15T20:22:16.338554641Z }
+2025-05-15T20:22:24.202858479Z ==> Your service is live 🎉
