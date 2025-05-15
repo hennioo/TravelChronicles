@@ -20,21 +20,65 @@ let dbConnected = false;
 const sessions = {};
 const ACCESS_CODE = process.env.ACCESS_CODE || 'suuuu';
 
-// Uploads-Verzeichnis einrichten
-const uploadsDir = path.join(__dirname, 'uploads');
-try {
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log('Uploads-Verzeichnis erstellt: ' + uploadsDir);
-  } else {
-    console.log('Uploads-Verzeichnis existiert: ' + uploadsDir);
+// Verschiedene mögliche Uploads-Verzeichnisse einrichten für unterschiedliche Umgebungen
+const uploadsDirectories = [
+  path.join(__dirname, 'uploads'),  // Standard
+  path.join(__dirname, 'dist', 'uploads'),  // Für Render
+  path.join(__dirname, 'dist', 'public', 'uploads')  // Alternative für Render
+];
+
+let uploadsDir = '';
+
+// Versuche alle möglichen Verzeichnisse
+for (const dir of uploadsDirectories) {
+  try {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      console.log('Uploads-Verzeichnis erstellt: ' + dir);
+    } else {
+      console.log('Uploads-Verzeichnis existiert: ' + dir);
+      
+      // Überprüfe, ob das couple.jpg hier existiert
+      const couplePath = path.join(dir, 'couple.jpg');
+      if (fs.existsSync(couplePath)) {
+        console.log('GEFUNDEN: couple.jpg existiert in: ' + dir);
+      } else {
+        console.log('couple.jpg fehlt in: ' + dir);
+      }
+    }
+    
+    // Verwende das erste erfolgreiche Verzeichnis
+    if (!uploadsDir) {
+      uploadsDir = dir;
+    }
+  } catch (error) {
+    console.error('Fehler beim Prüfen des Verzeichnisses ' + dir + ':', error);
   }
-} catch (error) {
-  console.error('Fehler beim Erstellen des Uploads-Verzeichnisses:', error);
 }
 
-// Statische Dateien und Uploads
+if (!uploadsDir) {
+  console.error('KRITISCH: Kein Uploads-Verzeichnis konnte erstellt werden!');
+  // Verwende Standard als Fallback
+  uploadsDir = path.join(__dirname, 'uploads');
+}
+
+// Statische Dateien und Uploads - mehrere Pfade für verschiedene Umgebungen
 app.use('/uploads', express.static(uploadsDir));
+
+// Zusätzliche Pfade für Render-Umgebung (für Fallback)
+if (process.env.RENDER === 'true') {
+  // Wenn auf Render ausgeführt, versuche auch diese Verzeichnisse
+  const distUploadsDir = path.join(__dirname, 'dist', 'uploads');
+  const publicUploadsDir = path.join(__dirname, 'dist', 'public', 'uploads');
+  
+  console.log('Render-Umgebung erkannt. Füge zusätzliche Upload-Pfade hinzu:');
+  console.log('- ' + distUploadsDir);
+  console.log('- ' + publicUploadsDir);
+  
+  app.use('/uploads', express.static(distUploadsDir));
+  app.use('/uploads', express.static(publicUploadsDir));
+  app.use('/public/uploads', express.static(publicUploadsDir));
+}
 
 // Datenbankverbindung initialisieren
 try {
@@ -815,6 +859,12 @@ app.get('/', function(req, res) {
     errorText = 'Ungültiger Zugangscode. Bitte versuche es erneut.';
   }
   
+  // Überprüfung, ob Bilder existieren, und Bestimmung des richtigen Bildpfads
+  let coupleImagePath = '/uploads/couple.jpg'; // Standard-Pfad
+  
+  // Log für einfacheres Debugging auf Render
+  console.log('Generiere Login-Seite mit Bildhintergrund');
+  
   res.send(`<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -832,11 +882,18 @@ app.get('/', function(req, res) {
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-image: url('/uploads/couple.jpg');
+      background-image: url('${coupleImagePath}');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      background-color: #1a532a;
+      background-color: #1a532a; /* Fallback, falls das Bild nicht geladen werden kann */
+    }
+    
+    /* Fallback für fehlenden Hintergrund */
+    @media (min-width: 1px) {
+      body.no-bg {
+        background-image: none;
+      }
     }
     .login-container {
       text-align: center;
@@ -919,6 +976,55 @@ app.get('/', function(req, res) {
       </div>
     </div>
   </div>
+  <script>
+    // Überprüft, ob das Hintergrundbild vorhanden ist
+    function checkBackgroundImage() {
+      // Liste möglicher alternativer Pfade
+      const imagePaths = [
+        '/uploads/couple.jpg',
+        '/dist/uploads/couple.jpg',
+        '/public/uploads/couple.jpg',
+        '/dist/public/uploads/couple.jpg'
+      ];
+      
+      // Aktuelle Hintergrundbild-URL aus dem body-Style extrahieren
+      const bodyStyle = window.getComputedStyle(document.body);
+      const currentBgImage = bodyStyle.backgroundImage;
+      
+      // Wenn das Bild nicht geladen werden konnte, versuche Alternativen
+      if (currentBgImage === 'none' || !currentBgImage.includes('couple.jpg')) {
+        console.log('Hintergrundbild nicht gefunden, versuche Alternativen...');
+        
+        // Versuche alle Alternativen
+        let imageFound = false;
+        
+        for (const path of imagePaths) {
+          if (imageFound) break;
+          
+          // Teste, ob das Bild geladen werden kann
+          const testImg = new Image();
+          testImg.onload = function() {
+            console.log('Bild gefunden unter: ' + path);
+            document.body.style.backgroundImage = "url('" + path + "')";
+            imageFound = true;
+          };
+          
+          testImg.src = path;
+        }
+        
+        // Nach 2 Sekunden prüfen, ob ein Bild gefunden wurde
+        setTimeout(function() {
+          if (!imageFound) {
+            console.log('Kein Bild gefunden, verwende Fallback-Hintergrundfarbe');
+            document.body.classList.add('no-bg');
+          }
+        }, 2000);
+      }
+    }
+    
+    // Führe die Prüfung nach dem vollständigen Laden der Seite aus
+    window.addEventListener('load', checkBackgroundImage);
+  </script>
 </body>
 </html>`);
 });
