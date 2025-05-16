@@ -1,0 +1,119 @@
+[2025-05-16T07:15:19.122Z] Datenbank-URL: "postgresql://neondb_owner:****@ep-late-river-a566oey9.us-east-2.aws.neon.tech/neondb?sslmode=require"
+[2025-05-16T07:15:19.124Z] Versuche, Verbindung zur Datenbank herzustellen...
+[2025-05-16T07:15:19.717Z] Verbindung zur Datenbank erfolgreich hergestellt
+[2025-05-16T07:15:19.756Z] Datenbank-Version: {
+  "version": "PostgreSQL 16.8 on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit"
+}
+[2025-05-16T07:15:19.779Z] Max Connections: {
+  "max_connections": "450"
+}
+[2025-05-16T07:15:19.809Z] Aktuelle Datenbankgröße: {
+  "db_size": "7512 kB"
+}
+[2025-05-16T07:15:19.809Z] Überprüfe Tabellenschema...
+[2025-05-16T07:15:19.891Z] Gefundene Tabellen: [
+  {
+    "table_name": "access_codes"
+  },
+  {
+    "table_name": "locations"
+  }
+]
+[2025-05-16T07:15:19.963Z] Spalten der locations-Tabelle: [
+  {
+    "column_name": "id",
+    "data_type": "integer",
+    "character_maximum_length": null,
+    "is_nullable": "NO"
+  },
+  {
+    "column_name": "title",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "is_nullable": "NO"
+  },
+  {
+    "column_name": "date",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "highlight",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "latitude",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "is_nullable": "NO"
+  },
+  {
+    "column_name": "longitude",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "is_nullable": "NO"
+  },
+  {
+    "column_name": "country_code",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "image",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "image_data",
+    "data_type": "bytea",
+    "character_maximum_length": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "image_type",
+    "data_type": "character varying",
+    "character_maximum_length": 50,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "thumbnail_data",
+    "data_type": "bytea",
+    "character_maximum_length": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "character_maximum_length": null,
+    "is_nullable": "YES"
+  }
+]
+[2025-05-16T07:15:20.017Z] Größe der locations-Tabelle: {
+  "total_size": "16 kB",
+  "table_size": "0 bytes",
+  "index_size": "16 kB"
+}
+[2025-05-16T07:15:20.017Z] Teste minimalen INSERT...
+[2025-05-16T07:15:20.069Z] Test-INSERT erfolgreich mit ID: {
+  "id": 1
+}
+[2025-05-16T07:15:20.091Z] Test-INSERT zurückgerollt
+[2025-05-16T07:15:20.092Z] Teste INSERT mit Binärdaten...
+[2025-05-16T07:15:20.152Z] Test-INSERT mit Binärdaten erfolgreich mit ID: {
+  "id": 2
+}
+[2025-05-16T07:15:20.178Z] Test-INSERT mit Binärdaten zurückgerollt
+[2025-05-16T07:15:20.178Z] Uploads-Verzeichnis existiert bereits
+[2025-05-16T07:15:20.181Z] Test-Datei erfolgreich geschrieben: ./uploads/test-1747379720179.txt
+[2025-05-16T07:15:20.182Z] Test-Datei erfolgreich gelöscht
