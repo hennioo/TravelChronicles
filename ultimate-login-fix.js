@@ -1,4 +1,4 @@
-// Verbesserter Server für Render mit Image-Fix
+// Susibert Login-Fix
 const express = require('express');
 const multer = require('multer');
 const { Pool } = require('pg');
@@ -133,173 +133,179 @@ app.get('/', function(req, res) {
   // Erstellt eine neue Session
   const sessionId = createSession();
   
-  const htmlContent = '<!DOCTYPE html>\n' +
-    '<html lang="de">\n' +
-    '<head>\n' +
-    '  <meta charset="UTF-8">\n' +
-    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
-    '  <title>Susibert - Login</title>\n' +
-    '  <style>\n' +
-    '    body {\n' +
-    '      font-family: system-ui, -apple-system, sans-serif;\n' +
-    '      background-color: #1a1a1a;\n' +
-    '      color: #f5f5f5;\n' +
-    '      margin: 0;\n' +
-    '      padding: 0;\n' +
-    '      display: flex;\n' +
-    '      justify-content: center;\n' +
-    '      align-items: center;\n' +
-    '      min-height: 100vh;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-container {\n' +
-    '      width: 90%;\n' +
-    '      max-width: 400px;\n' +
-    '      background-color: #222;\n' +
-    '      border-radius: 12px;\n' +
-    '      padding: 30px;\n' +
-    '      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-title {\n' +
-    '      text-align: center;\n' +
-    '      margin-bottom: 30px;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-title h1 {\n' +
-    '      font-size: 2.5rem;\n' +
-    '      margin: 0;\n' +
-    '      background: linear-gradient(45deg, #f59a0c, #ffbf49);\n' +
-    '      -webkit-background-clip: text;\n' +
-    '      -webkit-text-fill-color: transparent;\n' +
-    '      background-clip: text;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .couple-photo {\n' +
-    '      width: 150px;\n' +
-    '      height: 150px;\n' +
-    '      border-radius: 50%;\n' +
-    '      object-fit: cover;\n' +
-    '      margin: 0 auto 30px;\n' +
-    '      display: block;\n' +
-    '      border: 3px solid #f59a0c;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-form {\n' +
-    '      max-width: 350px;\n' +
-    '      margin: 0 auto;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-form .form-group {\n' +
-    '      margin-bottom: 20px;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-form label {\n' +
-    '      display: block;\n' +
-    '      margin-bottom: 8px;\n' +
-    '      font-weight: bold;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-form input {\n' +
-    '      width: 100%;\n' +
-    '      box-sizing: border-box;\n' +
-    '      padding: 12px;\n' +
-    '      background-color: #333;\n' +
-    '      border: 1px solid #444;\n' +
-    '      border-radius: 6px;\n' +
-    '      color: white;\n' +
-    '      font-size: 1rem;\n' +
-    '      display: block;\n' +
-    '      margin: 0 auto;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-form button {\n' +
-    '      width: 100%;\n' +
-    '      padding: 12px;\n' +
-    '      background: linear-gradient(45deg, #f59a0c, #ffbf49);\n' +
-    '      border: none;\n' +
-    '      border-radius: 6px;\n' +
-    '      color: black;\n' +
-    '      font-size: 1rem;\n' +
-    '      font-weight: bold;\n' +
-    '      cursor: pointer;\n' +
-    '      transition: opacity 0.2s;\n' +
-    '      box-sizing: border-box;\n' +
-    '      max-width: 100%;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .login-form button:hover {\n' +
-    '      opacity: 0.9;\n' +
-    '    }\n' +
-    '    \n' +
-    '    .error-message {\n' +
-    '      background-color: #ff5252;\n' +
-    '      color: white;\n' +
-    '      padding: 10px;\n' +
-    '      border-radius: 6px;\n' +
-    '      margin-bottom: 20px;\n' +
-    '      display: none;\n' +
-    '    }\n' +
-    '  </style>\n' +
-    '</head>\n' +
-    '<body>\n' +
-    '  <div class="login-container">\n' +
-    '    <div class="login-title">\n' +
-    '      <h1>Susibert</h1>\n' +
-    '    </div>\n' +
-    '    \n' +
-    '    <img src="/uploads/couple.jpg" alt="Pärchen" class="couple-photo" onerror="this.src=\'/uploads/couple.png\'">\n' +
-    '    \n' +
-    '    <div class="error-message" id="errorMessage"></div>\n' +
-    '    \n' +
-    '    <form class="login-form" id="loginForm">\n' +
-    '      <div class="form-group">\n' +
-    '        <label for="accessCode">Zugriffscode</label>\n' +
-    '        <input type="password" id="accessCode" name="accessCode" placeholder="Bitte Code eingeben..." required>\n' +
-    '      </div>\n' +
-    '      \n' +
-    '      <button type="submit">Anmelden</button>\n' +
-    '    </form>\n' +
-    '  </div>\n' +
-    '  \n' +
-    '  <script>\n' +
-    '    // Login-Formular\n' +
-    '    const loginForm = document.getElementById("loginForm");\n' +
-    '    const errorMessage = document.getElementById("errorMessage");\n' +
-    '    \n' +
-    '    loginForm.addEventListener("submit", function(e) {\n' +
-    '      e.preventDefault();\n' +
-    '      \n' +
-    '      const accessCode = document.getElementById("accessCode").value;\n' +
-    '      \n' +
-    '      fetch("/login", {\n' +
-    '        method: "POST",\n' +
-    '        headers: {\n' +
-    '          "Content-Type": "application/json"\n' +
-    '        },\n' +
-    '        body: JSON.stringify({ \n' +
-    '          accessCode: accessCode,\n' +
-    '          sessionId: "' + sessionId + '"\n' +
-    '        })\n' +
-    '      })\n' +
-    '      .then(response => response.json())\n' +
-    '      .then(data => {\n' +
-    '        if (data.success) {\n' +
-    '          window.location.href = data.redirect;\n' +
-    '        } else {\n' +
-    '          errorMessage.textContent = data.message;\n' +
-    '          errorMessage.style.display = "block";\n' +
-    '        }\n' +
-    '      })\n' +
-    '      .catch(error => {\n' +
-    '        console.error("Fehler:", error);\n' +
-    '        errorMessage.textContent = "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.";\n' +
-    '        errorMessage.style.display = "block";\n' +
-    '      });\n' +
-    '    });\n' +
-    '  </script>\n' +
-    '</body>\n' +
-    '</html>';
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="de">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Susibert - Login</title>
+      <style>
+        body {
+          font-family: system-ui, -apple-system, sans-serif;
+          background-color: #1a1a1a;
+          color: #f5f5f5;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+        }
+        
+        .login-container {
+          width: 90%;
+          max-width: 400px;
+          background-color: #222;
+          border-radius: 12px;
+          padding: 30px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .login-title {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+        
+        .login-title h1 {
+          font-size: 2.5rem;
+          margin: 0;
+          background: linear-gradient(45deg, #f59a0c, #ffbf49);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        
+        .couple-photo {
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          object-fit: cover;
+          margin: 0 auto 30px;
+          display: block;
+          border: 3px solid #f59a0c;
+        }
+        
+        .login-form {
+          max-width: 350px;
+          margin: 0 auto;
+        }
+        
+        .login-form .form-group {
+          margin-bottom: 20px;
+        }
+        
+        .login-form label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: bold;
+        }
+        
+        /* Container für das Eingabefeld und den Button */
+        .input-container {
+          max-width: 300px;
+          margin: 0 auto;
+        }
+        
+        .login-form input {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 12px;
+          background-color: #333;
+          border: 1px solid #444;
+          border-radius: 6px;
+          color: white;
+          font-size: 1rem;
+        }
+        
+        .login-form button {
+          width: 100%;
+          padding: 12px;
+          background: linear-gradient(45deg, #f59a0c, #ffbf49);
+          border: none;
+          border-radius: 6px;
+          color: black;
+          font-size: 1rem;
+          font-weight: bold;
+          cursor: pointer;
+          transition: opacity 0.2s;
+          margin-top: 10px;
+        }
+        
+        .login-form button:hover {
+          opacity: 0.9;
+        }
+        
+        .error-message {
+          background-color: #ff5252;
+          color: white;
+          padding: 10px;
+          border-radius: 6px;
+          margin-bottom: 20px;
+          display: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="login-container">
+        <div class="login-title">
+          <h1>Susibert</h1>
+        </div>
+        
+        <img src="/uploads/couple.jpg" alt="Pärchen" class="couple-photo" onerror="this.src='/uploads/couple.png'">
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <form class="login-form" id="loginForm">
+          <div class="form-group">
+            <label for="accessCode">Zugriffscode</label>
+            <div class="input-container">
+              <input type="password" id="accessCode" name="accessCode" placeholder="Bitte Code eingeben..." required>
+              <button type="submit">Anmelden</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <script>
+        // Login-Formular
+        const loginForm = document.getElementById("loginForm");
+        const errorMessage = document.getElementById("errorMessage");
+        
+        loginForm.addEventListener("submit", function(e) {
+          e.preventDefault();
+          
+          const accessCode = document.getElementById("accessCode").value;
+          
+          fetch("/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 
+              accessCode: accessCode,
+              sessionId: "${sessionId}"
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              window.location.href = data.redirect;
+            } else {
+              errorMessage.textContent = data.message;
+              errorMessage.style.display = "block";
+            }
+          })
+          .catch(error => {
+            console.error("Fehler:", error);
+            errorMessage.textContent = "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.";
+            errorMessage.style.display = "block";
+          });
+        });
+      </script>
+    </body>
+    </html>
+  `;
     
   res.send(htmlContent);
 });
