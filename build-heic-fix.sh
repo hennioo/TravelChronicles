@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Build-Skript mit verbesserter Bildverarbeitung
-echo "Starte Build mit verbesserter Bildverarbeitung und Fehlerbehandlung..."
+# Build-Skript mit HEIC-Format-Fix
+echo "Starte Build mit HEIC-Format-Fix..."
 
-# NPM-Pakete installieren, einschließlich heic-convert für HEIC-Unterstützung
-npm install express pg multer sharp dotenv cookie-parser fs-extra heic-convert
+# NPM-Pakete installieren
+npm install express pg multer sharp dotenv cookie-parser fs-extra
 
 # Verzeichnisstruktur erstellen
 echo "Erstelle Verzeichnisstruktur..."
@@ -13,7 +13,7 @@ mkdir -p dist/public/uploads
 
 # Server-Code erstellen
 echo "Erstelle Server-Code..."
-cp final-image-fix.cjs dist/index.js
+cp final-heic-fix.cjs dist/index.js
 
 # Dateien kopieren
 echo "Kopiere Dateien..."
@@ -39,8 +39,7 @@ cat > dist/package.json << EOL
     "sharp": "^0.33.1",
     "dotenv": "^16.3.1",
     "cookie-parser": "^1.4.6",
-    "fs-extra": "^11.2.0",
-    "heic-convert": "^1.2.4"
+    "fs-extra": "^11.2.0"
   },
   "engines": {
     "node": ">=18.0.0"
