@@ -1,0 +1,43 @@
+2025-05-17T17:45:27.304294516Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-17T17:45:29.666579489Z ==> Checking out commit b13cd05e7791f16f11a7707a7a16bddabc860662 in branch main
+2025-05-17T17:45:31.031617089Z ==> Downloading cache...
+2025-05-17T17:45:43.819980806Z ==> Transferred 222MB in 7s. Extraction took 5s.
+2025-05-17T17:45:50.686236695Z ==> Using Node.js version 22.14.0 (default)
+2025-05-17T17:45:50.713370682Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-17T17:45:50.85921554Z ==> Using Bun version 1.1.0 (default)
+2025-05-17T17:45:50.85923434Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-17T17:45:50.908591102Z ==> Running build command './build-fixed-server.sh'...
+2025-05-17T17:45:50.914904054Z Erstelle Build mit eingebautem Upload-Fix...
+2025-05-17T17:45:50.914920824Z Erstelle Verzeichnisstruktur...
+2025-05-17T17:45:50.916915876Z Kopiere Server-Code...
+2025-05-17T17:45:50.918892087Z Kopiere Uploads...
+2025-05-17T17:45:50.93719525Z Erstelle package.json...
+2025-05-17T17:45:50.939552499Z === Build abgeschlossen ===
+2025-05-17T17:45:52.53090508Z ==> Uploading build...
+2025-05-17T17:46:06.405066399Z ==> Uploaded in 9.7s. Compression took 4.2s
+2025-05-17T17:46:06.481461566Z ==> Build successful 🎉
+2025-05-17T17:46:08.813178477Z ==> Deploying...
+2025-05-17T17:46:32.184014186Z ==> Running 'npm start'
+2025-05-17T17:46:32.47473721Z 
+2025-05-17T17:46:32.474765911Z > rest-express@1.0.0 start
+2025-05-17T17:46:32.474771981Z > NODE_ENV=production node dist/index.js
+2025-05-17T17:46:32.474774681Z 
+2025-05-17T17:46:32.767745914Z Uploads-Verzeichnis existiert: /opt/render/project/src/dist/uploads
+2025-05-17T17:46:32.768013911Z Pärchenbild gefunden in: /opt/render/project/src/dist/uploads/couple.jpg
+2025-05-17T17:46:32.768021301Z Verwende Uploads-Verzeichnis: /opt/render/project/src/dist/uploads
+2025-05-17T17:46:32.768570575Z Umgebungsvariablen (ohne Werte): {
+2025-05-17T17:46:32.770509406Z   DATABASE_URL_EXISTS: true,
+2025-05-17T17:46:32.770518277Z   SUPABASE_URL_EXISTS: false,
+2025-05-17T17:46:32.770522057Z   SUPABASE_PASSWORD_EXISTS: false,
+2025-05-17T17:46:32.770525697Z   NODE_ENV: 'production'
+2025-05-17T17:46:32.770528727Z }
+2025-05-17T17:46:32.770545627Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-17T17:46:32.778520667Z Server läuft auf Port 10000
+2025-05-17T17:46:33.936035841Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-17T17:46:33.897Z }
+2025-05-17T17:46:34.031985667Z Tabelle locations existiert: true
+2025-05-17T17:46:34.032022138Z Datenbankverbindung Status: true
+2025-05-17T17:46:41.611592055Z ==> Your service is live 🎉
+2025-05-17T17:47:01.150604098Z Auth-Prüfung für Session: undefined
+2025-05-17T17:47:01.150643029Z Ungültige Session: undefined
+2025-05-17T17:47:01.658447498Z Auth-Prüfung für Session: d5467dc9beb029756667f3169f0cf88e
+2025-05-17T17:47:01.65852456Z Ungültige Session: d5467dc9beb029756667f3169f0cf88e

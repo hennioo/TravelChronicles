@@ -1,0 +1,129 @@
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:524 [DEBUG 2025-05-17T17:46:50.198Z] Lade Orte...
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:522 [DEBUG 2025-05-17T17:46:50.827Z] Orte geladen: 1
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:524 [DEBUG 2025-05-17T17:47:01.454Z] Formular wird abgesendet
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:522 [DEBUG 2025-05-17T17:47:01.454Z] Alle Eingaben validiert, bereite FormData vor Object
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:524 [DEBUG 2025-05-17T17:47:01.455Z] Sende Daten an /api/locations
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:522 [DEBUG 2025-05-17T17:47:03.367Z] Antwort erhalten, Status: 200
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:522 [DEBUG 2025-05-17T17:47:03.368Z] Fehler beim Parsen der Antwort (ok): 
+    <!DOCTYPE html>
+    <html lang="de">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Susibert</title>
+      <style>
+        body {
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+          background-color: #1a1a1a;
+          color: white;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+        
+        .container {
+          width: 90%;
+          max-width: 400px;
+          background-color: #000;
+          border-radius: 12px;
+          padding: 30px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+          text-align: center;
+        }
+        
+        .logo {
+          margin-bottom: 20px;
+          position: relative;
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          overflow: hidden;
+          margin: 0 auto 30px;
+          border: 3px solid #f59a0c;
+        }
+        
+        .logo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        h1 {
+          color: #f59a0c;
+          margin-bottom: 30px;
+          font-size: 2.5rem;
+          font-weight: bold;
+        }
+        
+        .form-group {
+          margin-bottom: 20px;
+        }
+        
+        label {
+          display: block;
+          text-align: left;
+          margin-bottom: 8px;
+          color: #ccc;
+        }
+        
+        input {
+          width: 100%;
+          padding: 12px;
+          border-radius: 6px;
+          border: 1px solid #333;
+          background-color: #222;
+          color: white;
+          font-size: 1rem;
+          box-sizing: border-box;
+        }
+        
+        button {
+          width: 100%;
+          padding: 12px;
+          background-color: #f59a0c;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 1.1rem;
+          font-weight: bold;
+          margin-top: 10px;
+          transition: background-color 0.3s;
+        }
+        
+        button:hover {
+          background-color: #e58e0b;
+        }
+        
+        .error {
+          color: #ff5555;
+          margin-top: 20px;
+          font-size: 0.9rem;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="logo">
+          <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.src='/uploads/couple.png'; this.onerror=null;">
+        </div>
+        <h1>Susibert</h1>
+        <form action="/login" method="post">
+          <div class="form-group">
+            <label for="accessCode">Zugangs-Code</label>
+            <input type="password" id="accessCode" name="accessCode" placeholder="Code eingeben" required autofocus>
+          </div>
+          <button type="submit">Anmelden</button>
+          <div class="error">Bitte melde dich an, um diese Seite zu sehen.</div>
+        </form>
+      </div>
+    </body>
+    </html>
+  
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:522 [DEBUG 2025-05-17T17:47:03.368Z] Erfolgreiche Antwort: Object
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:524 [DEBUG 2025-05-17T17:47:03.368Z] Lade Orte...
+map?sessionId=d5467dc9beb029756667f3169f0cf88e:522 [DEBUG 2025-05-17T17:47:03.771Z] Fehler beim Laden der Orte: SyntaxError: Unexpected token '<', "
+    <!DOCTYPE "... is not valid JSON
