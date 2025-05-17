@@ -1,0 +1,43 @@
+2025-05-17T12:33:03.463127723Z Login-Anfrage erhalten
+2025-05-17T12:33:03.747258222Z Kartenansicht angefordert
+2025-05-17T12:33:04.50936376Z Rufe alle Orte ab
+2025-05-17T12:33:05.656780545Z 0 Orte abgerufen
+2025-05-17T13:55:04.806411157Z Kartenansicht angefordert
+2025-05-17T13:55:05.219707528Z Rufe alle Orte ab
+2025-05-17T13:55:05.612242298Z 0 Orte abgerufen
+2025-05-17T13:55:06.810616027Z Admin-Bereich angefordert
+2025-05-17T13:55:06.861042176Z Tabellen-Check: Tabelle existiert
+2025-05-17T13:55:25.797809879Z Test-Insert angefordert
+2025-05-17T13:55:25.847347027Z Führe Test-Query aus...
+2025-05-17T13:55:25.90457941Z Query erfolgreich mit ID: 6
+2025-05-17T13:55:25.95501392Z Testdaten gelöscht
+2025-05-17T13:55:29.360382699Z Admin-Bereich angefordert
+2025-05-17T13:55:29.4104775Z Tabellen-Check: Tabelle existiert
+2025-05-17T13:55:35.432227715Z Kartenansicht angefordert
+2025-05-17T13:55:35.840643648Z Rufe alle Orte ab
+2025-05-17T13:55:35.889786956Z 0 Orte abgerufen
+2025-05-17T13:55:56.088461506Z Rufe alle Orte ab
+2025-05-17T13:55:56.137718516Z 0 Orte abgerufen
+2025-05-17T15:47:40.647525564Z Login-Anfrage erhalten
+2025-05-17T15:47:40.873342456Z Kartenansicht angefordert
+2025-05-17T15:47:41.303472909Z Rufe alle Orte ab
+2025-05-17T15:47:42.285187004Z 0 Orte abgerufen
+2025-05-17T15:48:15.066475606Z Admin-Bereich angefordert
+2025-05-17T15:48:15.484328253Z Tabellen-Check: Tabelle existiert
+2025-05-17T15:48:18.453416452Z Test-Insert angefordert
+2025-05-17T15:48:18.502188252Z Führe Test-Query aus...
+2025-05-17T15:48:18.560247396Z Query erfolgreich mit ID: 7
+2025-05-17T15:48:18.611604618Z Testdaten gelöscht
+2025-05-17T15:49:02.070561677Z Admin-Bereich angefordert
+2025-05-17T15:49:02.437624414Z Tabellen-Check: Tabelle existiert
+2025-05-17T15:49:05.371777596Z Minimaler Test-Insert angefordert
+2025-05-17T15:49:05.427294068Z Führe minimale Test-Query aus...
+2025-05-17T15:49:05.493407307Z Minimale Query erfolgreich mit ID: 8
+2025-05-17T15:49:05.550313283Z Minimale Testdaten gelöscht
+2025-05-17T15:49:07.589443139Z Admin-Bereich angefordert
+2025-05-17T15:49:07.63910714Z Tabellen-Check: Tabelle existiert
+2025-05-17T15:49:38.445368484Z Kartenansicht angefordert
+2025-05-17T15:49:38.692549832Z Rufe alle Orte ab
+2025-05-17T15:49:39.083922337Z 0 Orte abgerufen
+2025-05-17T15:49:55.244452485Z Rufe alle Orte ab
+2025-05-17T15:49:55.294854824Z 0 Orte abgerufen
