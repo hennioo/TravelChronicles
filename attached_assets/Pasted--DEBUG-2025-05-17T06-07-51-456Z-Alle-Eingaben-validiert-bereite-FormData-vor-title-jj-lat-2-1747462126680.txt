@@ -1,0 +1,118 @@
+[DEBUG 2025-05-17T06:07:51.456Z] Alle Eingaben validiert, bereite FormData vor {title: 'jj', lat: '29.99300228455108', lng: '0', fileName: '6aac7c76-0477-4a01-8140-fee74d92f66b.png', fileSize: 3049248}
+map?sessionId=55889af8b87401a3a47e037c98d867f1:524 [DEBUG 2025-05-17T06:07:51.457Z] Sende Daten an /api/locations
+map?sessionId=55889af8b87401a3a47e037c98d867f1:522 [DEBUG 2025-05-17T06:07:53.347Z] Antwort erhalten, Status: 200
+map?sessionId=55889af8b87401a3a47e037c98d867f1:522 [DEBUG 2025-05-17T06:07:53.348Z] Fehler beim Parsen der Antwort (ok): <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Susibert</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #1a1a1a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-box {
+      background-color: #222;
+      border-radius: 10px;
+      padding: 30px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #f59a0c;
+      margin-top: 0;
+    }
+    img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #f59a0c;
+      margin: 0 auto 20px;
+      display: block;
+    }
+    label {
+      display: block;
+      text-align: left;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #444;
+      background-color: #333;
+      color: white;
+      margin-bottom: 20px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #f59a0c;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .error {
+      background-color: #f44336;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h1>Susibert</h1>
+    <img src="/uploads/couple.jpg" onerror="this.src='/uploads/couple.png'">
+    <div id="error" class="error"></div>
+    <form id="loginForm">
+      <label for="code">Zugriffscode</label>
+      <input type="password" id="code" placeholder="Bitte Code eingeben...">
+      <button type="submit">Anmelden</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const code = document.getElementById('code').value;
+      
+      fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          accessCode: code,
+          sessionId: 'bcdfa590883a420acc90eca3209670bf'
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = data.redirect;
+        } else {
+          const error = document.getElementById('error');
+          error.textContent = data.message;
+          error.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+map?sessionId=55889af8b87401a3a47e037c98d867f1:522 [DEBUG 2025-05-17T06:07:53.348Z] Erfolgreiche Antwort: {success: true}
