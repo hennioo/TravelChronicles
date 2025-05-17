@@ -1,0 +1,41 @@
+2025-05-16T15:32:07.564331292Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-16T15:32:12.503567229Z ==> Checking out commit de6a6da250ec7b03b876ecb919129750084a425e in branch main
+2025-05-16T15:32:13.859241905Z ==> Downloading cache...
+2025-05-16T15:32:26.703636371Z ==> Transferred 223MB in 8s. Extraction took 4s.
+2025-05-16T15:32:33.215960944Z ==> Using Node.js version 22.14.0 (default)
+2025-05-16T15:32:33.242911104Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-16T15:32:33.383633194Z ==> Using Bun version 1.1.0 (default)
+2025-05-16T15:32:33.383650444Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-16T15:32:33.437874534Z ==> Running build command './build-image-test.sh'...
+2025-05-16T15:32:33.443953684Z Starte Build für Bildupload-Test...
+2025-05-16T15:32:34.82887934Z 
+2025-05-16T15:32:34.828910531Z up to date, audited 628 packages in 1s
+2025-05-16T15:32:34.828914341Z 
+2025-05-16T15:32:34.828924821Z 180 packages are looking for funding
+2025-05-16T15:32:34.828930702Z   run `npm fund` for details
+2025-05-16T15:32:34.845804176Z 
+2025-05-16T15:32:34.845828587Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-16T15:32:34.845830807Z 
+2025-05-16T15:32:34.845833317Z To address issues that do not require attention, run:
+2025-05-16T15:32:34.845835097Z   npm audit fix
+2025-05-16T15:32:34.845836707Z 
+2025-05-16T15:32:34.845838457Z To address all issues (including breaking changes), run:
+2025-05-16T15:32:34.845840967Z   npm audit fix --force
+2025-05-16T15:32:34.845842537Z 
+2025-05-16T15:32:34.845844897Z Run `npm audit` for details.
+2025-05-16T15:32:34.900670013Z Erstelle Verzeichnisstruktur...
+2025-05-16T15:32:34.902966643Z Erstelle Server-Code...
+2025-05-16T15:32:34.905176301Z Erstelle package.json...
+2025-05-16T15:32:34.907530383Z === Build erfolgreich abgeschlossen ===
+2025-05-16T15:32:36.075555382Z ==> Uploading build...
+2025-05-16T15:32:54.192701473Z ==> Uploaded in 14.5s. Compression took 3.6s
+2025-05-16T15:32:54.260326706Z ==> Build successful 🎉
+2025-05-16T15:32:56.273927687Z ==> Deploying...
+2025-05-16T15:33:14.921991005Z ==> Running 'npm start'
+2025-05-16T15:33:15.148552773Z 
+2025-05-16T15:33:15.148579163Z > rest-express@1.0.0 start
+2025-05-16T15:33:15.148584733Z > NODE_ENV=production node dist/index.js
+2025-05-16T15:33:15.148587573Z 
+2025-05-16T15:33:15.427113715Z Server läuft auf Port 10000
+2025-05-16T15:33:15.427260848Z Bildupload-Test verfügbar unter: http://localhost:10000
+2025-05-16T15:33:17.450505074Z ==> Your service is live 🎉
