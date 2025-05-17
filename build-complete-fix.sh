@@ -36,4 +36,10 @@ cat > dist/package.json << EOL
 }
 EOL
 
+# In das Verzeichnis wechseln und Abhängigkeiten installieren
+echo "Installiere Abhängigkeiten..."
+cd dist
+npm install
+cd ..
+
 echo "=== Build komplett abgeschlossen ==="

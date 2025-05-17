@@ -1,0 +1,48 @@
+2025-05-17T18:09:43.299084587Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-17T18:09:45.756357106Z ==> Checking out commit 7465b63a97d0dd5f6ccfdb82852e2ddfea87df0e in branch main
+2025-05-17T18:09:47.115673899Z ==> Downloading cache...
+2025-05-17T18:09:53.89301079Z ==> Still downloading cache...
+2025-05-17T18:09:56.539120205Z ==> Using Node.js version 22.14.0 (default)
+2025-05-17T18:09:56.567073335Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-17T18:09:58.636177439Z ==> Using Bun version 1.1.0 (default)
+2025-05-17T18:09:58.6361973Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-17T18:09:58.730109609Z ==> Running build command './build-complete-fix.sh'...
+2025-05-17T18:09:58.736244067Z Erstelle Build mit komplettem Fix (Upload + Detailansicht)...
+2025-05-17T18:09:58.736262157Z Erstelle Verzeichnisstruktur...
+2025-05-17T18:09:58.738334221Z Kopiere Server-Code...
+2025-05-17T18:09:58.740320312Z Kopiere Uploads...
+2025-05-17T18:09:58.760363118Z Erstelle package.json...
+2025-05-17T18:09:58.867869477Z === Build komplett abgeschlossen ===
+2025-05-17T18:10:00.571663782Z ==> Uploading build...
+2025-05-17T18:10:12.320303821Z ==> Uploaded in 10.1s. Compression took 1.7s
+2025-05-17T18:10:12.367774504Z ==> Build successful 🎉
+2025-05-17T18:10:14.877324753Z ==> Deploying...
+2025-05-17T18:10:26.396463684Z ==> Running 'npm start'
+2025-05-17T18:10:26.674155138Z 
+2025-05-17T18:10:26.674176338Z > rest-express@1.0.0 start
+2025-05-17T18:10:26.674180778Z > NODE_ENV=production node dist/index.js
+2025-05-17T18:10:26.674182849Z 
+2025-05-17T18:10:26.699171469Z node:internal/modules/cjs/loader:1228
+2025-05-17T18:10:26.699193569Z   throw err;
+2025-05-17T18:10:26.699197469Z   ^
+2025-05-17T18:10:26.699200849Z 
+2025-05-17T18:10:26.699204059Z Error: Cannot find module 'express'
+2025-05-17T18:10:26.69920767Z Require stack:
+2025-05-17T18:10:26.69921075Z - /opt/render/project/src/dist/index.js
+2025-05-17T18:10:26.699213919Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-17T18:10:26.69921708Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-17T18:10:26.6992204Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-17T18:10:26.69922399Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-17T18:10:26.69922746Z     at Module.require (node:internal/modules/cjs/loader:1311:12)
+2025-05-17T18:10:26.69923116Z     at require (node:internal/modules/helpers:136:16)
+2025-05-17T18:10:26.69923432Z     at Object.<anonymous> (/opt/render/project/src/dist/index.js:2:17)
+2025-05-17T18:10:26.69923749Z     at Module._compile (node:internal/modules/cjs/loader:1554:14)
+2025-05-17T18:10:26.6992409Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-17T18:10:26.69924416Z     at Module.load (node:internal/modules/cjs/loader:1289:32) {
+2025-05-17T18:10:26.69924792Z   code: 'MODULE_NOT_FOUND',
+2025-05-17T18:10:26.699251Z   requireStack: [ '/opt/render/project/src/dist/index.js' ]
+2025-05-17T18:10:26.69925436Z }
+2025-05-17T18:10:26.699257031Z 
+2025-05-17T18:10:26.699260511Z Node.js v22.14.0
+2025-05-17T18:10:29.787177942Z ==> Exited with status 1
+2025-05-17T18:10:29.802706278Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
