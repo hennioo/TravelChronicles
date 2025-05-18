@@ -1,0 +1,76 @@
+2025-05-18T08:26:53.324036397Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T08:26:56.210527515Z ==> Checking out commit 5c8761ce5c5486591076c9601d1bbe9df5b92891 in branch main
+2025-05-18T08:26:57.391702374Z ==> Downloading cache...
+2025-05-18T08:27:06.550320035Z ==> Transferred 55MB in 7s. Extraction took 1s.
+2025-05-18T08:27:09.526738435Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T08:27:09.553962228Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T08:27:09.710812551Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T08:27:09.710839973Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T08:27:09.759250285Z ==> Running build command './build-working-server.sh'...
+2025-05-18T08:27:09.765536066Z Erstelle Build mit vereinfachtem Server...
+2025-05-18T08:27:09.765557628Z Erstelle Verzeichnisstruktur...
+2025-05-18T08:27:09.767525879Z Kopiere Server-Code...
+2025-05-18T08:27:09.769521963Z Kopiere Uploads...
+2025-05-18T08:27:09.789531963Z Erstelle package.json...
+2025-05-18T08:27:09.791806906Z Installiere Abhängigkeiten...
+2025-05-18T08:27:13.466382619Z 
+2025-05-18T08:27:13.466444893Z added 101 packages, and audited 102 packages in 4s
+2025-05-18T08:27:13.466462844Z 
+2025-05-18T08:27:13.466468534Z 15 packages are looking for funding
+2025-05-18T08:27:13.466473215Z   run `npm fund` for details
+2025-05-18T08:27:13.467353754Z 
+2025-05-18T08:27:13.467362894Z found 0 vulnerabilities
+2025-05-18T08:27:13.527289878Z === Build erfolgreich abgeschlossen ===
+2025-05-18T08:27:14.480997214Z ==> Uploading build...
+2025-05-18T08:27:23.181462702Z ==> Uploaded in 7.4s. Compression took 1.3s
+2025-05-18T08:27:23.248895098Z ==> Build successful 🎉
+2025-05-18T08:27:24.709340134Z ==> Deploying...
+2025-05-18T08:28:19.270058082Z ==> Running 'npm start'
+2025-05-18T08:28:19.561184567Z 
+2025-05-18T08:28:19.563191734Z > rest-express@1.0.0 start
+2025-05-18T08:28:19.563206375Z > NODE_ENV=production node dist/index.js
+2025-05-18T08:28:19.563209085Z 
+2025-05-18T08:28:19.869576541Z Umgebungsvariablen (ohne Werte): { DATABASE_URL_EXISTS: true, NODE_ENV: 'production' }
+2025-05-18T08:28:19.869813527Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-18T08:28:19.880341717Z Server läuft auf Port 10000
+2025-05-18T08:28:21.791602579Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-18T08:28:21.753Z }
+2025-05-18T08:28:21.9168755Z Tabelle locations existiert: true
+2025-05-18T08:28:21.916922481Z Datenbankverbindung Status: true
+2025-05-18T08:28:26.582735247Z ==> Your service is live 🎉
+2025-05-18T08:30:02.65857814Z Login-Versuch mit Code: ******
+2025-05-18T08:30:02.658751434Z Neue Session erstellt: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:02.889298964Z Auth-Check mit SessionID: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:02.88953763Z Prüfe Session: b869ef98b187f09f0f3b7adf0d9f9ca7 Existiert: true
+2025-05-18T08:30:02.88955479Z Session verlängert: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:03.339058824Z Auth-Check mit SessionID: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:03.339084594Z Prüfe Session: b869ef98b187f09f0f3b7adf0d9f9ca7 Existiert: true
+2025-05-18T08:30:03.339089544Z Session verlängert: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:03.339291689Z Rufe alle Orte ab
+2025-05-18T08:30:04.166451932Z 6 Orte abgerufen
+2025-05-18T08:30:06.57783155Z Auth-Check mit SessionID: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:06.57786367Z Prüfe Session: b869ef98b187f09f0f3b7adf0d9f9ca7 Existiert: true
+2025-05-18T08:30:06.577872111Z Session verlängert: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:06.637734591Z Bild nicht gefunden, sende Fallback
+2025-05-18T08:30:13.098388823Z Auth-Check mit SessionID: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:13.098468415Z Prüfe Session: b869ef98b187f09f0f3b7adf0d9f9ca7 Existiert: true
+2025-05-18T08:30:13.098491945Z Session verlängert: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:13.152925327Z Bild nicht gefunden, sende Fallback
+2025-05-18T08:30:15.047398862Z Auth-Check mit SessionID: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:15.047526545Z Prüfe Session: b869ef98b187f09f0f3b7adf0d9f9ca7 Existiert: true
+2025-05-18T08:30:15.047540475Z Session verlängert: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:15.103034302Z Bild nicht gefunden, sende Fallback
+2025-05-18T08:30:57.120168459Z Auth-Check mit SessionID: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:57.120195459Z Prüfe Session: b869ef98b187f09f0f3b7adf0d9f9ca7 Existiert: true
+2025-05-18T08:30:57.12020657Z Session verlängert: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:30:57.707667078Z Neuer Ort wird hinzugefügt
+2025-05-18T08:30:57.707688558Z Bild hochgeladen: animal-eye-staring-close-up-watch-nature-generative-ai.jpg, 7024987 Bytes, image/jpeg
+2025-05-18T08:30:58.099899004Z Ort mit ID 15 erstellt
+2025-05-18T08:31:00.457643435Z Auth-Check mit SessionID: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:31:00.457667096Z Prüfe Session: b869ef98b187f09f0f3b7adf0d9f9ca7 Existiert: true
+2025-05-18T08:31:00.457678036Z Session verlängert: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:31:00.457682776Z Rufe alle Orte ab
+2025-05-18T08:31:00.506681679Z 7 Orte abgerufen
+2025-05-18T08:31:07.04452594Z Auth-Check mit SessionID: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:31:07.04455003Z Prüfe Session: b869ef98b187f09f0f3b7adf0d9f9ca7 Existiert: true
+2025-05-18T08:31:07.04456393Z Session verlängert: b869ef98b187f09f0f3b7adf0d9f9ca7
+2025-05-18T08:31:07.094130806Z Sende Bild: uploads/1747557057123-98b587e910350ce3.jpg

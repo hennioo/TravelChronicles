@@ -1,48 +1,47 @@
 #!/bin/bash
 
-# Build-Skript für einfache Server-Fix Version
-echo "Starte Build mit verbessertem Upload-System..."
-
-# NPM-Pakete installieren
-npm install express pg multer cookie-parser dotenv
+# Build-Skript für die einfache Fix-Version der TravelChronicles-App
+echo "Erstelle Build mit Detailansicht-Fix..."
 
 # Verzeichnisstruktur erstellen
 echo "Erstelle Verzeichnisstruktur..."
 mkdir -p dist/uploads
-mkdir -p dist/public/uploads
 
-# Server-Code erstellen
-echo "Erstelle Server-Code..."
-cp simple-server-fix.js dist/index.js
+# Server-Code kopieren
+echo "Kopiere Server-Code..."
+cp working-server.js dist/index.js
+cp location-detail-fix.js dist/location-detail-fix.js
 
-# Dateien kopieren
-echo "Kopiere Dateien..."
-mkdir -p dist/uploads
-cp -rv uploads/* dist/uploads/ 2>/dev/null || echo "Keine Uploads vorhanden oder Fehler beim Kopieren"
+# Uploads kopieren
+echo "Kopiere Uploads..."
+cp -r uploads/* dist/uploads/ 2>/dev/null || :
 
-# package.json für Render erstellen
+# package.json erstellen
 echo "Erstelle package.json..."
-cat > dist/package.json << EOL
+cat > dist/package.json << EOF
 {
-  "name": "travelchronicles",
+  "name": "rest-express",
   "version": "1.0.0",
-  "description": "Travel Map Application with Fixed Upload System",
-  "main": "index.js",
-  "type": "commonjs",
+  "private": true,
   "scripts": {
     "start": "NODE_ENV=production node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "pg": "^8.11.3",
-    "multer": "^1.4.5-lts.1",
     "cookie-parser": "^1.4.6",
-    "dotenv": "^16.3.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.3",
+    "sharp": "^0.33.2"
   }
 }
-EOL
+EOF
+
+# Server-Code modifizieren um den Fix einzubinden
+echo "Integriere den Detailansicht-Fix in den Server-Code..."
+sed -i 's|</head>|<script src="/location-detail-fix.js"></script></head>|' dist/index.js
+
+# Installiere Abhängigkeiten
+echo "Installiere Abhängigkeiten..."
+cd dist && npm install
 
 echo "=== Build erfolgreich abgeschlossen ==="
