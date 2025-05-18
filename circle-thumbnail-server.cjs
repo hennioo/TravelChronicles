@@ -670,7 +670,7 @@ app.get('/', requireAuth, (req, res) => {
           max-width: 550px;
           max-height: 85vh;
           overflow-y: auto;
-          padding: 25px;
+          padding: 30px;
         }
         
         .modal-header {
@@ -694,6 +694,7 @@ app.get('/', requireAuth, (req, res) => {
           font-size: 1.8rem;
           cursor: pointer;
           line-height: 1;
+          transform: translateY(-2px);
         }
         
         .form-group {
@@ -1393,9 +1394,9 @@ app.get('/', requireAuth, (req, res) => {
           if (tempMarker) {
             map.removeLayer(tempMarker);
           }
-          
+        
           // Temporären Marker setzen (mit Plus-Symbol)
-          const tempMarkerHtml = \`
+          const tempMarkerHtml = `
             <div class="temp-pin-container">
               <div class="temp-pin-body"></div>
               <div class="temp-pin-circle">
@@ -1403,32 +1404,39 @@ app.get('/', requireAuth, (req, res) => {
               </div>
               <div class="temp-pin-pointer"></div>
             </div>
-          \`;
-          
+          `;
+        
           const tempIcon = L.divIcon({
             html: tempMarkerHtml,
             className: '',
             iconSize: [38, 54], 
             iconAnchor: [19, 54]
           });
-          
+        
           tempMarker = L.marker([lat, lng], {
             icon: tempIcon
           }).addTo(map);
-          
+        
           // Formular zurücksetzen
           document.getElementById('location-form').reset();
           document.getElementById('form-location-id').value = '';
           document.getElementById('form-lat').value = lat;
           document.getElementById('form-lng').value = lng;
           document.getElementById('form-image').required = true;
-          
+        
+          // 🟠 Heutiges Datum als Vorauswahl für <input type="month">
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          document.getElementById('form-date').value = `${year}-${month}`;
+        
           // Titel anpassen
           document.getElementById('form-heading').textContent = 'Ort hinzufügen';
-          
+        
           // Formular anzeigen
           document.getElementById('location-form-container').style.display = 'flex';
         }
+
         
         // Formular zum Bearbeiten eines Ortes anzeigen
         async function showEditLocationForm(id) {
