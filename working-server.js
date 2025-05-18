@@ -1283,29 +1283,107 @@ app.get('/map', requireAuth, function(req, res) {
         }
       }
       
-      // Details setzen
-      activeLocationId = location.id;
-      detailTitle.textContent = location.title || 'Unbenannter Ort';
-      detailDescription.textContent = location.description || 'Keine Beschreibung vorhanden.';
+      // Entferne vorhandene Detailansicht falls vorhanden
+      var existingDetail = document.getElementById('locationDetailFixed');
+      if (existingDetail) {
+        existingDetail.remove();
+      }
       
-      // Bild mit Session-ID Parameter laden
-      detailImage.src = '/api/locations/' + location.id + '/image?sessionId=' + sessionId + '&t=' + new Date().getTime();
-      detailImage.onerror = function() {
-        detailImage.src = '/uploads/couple.jpg';
+      // Erstelle neues Detailfenster
+      var detailView = document.createElement('div');
+      detailView.id = 'locationDetailFixed';
+      detailView.style.position = 'fixed';
+      detailView.style.top = '50%';
+      detailView.style.left = '50%';
+      detailView.style.transform = 'translate(-50%, -50%)';
+      detailView.style.width = '90%';
+      detailView.style.maxWidth = '450px';
+      detailView.style.backgroundColor = '#222';
+      detailView.style.color = 'white';
+      detailView.style.padding = '20px';
+      detailView.style.borderRadius = '8px';
+      detailView.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+      detailView.style.zIndex = '9999';
+      detailView.style.display = 'flex';
+      detailView.style.flexDirection = 'column';
+      
+      // Header mit Titel und Schließen-Button
+      var header = document.createElement('div');
+      header.style.display = 'flex';
+      header.style.justifyContent = 'space-between';
+      header.style.alignItems = 'center';
+      header.style.marginBottom = '15px';
+      
+      var title = document.createElement('h3');
+      title.textContent = location.title || 'Unbenannter Ort';
+      title.style.margin = '0';
+      title.style.color = '#fff';
+      title.style.fontSize = '18px';
+      
+      var closeButton = document.createElement('button');
+      closeButton.innerHTML = '&times;';
+      closeButton.style.background = 'none';
+      closeButton.style.border = 'none';
+      closeButton.style.color = 'white';
+      closeButton.style.fontSize = '24px';
+      closeButton.style.cursor = 'pointer';
+      closeButton.style.padding = '0 5px';
+      closeButton.onclick = function() {
+        detailView.remove();
       };
       
-      // Detail-Container anzeigen - wichtig: direkt ins DOM-Style setzen
-      document.getElementById('locationDetail').style.display = 'block';
-      document.getElementById('locationDetail').style.zIndex = '9999';
+      header.appendChild(title);
+      header.appendChild(closeButton);
       
-      // Zusätzliche Styling-Anpassungen für bessere Sichtbarkeit
-      document.getElementById('locationDetail').style.backgroundColor = '#222';
-      document.getElementById('locationDetail').style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.5)';
+      // Bild
+      var image = document.createElement('img');
+      image.src = '/api/locations/' + location.id + '/image?sessionId=' + sessionId + '&t=' + new Date().getTime();
+      image.alt = location.title || 'Ortsbild';
+      image.style.width = '100%';
+      image.style.maxHeight = '300px';
+      image.style.objectFit = 'cover';
+      image.style.borderRadius = '4px';
+      image.style.marginBottom = '15px';
+      image.onerror = function() {
+        image.src = '/uploads/couple.jpg';
+        console.error('Fehler beim Laden des Bildes');
+      };
+      
+      // Beschreibung
+      var description = document.createElement('div');
+      description.textContent = location.description || 'Keine Beschreibung vorhanden.';
+      description.style.marginBottom = '15px';
+      description.style.lineHeight = '1.4';
+      
+      // Löschen-Button
+      var deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Löschen';
+      deleteButton.style.backgroundColor = '#e74c3c';
+      deleteButton.style.color = 'white';
+      deleteButton.style.border = 'none';
+      deleteButton.style.padding = '8px 15px';
+      deleteButton.style.borderRadius = '4px';
+      deleteButton.style.cursor = 'pointer';
+      deleteButton.style.alignSelf = 'flex-start';
+      deleteButton.style.marginTop = '10px';
+      deleteButton.onclick = function() {
+        if (confirm('Ort wirklich löschen?')) {
+          window.location.href = '/delete-location?id=' + location.id + '&sessionId=' + sessionId;
+        }
+      };
+      
+      // Alles zusammenfügen
+      detailView.appendChild(header);
+      detailView.appendChild(image);
+      detailView.appendChild(description);
+      detailView.appendChild(deleteButton);
+      
+      // Zum Body hinzufügen
+      document.body.appendChild(detailView);
       
       // Karte nur zentrieren, ohne Zoom zu ändern
       map.panTo([location.latitude, location.longitude]);
       
-      // Bestätigung im Debug-Log
       debug('Detailansicht sollte jetzt sichtbar sein');
     }
     
