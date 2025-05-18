@@ -418,7 +418,7 @@ app.get('/', requireAuth, (req, res) => {
           color: #f2960c;
           margin: 0;
           position: relative;
-          top: -2px;
+          top: -20px;
         }
 
         .plus-button {
@@ -432,9 +432,9 @@ app.get('/', requireAuth, (req, res) => {
           transition: background-color 0.3s;
         }
 
-.plus-button:hover {
-  background-color: #e08800;
-}
+        .plus-button:hover {
+          background-color: #e08800;
+        }
 
         
         /* Header-Aktionen */
