@@ -15,8 +15,8 @@ console.log('Attempting to connect to database:',
 
 export const pool = new Pool({
   user: 'postgres',
-  host: 'db.oooxcbiqljntazjylipt.supabase.co',
-  database: 'postgres',
+  host: 'aws-0-eu-central-1.pooler.supabase.com',
+  database: 'postgres', 
   password: DATABASE_URL?.split(':')[2]?.split('@')[0] || '',
   port: 6543, // Supabase Pooler port
   ssl: {
