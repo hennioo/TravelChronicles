@@ -163,7 +163,7 @@ app.get('/login', (req, res) => {
           <img src="/couple-image" alt="Pärchenbild" class="couple-image" onerror="this.src='/couple-image'">
           <form id="login-form">
             <input type="password" id="access-code" placeholder="Zugangscode eingeben" required>
-            <button type="submit">Zugang erhalten</button>
+            <button type="submit">LOGIN</button>
             <div class="error" id="error-message"></div>
           </form>
         </div>
