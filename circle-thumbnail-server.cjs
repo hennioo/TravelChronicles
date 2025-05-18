@@ -1537,7 +1537,7 @@ app.get('/', requireAuth, (req, res) => {
               this.classList.add('primary');
               document.getElementById('edit-mode-indicator').style.display = 'block';
             } else {
-              this.textContent = 'Bearbeiten';
+              this.textContent = '+';
               this.classList.remove('primary');
               document.getElementById('edit-mode-indicator').style.display = 'none';
               
