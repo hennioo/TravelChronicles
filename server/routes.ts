@@ -5,6 +5,7 @@ import { pool } from "./db";
 import { validateAccessCodeSchema, insertLocationSchema } from "@shared/schema";
 import multer from 'multer';
 import imageFixRouter from './image-fix';
+import { compressImage, formatBytes } from './image-processor';
 
 // Für Bild-Uploads nutzen wir In-Memory-Storage statt Dateisystem
 // Dies erlaubt uns, die Bilder direkt als Base64 in der Datenbank zu speichern
@@ -260,15 +261,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const endTime = Date.now();
         console.log(`✅ Bild ${id} erfolgreich gesendet (${endTime - startTime}ms)`);
         
-      } catch (queryError) {
+      } catch (queryError: any) {
         client.release();
         console.error(`Fehler bei der Datenbankabfrage für Bild ${id}:`, queryError);
-        return res.status(500).json({ message: "Datenbankfehler: " + queryError.message });
+        return res.status(500).json({ message: "Datenbankfehler: " + (queryError.message || 'Unbekannter Fehler') });
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Allgemeiner Fehler beim Abrufen des Bildes ${req.params.id}:`, error);
-      return res.status(500).json({ message: "Serverfehler: " + error.message });
+      return res.status(500).json({ message: "Serverfehler: " + (error.message || 'Unbekannter Fehler') });
     }
   });
   
@@ -307,27 +308,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Neuen Ort hinzufügen (mit Bild-Upload)
+  // Code wurde nach oben verschoben
+  
+  // Neuen Ort hinzufügen (mit optimiertem Bild-Upload)
   app.post("/api/locations", upload.single('image'), async (req: Request, res: Response) => {
     try {
       let imageBase64 = null;
       let imageType = null;
       
-      // Wenn ein Bild hochgeladen wurde, als Base64 konvertieren
+      // Wenn ein Bild hochgeladen wurde, verarbeiten und komprimieren
       if (req.file) {
-        console.log(`Bild hochgeladen: ${req.file.originalname}, ${req.file.size} Bytes, ${req.file.mimetype}`);
+        console.log(`Bild hochgeladen: ${req.file.originalname}, ${formatBytes(req.file.size)}, ${req.file.mimetype}`);
         
         try {
-          // Konvertiere zu Base64 für die Datenbank
-          imageBase64 = req.file.buffer.toString('base64');
-          imageType = req.file.mimetype;
+          // Bild komprimieren für optimale Speicherung
+          const processedImage = await compressImage(req.file.buffer, req.file.mimetype);
           
-          console.log(`Bild in Base64 konvertiert: ${imageBase64.length} Zeichen`);
+          // Komprimiertes Bild in Base64 konvertieren für die Datenbank
+          imageBase64 = processedImage.buffer.toString('base64');
+          imageType = processedImage.mimeType;
+          
+          console.log(`Bild verarbeitet: ${formatBytes(processedImage.originalSize)} → ${formatBytes(processedImage.compressedSize)}`);
+          console.log(`Base64-Länge: ${imageBase64.length} Zeichen`);
         } catch (imageError) {
           console.error("Fehler bei der Bildverarbeitung:", imageError);
-          return res.status(400).json({
-            message: "Fehler bei der Bildverarbeitung"
-          });
+          
+          // Fallback: Unverarbeitetes Bild verwenden wenn Kompression fehlschlägt
+          console.log("Verwende unkomprimiertes Originalbild als Fallback");
+          imageBase64 = req.file.buffer.toString('base64');
+          imageType = req.file.mimetype;
         }
       } else {
         console.warn("Kein Bild hochgeladen");
@@ -358,32 +367,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Speichere den neuen Ort direkt in der Datenbank
-      const result = await pool.query(`
-        INSERT INTO locations 
-        (name, description, highlight, date, latitude, longitude, countryCode, image, image_type) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING id, name, description, date, highlight, latitude, longitude, countryCode
-      `, [
-        locationData.name,
-        locationData.description,
-        locationData.highlight,
-        locationData.date,
-        locationData.latitude,
-        locationData.longitude,
-        locationData.countryCode,
-        imageBase64,
-        imageType
-      ]);
+      // Verbindung für bessere Fehlerbehandlung und Transaktionssicherheit
+      const client = await pool.connect();
       
-      const newLocation = result.rows[0];
-      newLocation.has_image = true;
-      
-      return res.status(201).json(newLocation);
-    } catch (error) {
+      try {
+        // Speichere den neuen Ort direkt in der Datenbank
+        const result = await client.query(`
+          INSERT INTO locations 
+          (name, description, highlight, date, latitude, longitude, countryCode, image, image_type) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          RETURNING id, name, description, date, highlight, latitude, longitude, countryCode
+        `, [
+          locationData.name,
+          locationData.description,
+          locationData.highlight,
+          locationData.date,
+          locationData.latitude,
+          locationData.longitude,
+          locationData.countryCode,
+          imageBase64,
+          imageType
+        ]);
+        
+        client.release();
+        
+        const newLocation = result.rows[0];
+        newLocation.has_image = true;
+        
+        console.log(`✅ Neuer Ort mit ID ${newLocation.id} erfolgreich gespeichert`);
+        return res.status(201).json(newLocation);
+      } catch (dbError) {
+        client.release();
+        throw dbError;
+      }
+    } catch (error: any) {
       console.error("Error adding new location:", error);
       return res.status(500).json({
-        message: "Fehler beim Hinzufügen des neuen Ortes"
+        message: "Fehler beim Hinzufügen des neuen Ortes: " + (error.message || "Unbekannter Fehler")
       });
     }
   });
