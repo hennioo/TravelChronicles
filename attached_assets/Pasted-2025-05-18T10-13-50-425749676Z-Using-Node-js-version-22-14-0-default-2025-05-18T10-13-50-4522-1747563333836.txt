@@ -1,0 +1,61 @@
+2025-05-18T10:13:50.425749676Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T10:13:50.452246879Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T10:13:52.340757237Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T10:13:52.340777337Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T10:13:52.388980095Z ==> Running build command './build-final-fix.sh'...
+2025-05-18T10:13:52.394929659Z Erstelle Build mit finalen Fixes...
+2025-05-18T10:13:52.394940979Z Erstelle Verzeichnisstruktur...
+2025-05-18T10:13:52.397094684Z Kopiere Server-Code...
+2025-05-18T10:13:52.399070466Z Kopiere Uploads...
+2025-05-18T10:13:52.418358928Z Stelle couple.jpg sicher...
+2025-05-18T10:13:52.418380099Z Erstelle package.json...
+2025-05-18T10:13:52.420762589Z Installiere Abhängigkeiten...
+2025-05-18T10:13:58.68978958Z 
+2025-05-18T10:13:58.689818661Z added 114 packages, and audited 115 packages in 6s
+2025-05-18T10:13:58.689827641Z 
+2025-05-18T10:13:58.689831431Z 18 packages are looking for funding
+2025-05-18T10:13:58.689835071Z   run `npm fund` for details
+2025-05-18T10:13:58.690839732Z 
+2025-05-18T10:13:58.690856972Z found 0 vulnerabilities
+2025-05-18T10:13:58.757342512Z === Build erfolgreich abgeschlossen ===
+2025-05-18T10:13:59.573562885Z ==> Uploading build...
+2025-05-18T10:14:13.676906418Z ==> Uploaded in 12.7s. Compression took 1.4s
+2025-05-18T10:14:13.736692887Z ==> Build successful 🎉
+2025-05-18T10:14:15.772726714Z ==> Deploying...
+2025-05-18T10:14:29.962108789Z Umgebungsvariablen (ohne Werte): { DATABASE_URL_EXISTS: true, NODE_ENV: 'production' }
+2025-05-18T10:14:29.962333992Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-18T10:14:29.974155545Z Server läuft auf Port 10000
+2025-05-18T10:14:32.778380366Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-18T10:14:32.739Z }
+2025-05-18T10:14:32.878120799Z Tabelle locations existiert: true
+2025-05-18T10:14:32.878178342Z Datenbankverbindung Status: true
+2025-05-18T10:14:37.322818274Z ==> Your service is live 🎉
+2025-05-18T10:14:56.013076744Z Login-Versuch mit Code: ******
+2025-05-18T10:14:56.013228023Z Neue Session erstellt: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:14:56.290748122Z Auth-Check mit SessionID: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:14:56.290821737Z Prüfe Session: 09f50743b3b4f3c5a83dafeed2aa1197 Existiert: true
+2025-05-18T10:14:56.290828417Z Session verlängert: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:14:56.63594371Z Auth-Check mit SessionID: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:14:56.635969272Z Prüfe Session: 09f50743b3b4f3c5a83dafeed2aa1197 Existiert: true
+2025-05-18T10:14:56.635984633Z Session verlängert: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:14:56.636111991Z Rufe alle Orte ab
+2025-05-18T10:14:59.01361241Z 1 Orte abgerufen
+2025-05-18T10:15:00.316459008Z Auth-Check mit SessionID: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:15:00.316520601Z Prüfe Session: 09f50743b3b4f3c5a83dafeed2aa1197 Existiert: true
+2025-05-18T10:15:00.316681381Z Session verlängert: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:15:00.316762436Z Bild für Ort 21 angefordert
+2025-05-18T10:15:04.599510057Z Sende Base64-Bild für Ort 21 mit Typ image/jpeg
+2025-05-18T10:15:05.07384073Z Auth-Check mit SessionID: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:15:05.074146809Z Prüfe Session: 09f50743b3b4f3c5a83dafeed2aa1197 Existiert: true
+2025-05-18T10:15:05.074155239Z Session verlängert: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:15:05.07417462Z Bild für Ort 21 angefordert
+2025-05-18T10:15:05.983276023Z Sende Base64-Bild für Ort 21 mit Typ image/jpeg
+2025-05-18T10:15:06.331377417Z Auth-Check mit SessionID: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:15:06.331472993Z Prüfe Session: 09f50743b3b4f3c5a83dafeed2aa1197 Existiert: true
+2025-05-18T10:15:06.331490874Z Session verlängert: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:15:06.331496424Z Bild für Ort 21 angefordert
+2025-05-18T10:15:06.977551089Z Sende Base64-Bild für Ort 21 mit Typ image/jpeg
+2025-05-18T10:15:07.338598494Z Auth-Check mit SessionID: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:15:07.338628146Z Prüfe Session: 09f50743b3b4f3c5a83dafeed2aa1197 Existiert: true
+2025-05-18T10:15:07.338659218Z Session verlängert: 09f50743b3b4f3c5a83dafeed2aa1197
+2025-05-18T10:15:07.338687499Z Bild für Ort 21 angefordert
+2025-05-18T10:15:07.882388624Z Sende Base64-Bild für Ort 21 mit Typ image/jpeg
