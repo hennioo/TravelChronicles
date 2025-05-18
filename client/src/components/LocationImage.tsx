@@ -14,8 +14,44 @@ export default function LocationImage({ locationId, locationName }: LocationImag
     // Debug-Informationen zur Fehlersuche
     console.log(`LocationImage wird geladen für ID: ${locationId}`);
     
+    // SessionID aus der URL extrahieren
+    const pathname = window.location.pathname;
+    const search = window.location.search;
+    const fullUrl = window.location.href;
+    
+    // Versuche verschiedene Methoden, um die sessionId zu finden
+    let sessionId = '';
+    
+    // Methode 1: Aus dem Pathname (für URL-Format /map/sessionId-xyz/)
+    const sessionIdFromPath = pathname.match(/sessionId[-=]([^\/&?#]+)/i);
+    if (sessionIdFromPath) {
+      sessionId = sessionIdFromPath[1];
+      console.log("SessionID aus URL-Pfad gefunden:", sessionId);
+    }
+    
+    // Methode 2: Aus der URL-Suche (für URL-Format ?sessionId=xyz)
+    if (!sessionId) {
+      const searchParams = new URLSearchParams(search);
+      const sessionIdFromSearch = searchParams.get('sessionId');
+      if (sessionIdFromSearch) {
+        sessionId = sessionIdFromSearch;
+        console.log("SessionID aus URL-Query gefunden:", sessionId);
+      }
+    }
+    
+    // Methode 3: Direkt aus der vollständigen URL
+    if (!sessionId) {
+      const directMatch = fullUrl.match(/sessionId[-=]([^\/&?#]+)/i);
+      if (directMatch) {
+        sessionId = directMatch[1];
+        console.log("SessionID direkt aus URL gefunden:", sessionId);
+      }
+    }
+    
+    console.log(`LocationImage verwendet SessionID: ${sessionId || 'keine'}`);
+    
     // Das tatsächliche Bild vom Server laden
-    fetch(`/api/locations/${locationId}/image?nocache=${Date.now()}`)
+    fetch(`/api/locations/${locationId}/image?sessionId=${sessionId}&nocache=${Date.now()}`)
       .then(response => {
         console.log(`Bild-Antwort Status für ID ${locationId}:`, response.status);
         if (!response.ok) {
