@@ -13,7 +13,6 @@ export const locations = pgTable("locations", {
   highlight: text("highlight").notNull(),
   latitude: text("latitude").notNull(),
   longitude: text("longitude").notNull(),
-  countryCode: text("country_code").notNull(),
   image: text("image").notNull(),
 });
 

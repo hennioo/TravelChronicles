@@ -1,4 +1,3 @@
-
 import { pool } from './server/db';
 import fs from 'fs';
 import path from 'path';
@@ -13,8 +12,8 @@ async function testLocationUpload() {
     // Insert test location with image
     const result = await pool.query(`
       INSERT INTO locations 
-      (name, description, date, highlight, latitude, longitude, countryCode, image, image_type) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      (name, description, date, highlight, latitude, longitude, image, image_type) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id
     `, [
       'Test Location',
@@ -23,7 +22,6 @@ async function testLocationUpload() {
       'Test highlight',
       '48.1351',
       '11.5820',
-      'DE',
       imageBase64,
       'image/jpeg'
     ]);
