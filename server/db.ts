@@ -3,11 +3,16 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = process.env.DATABASE_URL?.trim();
 
 if (!DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is not set!");
 }
+
+// Log connection attempt (without password)
+console.log('Attempting to connect to database:', 
+  DATABASE_URL.replace(/:[^:]*@/, ':***@')
+);
 
 export const pool = new Pool({
   connectionString: DATABASE_URL,
