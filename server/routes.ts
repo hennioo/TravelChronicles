@@ -157,7 +157,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   }
   
-  // Nur das Bild eines Ortes abrufen
+  // Einfache Testbild-Route ohne Authentifizierung (für Diagnose)
+  app.get("/test-image-direct", async (req, res) => {
+    try {
+      // Nehmen wir an, wir wollen ein einfaches Bild aus der Datenbank holen (z.B. ID 26)
+      const locationId = 26;
+      console.log(`TEST-ROUTE: Lade Bild für Ort ${locationId}`);
+      
+      const result = await pool.query(`
+        SELECT image, image_type
+        FROM locations
+        WHERE id = $1 AND image IS NOT NULL
+      `, [locationId]);
+      
+      if (result.rows.length === 0 || !result.rows[0].image) {
+        return res.status(404).send('Bild nicht gefunden');
+      }
+      
+      const imageBase64 = result.rows[0].image;
+      const imageType = result.rows[0].image_type || 'image/jpeg';
+      
+      // Strikte Header-Kontrolle
+      res.removeHeader('X-Powered-By');
+      res.removeHeader('ETag');
+      
+      // Anti-Cache-Header
+      res.setHeader('Cache-Control', 'no-store, private, no-cache, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      
+      // Content-Type MUSS korrekt sein
+      res.setHeader('Content-Type', imageType);
+      
+      // Base64 zu Binär konvertieren
+      const imageBuffer = Buffer.from(imageBase64, 'base64');
+      console.log(`TEST-ROUTE: Sende Bild mit Typ ${imageType} und Größe ${imageBuffer.length} Bytes`);
+      
+      // Binärdaten zurücksenden
+      return res.end(imageBuffer);
+    } catch (error) {
+      console.error('Test-Image-Fehler:', error);
+      res.status(500).send('Fehler beim Test-Bild');
+    }
+  });
+
+  // Nur das Bild eines Ortes abrufen (überarbeitete Version)
   app.get("/api/locations/:id/image", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -186,6 +229,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const imageBase64 = result.rows[0].image;
         const imageType = result.rows[0].image_type || 'image/jpeg';
         
+        // Lösche alle vorherigen Header
+        res.removeHeader('X-Powered-By');
+        res.removeHeader('ETag');
+        
         // Den Cache verhindern
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.setHeader('Pragma', 'no-cache');
@@ -198,8 +245,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const imageBuffer = Buffer.from(imageBase64, 'base64');
         
         // Binärdaten direkt senden
-        console.log(`Sende Base64-Bild für Ort ${id} mit Typ ${imageType} als Binärdaten`);
-        return res.send(imageBuffer);
+        console.log(`Sende Bild für Ort ${id} mit Typ ${imageType} und Größe ${imageBuffer.length} Bytes direkt`);
+        
+        // Verwende res.end statt res.send für maximale Kontrolle
+        return res.end(imageBuffer);
       } catch (imageError) {
         console.error(`Fehler beim Verarbeiten des Bildes für Ort ${id}:`, imageError);
         return res.status(500).json({ 
