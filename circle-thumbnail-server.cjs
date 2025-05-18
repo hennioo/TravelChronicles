@@ -815,11 +815,11 @@ app.get('/', requireAuth, (req, res) => {
         }
         
         .pin-circle img {
-          width: 120%;
-          height: 120%;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%; /* macht es rund */
           object-fit: cover;
           object-position: center center;
-          transform: translateX(-5%);
         }
 
         
