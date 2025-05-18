@@ -1353,12 +1353,6 @@ app.get('/map', requireAuth, function(req, res) {
       var maxRetries = 3;
       
       image.onerror = function() {
-        // Wenn die Location während des Bilderladens gelöscht wurde
-        if (document.getElementById('location-detail') === null) {
-          console.log('Detailansicht wurde geschlossen, breche Bildladen ab');
-          return; // Breche ab, wenn die Detailansicht nicht mehr existiert
-        }
-        
         if (retryCount < maxRetries) {
           retryCount++;
           console.log('Fehler beim Laden des Bildes, Versuch ' + retryCount + ' von ' + maxRetries);
@@ -1366,9 +1360,8 @@ app.get('/map', requireAuth, function(req, res) {
           var newTimestamp = new Date().getTime();
           image.src = '/api/locations/' + location.id + '/image?sessionId=' + sessionId + '&nocache=' + newTimestamp + '&retry=' + retryCount;
         } else {
-          // Fallback-Bild
-          image.src = '/uploads/couple.jpg?nocache=' + new Date().getTime();
-          console.error('Fehler beim Laden des Bildes nach ' + maxRetries + ' Versuchen');
+          image.src = '/uploads/couple.jpg';
+          console.error('Endgültiger Fehler beim Laden des Bildes nach ' + maxRetries + ' Versuchen');
         }
       };
       
@@ -1699,9 +1692,6 @@ app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
 app.delete('/api/locations/:id', requireAuth, async (req, res) => {
   try {
     const id = req.params.id;
-    
-    // Warten, um sicherzustellen, dass laufende Bildanfragen abgeschlossen sind
-    await new Promise(resolve => setTimeout(resolve, 500));
     
     await deleteLocation(id, res);
   } catch (error) {
