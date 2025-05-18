@@ -1337,16 +1337,32 @@ app.get('/map', requireAuth, function(req, res) {
       
       // Bild
       var image = document.createElement('img');
-      image.src = '/api/locations/' + location.id + '/image?sessionId=' + sessionId + '&t=' + new Date().getTime();
+      // Garantierte Cache-Vermeidung mit Timestamp
+      var timestamp = new Date().getTime();
+      image.src = '/api/locations/' + location.id + '/image?sessionId=' + sessionId + '&nocache=' + timestamp;
       image.alt = location.title || 'Ortsbild';
       image.style.width = '100%';
       image.style.maxHeight = '300px';
       image.style.objectFit = 'cover';
       image.style.borderRadius = '4px';
       image.style.marginBottom = '15px';
+      image.style.backgroundColor = '#111'; // Dunklerer Hintergrund für das Bild
+      
+      // Versuche das Bild mehrfach zu laden
+      var retryCount = 0;
+      var maxRetries = 3;
+      
       image.onerror = function() {
-        image.src = '/uploads/couple.jpg';
-        console.error('Fehler beim Laden des Bildes');
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log('Fehler beim Laden des Bildes, Versuch ' + retryCount + ' von ' + maxRetries);
+          // Neuer Cache-Parameter bei jedem Versuch
+          var newTimestamp = new Date().getTime();
+          image.src = '/api/locations/' + location.id + '/image?sessionId=' + sessionId + '&nocache=' + newTimestamp + '&retry=' + retryCount;
+        } else {
+          image.src = '/uploads/couple.jpg';
+          console.error('Endgültiger Fehler beim Laden des Bildes nach ' + maxRetries + ' Versuchen');
+        }
       };
       
       // Beschreibung
