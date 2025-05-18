@@ -1537,10 +1537,13 @@ app.post('/api/locations', requireAuth, upload.single('image'), async (req, res)
       return res.status(400).json({ error: 'Titel und Koordinaten sind erforderlich' });
     }
     
+    // Bild als Base64 einlesen
+    const imageData = fs.readFileSync(req.file.path, { encoding: 'base64' });
+    
     // In die Datenbank einfügen
     const result = await pool.query(
-      'INSERT INTO locations (title, latitude, longitude, description, image, image_type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      [title, latitude, longitude, description || null, req.file.path, req.file.mimetype]
+      'INSERT INTO locations (title, latitude, longitude, description, image_data, image_type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      [title, latitude, longitude, description || null, imageData, req.file.mimetype]
     );
     
     console.log(`Ort mit ID ${result.rows[0].id} erstellt`);
@@ -1561,30 +1564,26 @@ app.post('/api/locations', requireAuth, upload.single('image'), async (req, res)
 app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
   try {
     const id = req.params.id;
+    console.log(`Bild für Ort ${id} angefordert`);
     
-    const result = await pool.query('SELECT image, image_type FROM locations WHERE id = $1', [id]);
+    const result = await pool.query('SELECT image_data, image_type FROM locations WHERE id = $1', [id]);
     
     // Absoluter Pfad zum Uploads-Verzeichnis
     const absoluteUploadsDir = path.resolve(uploadsDir);
     
-    if (result.rows.length === 0 || !result.rows[0].image) {
-      console.log(`Bild für Ort ${id} nicht gefunden`);
+    if (result.rows.length === 0 || !result.rows[0].image_data) {
+      console.log(`Bild für Ort ${id} nicht gefunden (keine Daten in DB)`);
       return res.sendFile(path.join(absoluteUploadsDir, 'couple.jpg'));
     }
     
-    const { image, image_type } = result.rows[0];
+    const { image_data, image_type } = result.rows[0];
     
-    // Wenn der Pfad absolut ist
-    if (image && fs.existsSync(image)) {
-      console.log(`Sende Bild: ${image}`);
-      return res.sendFile(path.resolve(image));
-    }
-    
-    // Wenn der Pfad relativ ist
-    const relativePath = path.join(absoluteUploadsDir, path.basename(image));
-    if (fs.existsSync(relativePath)) {
-      console.log(`Sende Bild (relativ): ${relativePath}`);
-      return res.sendFile(relativePath);
+    // Sende Base64-Daten als Bild
+    if (image_data) {
+      console.log(`Sende Bild für Ort ${id} mit Typ ${image_type}`);
+      const buffer = Buffer.from(image_data, 'base64');
+      res.setHeader('Content-Type', image_type);
+      return res.send(buffer);
     }
     
     // Fallback zum Pärchenbild
