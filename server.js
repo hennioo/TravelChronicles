@@ -1,1083 +1,542 @@
-// Finale Render-kompatible Version
 const express = require('express');
-const path = require('path');
 const { Pool } = require('pg');
 const multer = require('multer');
+const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const cookieParser = require('cookie-parser');
+const sharp = require('sharp');
 
-// Import der neuen Kartenansicht
-const { generateMapView } = require('./new-map-view');
+// In-Memory Sessions (würden bei Neustart verloren gehen)
+const sessions = {};
 
-// Express-App und Port
+// Verbindung zur Datenbank
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// Prüfe, ob die Umgebungsvariable für den Zugriffscode existiert
+if (!process.env.ACCESS_CODE) {
+  console.warn("Warnung: Umgebungsvariable ACCESS_CODE nicht gesetzt. Verwende Standard-Code 'suuuu'.");
+}
+const ACCESS_CODE = process.env.ACCESS_CODE || 'suuuu';
+
+// Express-App
 const app = express();
 const port = process.env.PORT || 10000;
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Globale Variablen
-let pool;
-let dbConnected = false;
-const sessions = {};
-const ACCESS_CODE = process.env.ACCESS_CODE || 'suuuu';
-
-// Hosting-Konfiguration
-const PRODUCTION_DOMAIN = 'susio.site';
-const isProduction = process.env.NODE_ENV === 'production' || 
-                     (process.env.RENDER && process.env.RENDER === 'true');
-
-// Verschiedene mögliche Uploads-Verzeichnisse einrichten für unterschiedliche Umgebungen
-const uploadsDirectories = [
-  path.join(__dirname, 'uploads'),  // Standard
-  path.join(__dirname, 'dist', 'uploads'),  // Für Render
-  path.join(__dirname, 'dist', 'public', 'uploads'),  // Alternative für Render
-  path.join(__dirname, '..', 'uploads'),  // Für relative Pfade
-  path.join(__dirname, '..', 'dist', 'uploads'),  // Weitere Alternative
-  '/opt/render/project/src/uploads',  // Absoluter Pfad für Render
-  '/opt/render/project/src/dist/uploads'  // Weitere Render-Option
-];
-
-let uploadsDir = '';
-
-// Versuche alle möglichen Verzeichnisse
-for (const dir of uploadsDirectories) {
-  try {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-      console.log('Uploads-Verzeichnis erstellt: ' + dir);
-    } else {
-      console.log('Uploads-Verzeichnis existiert: ' + dir);
-      
-      // Überprüfe, ob das couple.jpg hier existiert
-      const couplePath = path.join(dir, 'couple.jpg');
-      if (fs.existsSync(couplePath)) {
-        console.log('Pärchenbild gefunden in: ' + couplePath);
-        uploadsDir = dir;
-        break;
-      }
-    }
-    
-    // Wenn Verzeichnis existiert aber kein couple.jpg, trotzdem merken für später
-    if (uploadsDir === '') {
-      uploadsDir = dir;
-    }
-  } catch (error) {
-    console.error('Fehler beim Erstellen des Verzeichnisses ' + dir + ': ' + error.message);
-  }
-}
-
-console.log('Verwende Uploads-Verzeichnis: ' + uploadsDir);
-
-// Prüfen, ob das Pärchenbild existiert
-const coupleImagePath = path.join(uploadsDir, 'couple.jpg');
-if (!fs.existsSync(coupleImagePath)) {
-  console.warn('WARNUNG: Pärchenbild nicht gefunden: ' + coupleImagePath);
-}
-
-// Multer Storage für Uploads
-const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename: function(req, file, cb) {
-    // UUID für den Dateinamen generieren
-    const uniqueName = Date.now() + '-' + crypto.randomUUID() + path.extname(file.originalname);
-    cb(null, uniqueName);
-  }
-});
-
-const upload = multer({ 
-  storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB Limit
-  fileFilter: function(req, file, cb) {
-    // Erlaubte Dateitypen
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/heic'];
-    
-    if (allowedMimeTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Ungültiger Dateityp. Erlaubt sind nur JPG, PNG und HEIC.'));
-    }
-  }
-});
-
-// Statisches Verzeichnis
-app.use('/uploads', express.static(uploadsDir));
-
-// Datenbank-Verbindung
+// Datenbank-Funktionen
 async function connectToDatabase() {
   try {
-    // Debugging-Info für Render
-    console.log('Umgebungsvariablen (ohne Werte):', {
-      DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
-      SUPABASE_URL_EXISTS: !!process.env.SUPABASE_URL,
-      SUPABASE_PASSWORD_EXISTS: !!process.env.SUPABASE_PASSWORD,
-      NODE_ENV: process.env.NODE_ENV
-    });
-    
-    // Direkter Zugriff auf DATABASE_URL, da diese auf Render konfiguriert ist
-    let connectionString = process.env.DATABASE_URL;
-    
-    // Sicherheitsprüfung für Datenbankkonfiguration
-    if (!connectionString) {
-      console.error('Fehler: DATABASE_URL ist nicht konfiguriert');
-      return false;
-    }
-    
-    console.log('Verbindungsstring-Länge:', connectionString.length, 'Zeichen');
-    
-    pool = new Pool({
-      connectionString,
-      ssl: {
-        rejectUnauthorized: false
-      }
-    });
-    
-    // Test-Abfrage
-    const now = await pool.query('SELECT NOW()');
-    console.log('Datenbankverbindung erfolgreich hergestellt:', { now: now.rows[0].now });
-    
-    // Prüfen, ob die Tabellen existieren, sonst erstellen
-    const tablesExist = await checkTablesExist();
-    console.log('Tabelle locations existiert:', tablesExist);
-    
-    if (!tablesExist) {
-      await createTables();
-    }
-    
-    return true;
+    const client = await pool.connect();
+    console.log('Datenbankverbindung hergestellt');
+    return client;
   } catch (error) {
     console.error('Fehler bei der Datenbankverbindung:', error);
-    return false;
+    throw error;
   }
 }
 
-// Prüfen, ob die Tabellen existieren
 async function checkTablesExist() {
+  const client = await connectToDatabase();
   try {
-    const result = await pool.query(`
+    const result = await client.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'locations'
+        WHERE table_name = 'locations'
       );
     `);
-    return result.rows[0].exists;
+    
+    if (!result.rows[0].exists) {
+      await createTables(client);
+    } else {
+      console.log('Tabellen existieren bereits');
+    }
   } catch (error) {
     console.error('Fehler beim Prüfen der Tabellen:', error);
-    return false;
+    throw error;
+  } finally {
+    client.release();
   }
 }
 
-// Tabellen erstellen
 async function createTables() {
+  const client = await connectToDatabase();
   try {
-    await pool.query(`
+    // Erstelle Locations-Tabelle
+    await client.query(`
       CREATE TABLE IF NOT EXISTS locations (
         id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        latitude NUMERIC(10, 6) NOT NULL,
+        longitude NUMERIC(10, 6) NOT NULL,
         description TEXT,
-        latitude DECIMAL(10, 8) NOT NULL,
-        longitude DECIMAL(11, 8) NOT NULL,
-        image TEXT,
-        image_data BYTEA,
-        image_type TEXT,
-        thumbnail_data BYTEA,
-        date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        image_data TEXT,
+        image_type VARCHAR(50),
+        thumbnail_data TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    
     console.log('Tabellen erfolgreich erstellt');
-    return true;
   } catch (error) {
     console.error('Fehler beim Erstellen der Tabellen:', error);
-    return false;
+    throw error;
+  } finally {
+    client.release();
   }
 }
 
-// Session erstellen
+// Session-Funktionen
 function createSession() {
-  const sessionId = crypto.randomUUID();
+  const sessionId = crypto.randomBytes(16).toString('hex');
   sessions[sessionId] = {
-    authenticated: true,
-    created: Date.now()
+    created: Date.now(),
+    lastActive: Date.now()
   };
+  console.log(`Neue Session erstellt: ${sessionId}`);
   return sessionId;
 }
 
-// Prüfen, ob eine Session gültig ist
 function isValidSession(sessionId) {
-  if (!sessionId || !sessions[sessionId]) {
+  const session = sessions[sessionId];
+  
+  if (!session) {
+    console.log(`Prüfe Session: ${sessionId} Existiert: false`);
     return false;
   }
   
-  // Session-Timeout nach 24 Stunden
-  const sessionTimeout = 24 * 60 * 60 * 1000; // 24 Stunden
-  const now = Date.now();
-  const sessionAge = now - sessions[sessionId].created;
+  console.log(`Prüfe Session: ${sessionId} Existiert: true`);
   
-  if (sessionAge > sessionTimeout) {
+  // Prüfe, ob die Session abgelaufen ist (24 Stunden)
+  const now = Date.now();
+  const sessionAge = now - session.created;
+  const maxAge = 24 * 60 * 60 * 1000; // 24 Stunden
+  
+  if (sessionAge > maxAge) {
+    console.log(`Session abgelaufen: ${sessionId}`);
     delete sessions[sessionId];
     return false;
   }
   
-  return sessions[sessionId].authenticated;
+  // Aktualisiere den Zeitstempel der letzten Aktivität
+  session.lastActive = now;
+  console.log(`Session verlängert: ${sessionId}`);
+  
+  return true;
 }
 
 // Auth-Middleware
 function requireAuth(req, res, next) {
-  const sessionId = req.query.sessionId;
+  const sessionId = req.query.sessionId || req.cookies.sessionId;
   
-  if (isValidSession(sessionId)) {
-    // Session verlängern
-    if (sessions[sessionId]) {
-      sessions[sessionId].created = Date.now();
-    }
-    return next();
+  console.log(`Auth-Check mit SessionID: ${sessionId}`);
+  
+  if (!sessionId || !isValidSession(sessionId)) {
+    console.log(`Ungültige Session: ${sessionId}`);
+    return res.status(401).json({ success: false, error: 'Nicht autorisiert' });
   }
   
-  res.redirect('/?error=' + encodeURIComponent('Bitte melde dich an, um diese Seite zu sehen.'));
+  next();
 }
 
-// Helper-Funktion für das Löschen eines Ortes
-async function deleteLocation(id, res, redirectUrl = null) {
-  try {
-    // Lösche direkt den Ort aus der Datenbank
-    // Die Bild-Daten werden automatisch mitgelöscht, da sie in derselben Tabelle sind
-    const deleteResult = await pool.query('DELETE FROM locations WHERE id = $1 RETURNING id', [id]);
-    
-    if (deleteResult.rows.length > 0) {
-      // Ort wurde erfolgreich gelöscht
-      
-      if (redirectUrl) {
-        return res.redirect(redirectUrl);
-      }
-      
-      res.json({ success: true });
-    } else {
-      if (redirectUrl) {
-        return res.redirect(redirectUrl + '?error=Ort nicht gefunden');
-      }
-      
-      res.status(404).json({ error: 'Ort nicht gefunden' });
-    }
-  } catch (error) {
-    console.error('Fehler beim Löschen des Ortes:', error);
-    
-    if (redirectUrl) {
-      return res.redirect(redirectUrl + '?error=' + encodeURIComponent('Fehler beim Löschen: ' + error.message));
-    }
-    
-    res.status(500).json({ error: error.message });
-  }
-}
-
-// Funktion zum Generieren von Thumbnails für alle bestehenden Orte ohne Thumbnails
-async function generateAllMissingThumbnails() {
-  try {
-    if (!dbConnected) {
-      console.log('Datenbank nicht verbunden, überspringe Thumbnail-Generierung');
-      return;
-    }
-    
-    console.log('Prüfe auf fehlende Thumbnails für bestehende Orte...');
-    
-    // Hole alle Orte, die ein Bild aber kein Thumbnail haben
-    const result = await pool.query(
-      'SELECT id, image_data, image_type FROM locations WHERE image_data IS NOT NULL AND thumbnail_data IS NULL'
-    );
-    
-    if (result.rows.length === 0) {
-      console.log('Alle Orte haben bereits Thumbnails');
-      return;
-    }
-    
-    console.log(`${result.rows.length} Orte ohne Thumbnails gefunden, generiere Thumbnails...`);
-    
-    // Generiere Thumbnails für jeden Ort
-    for (const location of result.rows) {
-      await ensureThumbnailExists(location.id, location.image_data, location.image_type);
-    }
-    
-    console.log('Alle fehlenden Thumbnails wurden generiert');
-  } catch (error) {
-    console.error('Fehler beim Generieren der Thumbnails:', error);
-  }
-}
-
-// Verbindung zur Datenbank herstellen
-connectToDatabase().then(connected => {
-  dbConnected = connected;
-  console.log('Datenbankverbindung Status:', dbConnected);
-  
-  // Nach erfolgreicher Verbindung alle fehlenden Thumbnails generieren
-  if (dbConnected) {
-    generateAllMissingThumbnails();
-  }
-}).catch(error => {
-  console.error('Fehler beim Verbinden zur Datenbank:', error);
+// Multer für Datei-Uploads konfigurieren
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 15 * 1024 * 1024 } // 15MB Limit
 });
 
-// ROUTES
-
-// Startseite / Login
-app.get('/', function(req, res) {
-  const error = req.query.error || '';
-  
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="de">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Susibert</title>
-      <style>
-        body {
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-          background-color: #1a1a1a;
-          color: white;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-        }
-        
-        .container {
-          width: 90%;
-          max-width: 400px;
-          background-color: #000;
-          border-radius: 12px;
-          padding: 30px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-          text-align: center;
-        }
-        
-        .logo {
-          margin-bottom: 20px;
-          position: relative;
-          width: 150px;
-          height: 150px;
-          border-radius: 50%;
-          overflow: hidden;
-          margin: 0 auto 30px;
-          border: 3px solid #f59a0c;
-        }
-        
-        .logo img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        
-        h1 {
-          color: #f59a0c;
-          margin-bottom: 30px;
-          font-size: 2.5rem;
-          font-weight: bold;
-        }
-        
-        .form-group {
-          margin-bottom: 20px;
-        }
-        
-        label {
-          display: block;
-          text-align: left;
-          margin-bottom: 8px;
-          color: #ccc;
-        }
-        
-        input {
-          width: 100%;
-          padding: 12px;
-          border-radius: 6px;
-          border: 1px solid #333;
-          background-color: #222;
-          color: white;
-          font-size: 1rem;
-          box-sizing: border-box;
-        }
-        
-        button {
-          width: 100%;
-          padding: 12px;
-          background-color: #f59a0c;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 1.1rem;
-          font-weight: bold;
-          margin-top: 10px;
-          transition: background-color 0.3s;
-        }
-        
-        button:hover {
-          background-color: #e58e0b;
-        }
-        
-        .error {
-          color: #ff5555;
-          margin-top: 20px;
-          font-size: 0.9rem;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="logo">
-          <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.src='/uploads/couple.png'; this.onerror=null;">
-        </div>
-        <h1>Susibert</h1>
-        <form action="/login" method="post">
-          <div class="form-group">
-            <label for="accessCode">Zugangs-Code</label>
-            <input type="password" id="accessCode" name="accessCode" placeholder="Code eingeben" required autofocus>
-          </div>
-          <button type="submit">Anmelden</button>
-          ${error ? `<div class="error">${error}</div>` : ''}
-        </form>
-      </div>
-    </body>
-    </html>
-  `);
-});
-
-// Login-Verarbeitung
-app.post('/login', function(req, res) {
+// API-Routen
+// Login mit Zugangscode
+app.post('/api/login', (req, res) => {
   const { accessCode } = req.body;
   
-  if (accessCode === ACCESS_CODE) {
-    const sessionId = createSession();
-    res.redirect('/map?sessionId=' + sessionId);
-  } else {
-    res.redirect('/?error=' + encodeURIComponent('Falscher Zugangs-Code. Bitte versuche es erneut.'));
+  console.log(`Login-Versuch mit Code: ${accessCode ? '******' : 'undefined'}`);
+  
+  if (!accessCode || accessCode !== ACCESS_CODE) {
+    return res.status(401).json({
+      success: false,
+      error: 'Falscher Zugangscode'
+    });
   }
+  
+  const sessionId = createSession();
+  
+  // Session-Cookie setzen
+  res.cookie('sessionId', sessionId, {
+    maxAge: 24 * 60 * 60 * 1000, // 24 Stunden
+    httpOnly: true
+  });
+  
+  res.json({
+    success: true,
+    sessionId: sessionId
+  });
 });
 
 // Logout
-app.get('/logout', function(req, res) {
-  const sessionId = req.query.sessionId;
+app.post('/api/logout', (req, res) => {
+  const sessionId = req.cookies.sessionId;
   
   if (sessionId && sessions[sessionId]) {
     delete sessions[sessionId];
+    console.log(`Session beendet: ${sessionId}`);
   }
   
-  res.redirect('/');
-});
-
-// Geschützte Kartenansicht mit Leaflet
-app.get('/map', requireAuth, function(req, res) {
-  // Prüfe, ob die Datenbankverbindung aktiv ist
-  if (!dbConnected) {
-    return res.send(`<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Susibert - Datenbankfehler</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background-color: #1a1a1a;
-      color: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    
-    .header {
-      background-color: #222;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #f59a0c;
-      text-decoration: none;
-    }
-    
-    .logo-circle {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 2px solid #f59a0c;
-    }
-    
-    .logo-circle img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .logo-text {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    
-    .error-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-      text-align: center;
-    }
-    
-    .error-message {
-      background-color: #ff5252;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-      max-width: 600px;
-    }
-    
-    .btn {
-      background-color: #f59a0c;
-      color: black;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      margin-top: 1rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <a href="/" class="logo">
-      <div class="logo-circle">
-        <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.src='/uploads/couple.png'">
-      </div>
-      <span class="logo-text">Susibert</span>
-    </a>
-  </div>
-  
-  <div class="error-container">
-    <div class="error-message">
-      <h2>Datenbankverbindung nicht verfügbar</h2>
-      <p>Die Verbindung zur Datenbank konnte nicht hergestellt werden. Bitte versuche es später erneut.</p>
-    </div>
-    <a href="/" class="btn">Zurück zur Anmeldung</a>
-  </div>
-</body>
-</html>`);
-  }
-
-  // Debug-Ausgabe für den Pfad der Uploads
-  console.log('Debug: Map-Seite wird geladen mit Uploads-Verzeichnis:', {
-    uploadsDir: uploadsDir,
-    dirname: __dirname,
-    env: process.env.NODE_ENV,
-    host: req.get('host'),
-    protocol: req.protocol
-  });
-
-  // Pfad zum Pärchenbild
-  const coupleImageUrl = '/uploads/couple.jpg';
-
-  // Neue Layout-Funktion für die Kartenansicht verwenden
-  return res.send(generateMapView(coupleImageUrl));
-});
-
-// Admin-Bereich
-app.get('/admin', requireAuth, function(req, res) {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="de">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Susibert Admin</title>
-      <style>
-        body {
-          font-family: system-ui, -apple-system, sans-serif;
-          background-color: #1a1a1a;
-          color: #f5f5f5;
-          margin: 0;
-          padding: 20px;
-        }
-        
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-        
-        h1 {
-          color: #f59a0c;
-          margin: 0;
-        }
-        
-        .btn {
-          background-color: #333;
-          color: #fff;
-          border: none;
-          padding: 8px 12px;
-          border-radius: 4px;
-          cursor: pointer;
-          text-decoration: none;
-          font-size: 0.9rem;
-          transition: background-color 0.2s;
-        }
-        
-        .btn:hover {
-          background-color: #444;
-        }
-        
-        .btn-primary {
-          background-color: #f59a0c;
-          color: #000;
-        }
-        
-        .btn-primary:hover {
-          background-color: #e58e0b;
-        }
-        
-        .btn-danger {
-          background-color: #e74c3c;
-          color: white;
-        }
-        
-        .btn-danger:hover {
-          background-color: #c0392b;
-        }
-        
-        .card {
-          background-color: #222;
-          border-radius: 8px;
-          padding: 20px;
-          margin-bottom: 20px;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .section-title {
-          color: #f59a0c;
-          font-size: 1.2rem;
-          margin-top: 0;
-          margin-bottom: 15px;
-          border-bottom: 1px solid #333;
-          padding-bottom: 8px;
-        }
-        
-        .confirmation {
-          display: none;
-          margin-top: 10px;
-          background-color: rgba(255, 0, 0, 0.1);
-          padding: 10px;
-          border-radius: 4px;
-          border: 1px solid #f55;
-        }
-        
-        .confirmation p {
-          color: #f55;
-          margin: 0 0 10px 0;
-        }
-        
-        .confirmation-buttons {
-          display: flex;
-          gap: 10px;
-        }
-        
-        .form-group {
-          margin-bottom: 15px;
-        }
-        
-        .form-group label {
-          display: block;
-          margin-bottom: 5px;
-          color: #ccc;
-        }
-        
-        .form-control {
-          width: 100%;
-          padding: 8px;
-          background-color: #333;
-          border: 1px solid #444;
-          border-radius: 4px;
-          color: #fff;
-          font-size: 0.9rem;
-        }
-        
-        .confirmation-count {
-          font-weight: bold;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>Susibert Admin</h1>
-        <div>
-          <a href="/map?sessionId=${req.query.sessionId}" class="btn">Zurück zur Karte</a>
-          <a href="/logout?sessionId=${req.query.sessionId}" class="btn btn-primary">Abmelden</a>
-        </div>
-      </div>
-      
-      <!-- Datenbank-Verwaltung -->
-      <div class="card">
-        <h2 class="section-title">Datenbank-Verwaltung</h2>
-        <p>Hier kannst du die Datenbank zurücksetzen und alle gespeicherten Orte löschen.</p>
-        
-        <button id="resetDbBtn" class="btn btn-danger">Datenbank zurücksetzen</button>
-        
-        <div id="confirmationStep1" class="confirmation">
-          <p>Bist du sicher? Diese Aktion wird <span class="confirmation-count">ALLE Orte und Bilder</span> unwiderruflich löschen!</p>
-          <div class="confirmation-buttons">
-            <button id="step1Cancel" class="btn">Abbrechen</button>
-            <button id="step1Confirm" class="btn btn-danger">Ja, weiter</button>
-          </div>
-        </div>
-        
-        <div id="confirmationStep2" class="confirmation">
-          <p>Letzte Warnung: Nach dieser Aktion gibt es kein Zurück mehr!</p>
-          <div class="confirmation-buttons">
-            <button id="step2Cancel" class="btn">Abbrechen</button>
-            <button id="step2Confirm" class="btn btn-danger">Ja, wirklich löschen</button>
-          </div>
-        </div>
-        
-        <div id="confirmationStep3" class="confirmation">
-          <p>Tippe "LÖSCHEN" ein, um zu bestätigen:</p>
-          <div class="form-group">
-            <input type="text" id="deleteConfirmation" class="form-control" placeholder="LÖSCHEN">
-          </div>
-          <div class="confirmation-buttons">
-            <button id="step3Cancel" class="btn">Abbrechen</button>
-            <button id="step3Confirm" class="btn btn-danger">Datenbank unwiderruflich löschen</button>
-          </div>
-        </div>
-      </div>
-      
-      <script>
-        // Reset-Bestätigung
-        const resetDbBtn = document.getElementById('resetDbBtn');
-        const confirmationStep1 = document.getElementById('confirmationStep1');
-        const confirmationStep2 = document.getElementById('confirmationStep2');
-        const confirmationStep3 = document.getElementById('confirmationStep3');
-        
-        // Schritt 1
-        resetDbBtn.addEventListener('click', function() {
-          confirmationStep1.style.display = 'block';
-          resetDbBtn.style.display = 'none';
-        });
-        
-        document.getElementById('step1Cancel').addEventListener('click', function() {
-          confirmationStep1.style.display = 'none';
-          resetDbBtn.style.display = 'block';
-        });
-        
-        document.getElementById('step1Confirm').addEventListener('click', function() {
-          confirmationStep1.style.display = 'none';
-          confirmationStep2.style.display = 'block';
-        });
-        
-        // Schritt 2
-        document.getElementById('step2Cancel').addEventListener('click', function() {
-          confirmationStep2.style.display = 'none';
-          resetDbBtn.style.display = 'block';
-        });
-        
-        document.getElementById('step2Confirm').addEventListener('click', function() {
-          confirmationStep2.style.display = 'none';
-          confirmationStep3.style.display = 'block';
-        });
-        
-        // Schritt 3
-        document.getElementById('step3Cancel').addEventListener('click', function() {
-          confirmationStep3.style.display = 'none';
-          resetDbBtn.style.display = 'block';
-        });
-        
-        document.getElementById('step3Confirm').addEventListener('click', function() {
-          const deleteConfirmation = document.getElementById('deleteConfirmation').value;
-          
-          if (deleteConfirmation === 'LÖSCHEN') {
-            // Redirect zum Reset-Endpunkt
-            window.location.href = '/api/reset-database?sessionId=${req.query.sessionId}';
-          } else {
-            alert('Bitte gib "LÖSCHEN" ein, um zu bestätigen.');
-          }
-        });
-      </script>
-    </body>
-    </html>
-  `);
-});
-
-// Sharp für Bildmanipulation importieren
-const sharp = require('sharp');
-
-// API-Endpunkte
-
-// Thumbnail aus der Datenbank abrufen
-app.get('/api/thumbnails/:id', async (req, res) => {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verfügbar' });
-  }
-  
-  try {
-    const id = req.params.id;
-    const result = await pool.query('SELECT thumbnail_data, image_type FROM locations WHERE id = $1', [id]);
-    
-    if (result.rows.length === 0 || !result.rows[0].thumbnail_data) {
-      // Fallback auf das Pärchenbild, wenn kein Thumbnail gefunden wurde
-      const defaultImagePath = path.join(uploadsDir, 'couple.jpg');
-      if (fs.existsSync(defaultImagePath)) {
-        // Verkleinertes Thumbnail vom Pärchenbild erstellen
-        const thumbnailBuffer = await sharp(defaultImagePath)
-          .resize(60, 60, { fit: 'cover' })
-          .toBuffer();
-        
-        res.contentType('image/jpeg');
-        return res.send(thumbnailBuffer);
-      } else {
-        return res.status(404).send('Thumbnail nicht gefunden');
-      }
-    }
-    
-    // Setze den korrekten Content-Type
-    const imageType = result.rows[0].image_type || 'image/jpeg';
-    res.contentType(imageType);
-    
-    // Sende das Thumbnail als Binärdaten
-    res.send(result.rows[0].thumbnail_data);
-  } catch (error) {
-    console.error('Fehler beim Abrufen des Thumbnails:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Prüfen und ggf. generieren von Thumbnails für bestehende Orte
-async function ensureThumbnailExists(id, imageData, imageType) {
-  try {
-    // Prüfen, ob bereits ein Thumbnail existiert
-    const thumbResult = await pool.query('SELECT thumbnail_data FROM locations WHERE id = $1', [id]);
-    
-    if (thumbResult.rows.length > 0 && thumbResult.rows[0].thumbnail_data) {
-      // Thumbnail existiert bereits
-      return;
-    }
-    
-    if (!imageData) {
-      console.log(`Kein Bild für Ort ${id} vorhanden, kann kein Thumbnail generieren.`);
-      return;
-    }
-    
-    // Thumbnail mit Sharp generieren
-    const thumbnailBuffer = await sharp(imageData)
-      .resize(60, 60, { fit: 'cover' })
-      .toBuffer();
-    
-    // Thumbnail in der Datenbank speichern
-    await pool.query('UPDATE locations SET thumbnail_data = $1 WHERE id = $2', [thumbnailBuffer, id]);
-    console.log(`Thumbnail für Ort ${id} nachträglich generiert.`);
-  } catch (error) {
-    console.error(`Fehler beim Generieren des Thumbnails für Ort ${id}:`, error);
-  }
-}
-
-// Bild aus der Datenbank abrufen
-app.get('/api/images/:id', async (req, res) => {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verfügbar' });
-  }
-  
-  try {
-    const id = req.params.id;
-    const result = await pool.query('SELECT image_data, image_type FROM locations WHERE id = $1', [id]);
-    
-    if (result.rows.length === 0 || !result.rows[0].image_data) {
-      // Fallback auf das Pärchenbild, wenn kein Bild gefunden wurde
-      const defaultImagePath = path.join(uploadsDir, 'couple.jpg');
-      if (fs.existsSync(defaultImagePath)) {
-        const defaultImage = fs.readFileSync(defaultImagePath);
-        res.contentType('image/jpeg');
-        return res.send(defaultImage);
-      } else {
-        return res.status(404).send('Bild nicht gefunden');
-      }
-    }
-    
-    // Setze den korrekten Content-Type
-    const imageType = result.rows[0].image_type || 'image/jpeg';
-    res.contentType(imageType);
-    
-    // Stelle sicher, dass ein Thumbnail existiert, falls es noch nicht erstellt wurde
-    await ensureThumbnailExists(id, result.rows[0].image_data, imageType);
-    
-    // Sende das Bild als Binärdaten
-    res.send(result.rows[0].image_data);
-  } catch (error) {
-    console.error('Fehler beim Abrufen des Bildes:', error);
-    res.status(500).json({ error: error.message });
-  }
+  res.clearCookie('sessionId');
+  res.json({ success: true });
 });
 
 // Alle Orte abrufen
-app.get('/api/locations', async (req, res) => {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verfügbar' });
-  }
+app.get('/api/locations', requireAuth, async (req, res) => {
+  console.log('Rufe alle Orte ab');
   
   try {
-    const result = await pool.query('SELECT * FROM locations ORDER BY date DESC');
+    const result = await pool.query(`
+      SELECT id, title, latitude, longitude, description, created_at, 
+      CASE WHEN thumbnail_data IS NOT NULL THEN true ELSE false END as has_image
+      FROM locations
+      ORDER BY created_at DESC
+    `);
     
-    // Absolute URLs für Bilder
-    const baseUrl = isProduction ? `https://${PRODUCTION_DOMAIN}` : '';
+    console.log(`${result.rows.length} Orte abgerufen`);
     
-    const locations = result.rows.map(location => {
-      // Bild-URL und Thumbnail-URL über die API-Endpunkte
-      if (location.id) {
-        // URL für das Vollbild (wird erst geladen, wenn Details angezeigt werden)
-        location.image = `${baseUrl}/api/images/${location.id}`;
-        
-        // URL für das Thumbnail (für die Listenansicht)
-        location.thumbnail = `${baseUrl}/api/thumbnails/${location.id}`;
-      }
-      
-      return location;
+    res.json({
+      success: true,
+      locations: result.rows
     });
-    
-    res.json(locations);
   } catch (error) {
     console.error('Fehler beim Abrufen der Orte:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Datenbankfehler'
+    });
   }
 });
 
-// Neuen Ort hinzufügen
-app.post('/api/locations', requireAuth, upload.single('image'), async (req, res) => {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verfügbar' });
-  }
-  
+// Einen bestimmten Ort abrufen
+app.get('/api/locations/:id', requireAuth, async (req, res) => {
   try {
-    // Validierung
-    const { name, latitude, longitude, description } = req.body;
+    const { id } = req.params;
     
-    if (!name || !latitude || !longitude) {
-      return res.status(400).json({ error: 'Name, Breitengrad und Längengrad sind erforderlich' });
+    const result = await pool.query(`
+      SELECT id, title, latitude, longitude, description, created_at 
+      FROM locations 
+      WHERE id = $1
+    `, [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Ort nicht gefunden'
+      });
     }
     
-    let imageData = null;
-    let thumbnailData = null;
-    let imageType = null;
-    let imageName = null;
-    
-    if (req.file) {
-      // Bild-Daten aus der Datei lesen
-      imageData = fs.readFileSync(req.file.path);
-      imageType = req.file.mimetype;
-      imageName = req.file.filename;
-      
-      // Thumbnail erstellen (60x60 Pixel)
-      try {
-        thumbnailData = await sharp(req.file.path)
-          .resize(60, 60, { fit: 'cover' })
-          .toBuffer();
-        
-        console.log('Thumbnail erstellt: ' + thumbnailData.length + ' Bytes');
-      } catch (thumbError) {
-        console.error('Fehler beim Erstellen des Thumbnails:', thumbError);
-      }
-      
-      // Temporäre Datei löschen, da wir sie in der Datenbank speichern
-      try {
-        fs.unlinkSync(req.file.path);
-      } catch (unlinkError) {
-        console.warn('Konnte temporäre Datei nicht löschen:', unlinkError);
-      }
-    }
-    
-    // Einfügen in die Datenbank mit Bild- und Thumbnail-Daten
-    const result = await pool.query(
-      'INSERT INTO locations (name, description, latitude, longitude, image, image_data, image_type, thumbnail_data) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-      [name, description || null, latitude, longitude, imageName, imageData, imageType, thumbnailData]
-    );
-    
-    const newLocation = result.rows[0];
-    
-    // Setze die Bild-URL und Thumbnail-URL auf die API-Endpunkte
-    if (newLocation.id) {
-      const baseUrl = isProduction ? `https://${PRODUCTION_DOMAIN}` : '';
-      newLocation.image = `${baseUrl}/api/images/${newLocation.id}`;
-      newLocation.thumbnail = `${baseUrl}/api/thumbnails/${newLocation.id}`;
-    }
-    
-    // Entferne die großen Binärdaten aus der Antwort
-    delete newLocation.image_data;
-    delete newLocation.thumbnail_data;
-    
-    res.status(201).json(newLocation);
+    res.json(result.rows[0]);
   } catch (error) {
-    console.error('Fehler beim Hinzufügen des Ortes:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Fehler beim Abrufen des Ortes:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Datenbankfehler'
+    });
+  }
+});
+
+// Bild für einen Ort abrufen (optimiert)
+app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Bild für Ort ${id} angefordert`);
+    
+    const result = await pool.query(`
+      SELECT image_data, image_type
+      FROM locations
+      WHERE id = $1 AND image_data IS NOT NULL
+    `, [id]);
+    
+    if (result.rows.length === 0 || !result.rows[0].image_data) {
+      console.log(`Ort ${id} nicht gefunden oder hat keine Bilddaten`);
+      return res.status(404).send('Bild nicht gefunden');
+    }
+    
+    const { image_data, image_type } = result.rows[0];
+    
+    // Verbessertes Caching-Header
+    res.set('Cache-Control', 'public, max-age=31536000'); // 1 Jahr
+    res.set('Content-Type', image_type);
+    
+    // Base64-Daten dekodieren und als Binärdaten senden
+    const imageBuffer = Buffer.from(image_data, 'base64');
+    res.send(imageBuffer);
+    
+  } catch (error) {
+    console.error('Fehler beim Abrufen des Bildes:', error);
+    res.status(500).send('Serverfehler');
+  }
+});
+
+// Base64-Bild für einen Ort abrufen
+app.get('/api/locations/:id/image/base64', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await pool.query(`
+      SELECT image_data, image_type
+      FROM locations
+      WHERE id = $1 AND image_data IS NOT NULL
+    `, [id]);
+    
+    if (result.rows.length === 0 || !result.rows[0].image_data) {
+      return res.json({
+        success: false,
+        error: 'Bild nicht gefunden'
+      });
+    }
+    
+    const { image_data, image_type } = result.rows[0];
+    console.log(`Sende Base64-Bild für Ort ${id} mit Typ ${image_type}`);
+    
+    res.json({
+      success: true,
+      imageData: image_data,
+      imageType: image_type
+    });
+    
+  } catch (error) {
+    console.error('Fehler beim Abrufen des Base64-Bildes:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Serverfehler'
+    });
+  }
+});
+
+// Thumbnail für einen Ort abrufen
+app.get('/api/locations/:id/thumbnail', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await pool.query(`
+      SELECT thumbnail_data, image_type
+      FROM locations
+      WHERE id = $1 AND thumbnail_data IS NOT NULL
+    `, [id]);
+    
+    if (result.rows.length === 0 || !result.rows[0].thumbnail_data) {
+      return res.status(404).send('Thumbnail nicht gefunden');
+    }
+    
+    const { thumbnail_data, image_type } = result.rows[0];
+    
+    res.set('Cache-Control', 'public, max-age=31536000');
+    res.set('Content-Type', image_type);
+    
+    const thumbnailBuffer = Buffer.from(thumbnail_data, 'base64');
+    res.send(thumbnailBuffer);
+    
+  } catch (error) {
+    console.error('Fehler beim Abrufen des Thumbnails:', error);
+    res.status(500).send('Serverfehler');
+  }
+});
+
+// Neuen Ort erstellen
+app.post('/api/locations', requireAuth, upload.single('image'), async (req, res) => {
+  try {
+    const { title, latitude, longitude, description } = req.body;
+    console.log('Neuer Ort wird hinzugefügt');
+    
+    // Validierung
+    if (!title || !latitude || !longitude) {
+      return res.status(400).json({
+        success: false,
+        error: 'Titel, Breitengrad und Längengrad sind erforderlich'
+      });
+    }
+    
+    // Prüfe, ob ein Bild hochgeladen wurde
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Ein Bild ist erforderlich'
+      });
+    }
+    
+    console.log(`Bild hochgeladen: ${req.file.originalname}, ${req.file.size} Bytes, ${req.file.mimetype}`);
+    
+    // Bildverarbeitung mit Sharp
+    let imageBuffer = req.file.buffer;
+    let imageType = req.file.mimetype;
+    
+    // Konvertiere HEIC zu JPEG falls nötig
+    if (req.file.originalname.toLowerCase().endsWith('.heic') || req.file.mimetype === 'image/heic') {
+      try {
+        const heicConvert = require('heic-convert');
+        imageBuffer = await heicConvert({
+          buffer: req.file.buffer,
+          format: 'JPEG',
+          quality: 0.9
+        });
+        imageType = 'image/jpeg';
+        console.log('HEIC zu JPEG konvertiert');
+      } catch (error) {
+        console.error('Fehler bei HEIC-Konvertierung:', error);
+        return res.status(500).json({
+          success: false,
+          error: 'Fehler bei der Bildkonvertierung'
+        });
+      }
+    }
+    
+    // Komprimiere das Bild auf maximal 800px Breite/Höhe
+    try {
+      imageBuffer = await sharp(imageBuffer)
+        .resize({
+          width: 800,
+          height: 800,
+          fit: 'inside',
+          withoutEnlargement: true
+        })
+        .jpeg({ quality: 85 })
+        .toBuffer();
+      
+      console.log(`Bild auf ${imageBuffer.length} Bytes komprimiert`);
+    } catch (error) {
+      console.error('Fehler bei der Bildkomprimierung:', error);
+    }
+    
+    // Erstelle ein Thumbnail für die Seitenleiste
+    let thumbnailBuffer;
+    try {
+      thumbnailBuffer = await sharp(imageBuffer)
+        .resize({
+          width: 100,
+          height: 100,
+          fit: 'cover'
+        })
+        .jpeg({ quality: 70 })
+        .toBuffer();
+      
+      console.log(`Thumbnail erstellt: ${thumbnailBuffer.length} Bytes`);
+    } catch (error) {
+      console.error('Fehler beim Erstellen des Thumbnails:', error);
+      thumbnailBuffer = null;
+    }
+    
+    // Speichere in der Datenbank
+    const imageBase64 = imageBuffer.toString('base64');
+    const thumbnailBase64 = thumbnailBuffer ? thumbnailBuffer.toString('base64') : null;
+    
+    const result = await pool.query(`
+      INSERT INTO locations (title, latitude, longitude, description, image_data, image_type, thumbnail_data)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id
+    `, [
+      title,
+      latitude,
+      longitude,
+      description || null,
+      imageBase64,
+      imageType,
+      thumbnailBase64
+    ]);
+    
+    console.log(`Ort mit ID ${result.rows[0].id} erstellt`);
+    
+    res.json({
+      success: true,
+      locationId: result.rows[0].id
+    });
+    
+  } catch (error) {
+    console.error('Fehler beim Erstellen des Ortes:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Serverfehler'
+    });
   }
 });
 
 // Ort löschen
-app.get('/api/locations/:id/delete', requireAuth, async (req, res) => {
-  if (!dbConnected) {
-    return res.status(503).json({ error: 'Datenbank nicht verfügbar' });
-  }
-  
+app.delete('/api/locations/:id', requireAuth, async (req, res) => {
   try {
-    const id = req.params.id;
-    await deleteLocation(id, res);
-  } catch (error) {
-    console.error('Fehler beim Löschen des Ortes:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Datenbank zurücksetzen
-app.get('/api/reset-database', requireAuth, async (req, res) => {
-  if (!dbConnected) {
-    return res.redirect('/admin?sessionId=' + req.query.sessionId + '&error=' + encodeURIComponent('Datenbank nicht verfügbar'));
-  }
-  
-  try {
-    // Alle Bilder aus dem Uploads-Verzeichnis löschen, außer couple.jpg
-    const files = fs.readdirSync(uploadsDir);
-    for (const file of files) {
-      if (file !== 'couple.jpg' && file !== 'couple.png') {
-        try {
-          fs.unlinkSync(path.join(uploadsDir, file));
-          console.log('Datei gelöscht:', file);
-        } catch (fileError) {
-          console.error('Fehler beim Löschen der Datei ' + file + ':', fileError);
-        }
-      }
+    const { id } = req.params;
+    
+    const result = await pool.query('DELETE FROM locations WHERE id = $1 RETURNING id', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Ort nicht gefunden'
+      });
     }
     
-    // Alle Orte aus der Datenbank löschen
-    await pool.query('TRUNCATE TABLE locations RESTART IDENTITY');
+    console.log(`Ort mit ID ${id} gelöscht`);
     
-    // Zur Admin-Seite zurückleiten
-    res.redirect('/admin?sessionId=' + req.query.sessionId + '&success=true');
+    res.json({
+      success: true,
+      message: 'Ort erfolgreich gelöscht'
+    });
   } catch (error) {
-    console.error('Fehler beim Zurücksetzen der Datenbank:', error);
-    res.redirect('/admin?sessionId=' + req.query.sessionId + '&error=' + encodeURIComponent('Fehler beim Zurücksetzen: ' + error.message));
+    console.error('Fehler beim Löschen des Ortes:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Datenbankfehler'
+    });
   }
 });
 
-// Server starten
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server läuft auf Port ${port}`);
+// Datenbank zurücksetzen (Admin)
+app.post('/api/admin/reset-database', requireAuth, async (req, res) => {
+  try {
+    // Lösche alle Einträge aus der locations-Tabelle
+    await pool.query('DELETE FROM locations');
+    
+    console.log('Datenbank zurückgesetzt');
+    
+    res.json({
+      success: true,
+      message: 'Datenbank erfolgreich zurückgesetzt'
+    });
+  } catch (error) {
+    console.error('Fehler beim Zurücksetzen der Datenbank:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Datenbankfehler'
+    });
+  }
 });
+
+// Frontend-Dateien bereitstellen
+app.use(express.static('public'));
+
+// Index.html für alle unbekannten Routen senden (für clientseitiges Routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+});
+
+// Starte den Server
+async function startServer() {
+  try {
+    // Prüfe und erstelle Datenbanktabellen
+    await checkTablesExist();
+    
+    // Starte den Server
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Server läuft auf Port ${port}`);
+    });
+  } catch (error) {
+    console.error('Fehler beim Starten des Servers:', error);
+  }
+}
+
+startServer();
