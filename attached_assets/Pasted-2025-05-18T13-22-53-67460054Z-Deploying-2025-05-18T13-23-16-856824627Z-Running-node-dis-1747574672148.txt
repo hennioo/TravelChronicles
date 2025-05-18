@@ -1,0 +1,37 @@
+2025-05-18T13:22:53.67460054Z ==> Deploying...
+2025-05-18T13:23:16.856824627Z ==> Running 'node dist/index.js'
+2025-05-18T13:23:16.935640556Z node:internal/modules/cjs/loader:1228
+2025-05-18T13:23:16.935667227Z   throw err;
+2025-05-18T13:23:16.935670207Z   ^
+2025-05-18T13:23:16.935672327Z 
+2025-05-18T13:23:16.935674798Z Error: Cannot find module '/opt/render/project/src/dist/index.js'
+2025-05-18T13:23:16.935677108Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-18T13:23:16.935679788Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-18T13:23:16.935681818Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-18T13:23:16.935683818Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-18T13:23:16.935686458Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-18T13:23:16.935690268Z     at node:internal/main/run_main_module:36:49 {
+2025-05-18T13:23:16.935692988Z   code: 'MODULE_NOT_FOUND',
+2025-05-18T13:23:16.935695999Z   requireStack: []
+2025-05-18T13:23:16.935698049Z }
+2025-05-18T13:23:16.935699919Z 
+2025-05-18T13:23:16.935701849Z Node.js v22.14.0
+2025-05-18T13:23:24.840811666Z ==> Exited with status 1
+2025-05-18T13:23:24.857424212Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-18T13:23:26.549948835Z ==> Running 'node dist/index.js'
+2025-05-18T13:23:26.630974735Z node:internal/modules/cjs/loader:1228
+2025-05-18T13:23:26.630997956Z   throw err;
+2025-05-18T13:23:26.631000586Z   ^
+2025-05-18T13:23:26.631002596Z 
+2025-05-18T13:23:26.631005496Z Error: Cannot find module '/opt/render/project/src/dist/index.js'
+2025-05-18T13:23:26.631008036Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-18T13:23:26.631010807Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-18T13:23:26.631012817Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-18T13:23:26.631014817Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-18T13:23:26.631017767Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-18T13:23:26.631021317Z     at node:internal/main/run_main_module:36:49 {
+2025-05-18T13:23:26.631023867Z   code: 'MODULE_NOT_FOUND',
+2025-05-18T13:23:26.631026948Z   requireStack: []
+2025-05-18T13:23:26.631029108Z }
+2025-05-18T13:23:26.631030928Z 
+2025-05-18T13:23:26.631033308Z Node.js v22.14.0

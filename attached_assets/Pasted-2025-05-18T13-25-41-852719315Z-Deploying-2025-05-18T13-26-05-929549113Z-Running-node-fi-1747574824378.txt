@@ -1,0 +1,29 @@
+2025-05-18T13:25:41.852719315Z ==> Deploying...
+2025-05-18T13:26:05.929549113Z ==> Running 'node final-render-deploy.js'
+2025-05-18T13:26:06.0254111Z file:///opt/render/project/src/final-render-deploy.js:3
+2025-05-18T13:26:06.025441641Z const express = require('express');
+2025-05-18T13:26:06.025446501Z                 ^
+2025-05-18T13:26:06.025449451Z 
+2025-05-18T13:26:06.025453451Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-05-18T13:26:06.025458061Z This file is being treated as an ES module because it has a '.js' file extension and '/opt/render/project/src/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-05-18T13:26:06.025463682Z     at file:///opt/render/project/src/final-render-deploy.js:3:17
+2025-05-18T13:26:06.025467052Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-05-18T13:26:06.025469172Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)
+2025-05-18T13:26:06.025471762Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+2025-05-18T13:26:06.025473752Z 
+2025-05-18T13:26:06.025475842Z Node.js v22.14.0
+2025-05-18T13:26:14.238512885Z ==> Exited with status 1
+2025-05-18T13:26:14.255256182Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-18T13:26:15.154128896Z ==> Running 'node final-render-deploy.js'
+2025-05-18T13:26:15.240570361Z file:///opt/render/project/src/final-render-deploy.js:3
+2025-05-18T13:26:15.240600701Z const express = require('express');
+2025-05-18T13:26:15.240605541Z                 ^
+2025-05-18T13:26:15.240608541Z 
+2025-05-18T13:26:15.240612231Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-05-18T13:26:15.240616562Z This file is being treated as an ES module because it has a '.js' file extension and '/opt/render/project/src/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-05-18T13:26:15.240622752Z     at file:///opt/render/project/src/final-render-deploy.js:3:17
+2025-05-18T13:26:15.240626542Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-05-18T13:26:15.240629722Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)
+2025-05-18T13:26:15.240632912Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+2025-05-18T13:26:15.240636012Z 
+2025-05-18T13:26:15.240638912Z Node.js v22.14.0

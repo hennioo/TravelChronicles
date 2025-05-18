@@ -1,11 +1,13 @@
-// CommonJS Format für maximale Kompatibilität
+// Optimierter Node.js Server für Render-Deployment 
+// CommonJS Format (.cjs) für Kompatibilität mit "type": "module" in package.json
 const express = require('express');
-const pg = require('pg');
-const { Pool } = pg;
+const { Pool } = require('pg');
+const path = require('path');
+const sharp = require('sharp');
 
 // Server erstellen
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
 // Grundlegende Konfiguration
 app.use(express.json());
@@ -78,14 +80,19 @@ app.get('/direct-image/:id', async (req, res) => {
     
     if (result.rows.length === 0) {
       client.release();
-      console.log(`Bild ${id} nicht in DB gefunden`);
+      console.log(`Bild ${id} nicht gefunden`);
       return res.status(404).send('Bild nicht gefunden');
     }
     
     // Bild-Daten
     const imageBase64 = result.rows[0].image;
     const imageType = result.rows[0].image_type || 'image/jpeg';
-    console.log(`Bild ${id} gefunden: Typ ${imageType}, Base64-Länge: ${imageBase64.length}`);
+    console.log(`Bild ${id} gefunden: Typ ${imageType}, Base64-Länge: ${imageBase64 ? imageBase64.length : 0}`);
+    
+    if (!imageBase64) {
+      client.release();
+      return res.status(404).send('Bild ist leer');
+    }
     
     // Buffer erstellen
     const imageBuffer = Buffer.from(imageBase64, 'base64');
@@ -173,7 +180,7 @@ app.get('/base64-json/:id', async (req, res) => {
       success: true,
       imageType,
       imageData: imageBase64,
-      length: imageBase64.length
+      length: imageBase64 ? imageBase64.length : 0
     });
     
   } catch (err) {
