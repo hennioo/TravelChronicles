@@ -1965,7 +1965,7 @@ app.get('/admin', requireAuth, (req, res) => {
     </head>
     <body>
       <div class="admin-container">
-        <h1 class="page-title">Susibert Administrations-Bereich</h1>
+        <h1 class="page-title">Susio Admin</h1>
         
         <div class="card">
           <h2 class="card-title">Navigation</h2>
