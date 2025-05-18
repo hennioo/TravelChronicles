@@ -435,12 +435,14 @@ app.get('/', requireAuth, (req, res) => {
         .plus-button {
           background-color: #f2960c;
           color: white;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px; /* Eher ein Quadrat als Kreis */
           font-size: 1.5rem;
           font-weight: bold;
-          transition: background-color 0.3s;
+          border: 1px solid #f2960c;
+          transition: background-color 0.3s, transform 0.2s;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
 
         .plus-button:hover {
@@ -483,18 +485,24 @@ app.get('/', requireAuth, (req, res) => {
         }
         
         .menu-button {
-          background: none;
-          border: none;
+          background-color: #444;
+          border-radius: 10px;
+          border: 1px solid #f2960c;
+          width: 40px;
+          height: 40px;
+          font-size: 1.4rem;
           color: white;
-          font-size: 1.5rem;
-          cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 40px;
-          height: 40px;
-          padding: 0;
+          cursor: pointer;
+          transition: background-color 0.3s, transform 0.2s;
         }
+        .menu-button:hover {
+          background-color: #555;
+          transform: scale(1.05);
+        }
+
         
         /* Hauptinhaltsbereich */
         .main-content {
@@ -1719,6 +1727,15 @@ app.get('/admin', requireAuth, (req, res) => {
           color: white;
           min-height: 100%;
         }
+
+        /* Admin-Buttons mobilefreundlich und gleich breit */
+        .button-stack .button {
+          width: 100%;
+          display: block;
+          box-sizing: border-box;
+          text-align: center;
+        }
+
         
         .admin-container {
           max-width: 900px;
