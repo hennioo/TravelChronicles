@@ -9,7 +9,6 @@ if (!DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is not set!");
 }
 
-// Log connection attempt (without password)
 console.log('Attempting to connect to database:', 
   DATABASE_URL.replace(/:[^:]*@/, ':***@')
 );
@@ -30,14 +29,13 @@ pool.on('error', (err) => {
   console.error('Unexpected database error:', err.message);
 });
 
-// Initialize Drizzle ORM
 export const db = drizzle(pool, { schema });
 
-// Create tables if they don't exist
 const initDb = async () => {
   try {
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS locations (
+      DROP TABLE IF EXISTS locations;
+      CREATE TABLE locations (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
         date TEXT NOT NULL,
@@ -45,8 +43,10 @@ const initDb = async () => {
         highlight TEXT NOT NULL,
         latitude TEXT NOT NULL,
         longitude TEXT NOT NULL,
-        country_code TEXT NOT NULL,
-        image TEXT NOT NULL
+        image TEXT NOT NULL,
+        image_type TEXT,
+        image_data TEXT,
+        thumbnail_data TEXT
       );
       
       CREATE TABLE IF NOT EXISTS access_codes (
