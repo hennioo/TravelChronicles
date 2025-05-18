@@ -1,0 +1,62 @@
+2025-05-18T22:30:03.455613379Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T22:30:12.530033555Z ==> Checking out commit b8902271a76bc376da17fa69628474904e137abc in branch main
+2025-05-18T22:30:15.510941086Z ==> Downloading cache...
+2025-05-18T22:30:30.377602874Z ==> Transferred 234MB in 8s. Extraction took 6s.
+2025-05-18T22:30:56.178895823Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T22:30:56.208047973Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T22:30:56.352382613Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T22:30:56.352404083Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T22:30:56.406153071Z ==> Running build command 'npm install express pg multer sharp cookie-parser'...
+2025-05-18T22:30:59.3913468Z 
+2025-05-18T22:30:59.39136951Z up to date, audited 634 packages in 2s
+2025-05-18T22:30:59.39137941Z 
+2025-05-18T22:30:59.391409901Z 183 packages are looking for funding
+2025-05-18T22:30:59.391414401Z   run `npm fund` for details
+2025-05-18T22:30:59.411112087Z 
+2025-05-18T22:30:59.411133208Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-18T22:30:59.411137168Z 
+2025-05-18T22:30:59.411141588Z To address issues that do not require attention, run:
+2025-05-18T22:30:59.411145458Z   npm audit fix
+2025-05-18T22:30:59.411149078Z 
+2025-05-18T22:30:59.411152538Z To address all issues (including breaking changes), run:
+2025-05-18T22:30:59.411157028Z   npm audit fix --force
+2025-05-18T22:30:59.411160358Z 
+2025-05-18T22:30:59.411164538Z Run `npm audit` for details.
+2025-05-18T22:31:01.095569939Z ==> Uploading build...
+2025-05-18T22:32:07.03695387Z ==> Uploaded in 19.5s. Compression took 46.4s
+2025-05-18T22:32:07.133791934Z ==> Build successful 🎉
+2025-05-18T22:32:23.008868466Z ==> Deploying...
+2025-05-18T22:32:46.742432748Z ==> Running 'node circle-thumbnail-server.cjs'
+2025-05-18T22:32:46.82816968Z /opt/render/project/src/circle-thumbnail-server.cjs:1130
+2025-05-18T22:32:46.828189901Z         const sessionId = '${sessionId}';
+2025-05-18T22:32:46.828192821Z 
+2025-05-18T22:32:46.828195661Z SyntaxError: missing ) after argument list
+2025-05-18T22:32:46.828198481Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-18T22:32:46.828201691Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-18T22:32:46.828204371Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-18T22:32:46.828207241Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-18T22:32:46.828210531Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-18T22:32:46.828213381Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-18T22:32:46.828216231Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-18T22:32:46.828219771Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-18T22:32:46.828224111Z     at node:internal/main/run_main_module:36:49
+2025-05-18T22:32:46.828226951Z 
+2025-05-18T22:32:46.828229581Z Node.js v22.14.0
+2025-05-18T22:32:54.247542164Z ==> Exited with status 1
+2025-05-18T22:32:54.26644782Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-18T22:32:55.684719802Z ==> Running 'node circle-thumbnail-server.cjs'
+2025-05-18T22:32:55.712133908Z /opt/render/project/src/circle-thumbnail-server.cjs:1130
+2025-05-18T22:32:55.712154728Z         const sessionId = '${sessionId}';
+2025-05-18T22:32:55.712158868Z 
+2025-05-18T22:32:55.712162518Z SyntaxError: missing ) after argument list
+2025-05-18T22:32:55.712166178Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-18T22:32:55.712170148Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-18T22:32:55.712173708Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-18T22:32:55.712177009Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-18T22:32:55.712180629Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-18T22:32:55.712184289Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-18T22:32:55.712187999Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-18T22:32:55.712191679Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-18T22:32:55.712196219Z     at node:internal/main/run_main_module:36:49
+2025-05-18T22:32:55.712199419Z 
+2025-05-18T22:32:55.712202919Z Node.js v22.14.0
