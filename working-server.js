@@ -900,7 +900,7 @@ app.get('/map', requireAuth, function(req, res) {
         </form>
       </div>
       
-      <div class="location-detail" id="locationDetail">
+      <div class="location-detail" id="locationDetail" style="z-index: 9999;">
         <div class="detail-header">
           <h3 class="detail-title" id="detailTitle"></h3>
           <button class="detail-close" id="detailClose" onclick="hideLocationDetail()">&times;</button>
@@ -1294,11 +1294,19 @@ app.get('/map', requireAuth, function(req, res) {
         detailImage.src = '/uploads/couple.jpg';
       };
       
-      // Detail-Container anzeigen
-      locationDetail.style.display = 'block';
+      // Detail-Container anzeigen - wichtig: direkt ins DOM-Style setzen
+      document.getElementById('locationDetail').style.display = 'block';
+      document.getElementById('locationDetail').style.zIndex = '9999';
+      
+      // Zusätzliche Styling-Anpassungen für bessere Sichtbarkeit
+      document.getElementById('locationDetail').style.backgroundColor = '#222';
+      document.getElementById('locationDetail').style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.5)';
       
       // Karte nur zentrieren, ohne Zoom zu ändern
       map.panTo([location.latitude, location.longitude]);
+      
+      // Bestätigung im Debug-Log
+      debug('Detailansicht sollte jetzt sichtbar sein');
     }
     
     // Detailansicht schließen

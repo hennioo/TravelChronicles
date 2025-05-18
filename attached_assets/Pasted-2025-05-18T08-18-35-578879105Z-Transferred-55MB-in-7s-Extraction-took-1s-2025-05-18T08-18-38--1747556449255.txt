@@ -1,0 +1,73 @@
+2025-05-18T08:18:35.578879105Z ==> Transferred 55MB in 7s. Extraction took 1s.
+2025-05-18T08:18:38.520536184Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T08:18:38.546389189Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T08:18:38.684263624Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T08:18:38.684291405Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T08:18:38.731723106Z ==> Running build command './build-working-server.sh'...
+2025-05-18T08:18:38.737416619Z Erstelle Build mit vereinfachtem Server...
+2025-05-18T08:18:38.737430859Z Erstelle Verzeichnisstruktur...
+2025-05-18T08:18:38.739346616Z Kopiere Server-Code...
+2025-05-18T08:18:38.741400328Z Kopiere Uploads...
+2025-05-18T08:18:38.759413727Z Erstelle package.json...
+2025-05-18T08:18:38.761270503Z Installiere Abhängigkeiten...
+2025-05-18T08:18:40.284094759Z 
+2025-05-18T08:18:40.28411618Z added 101 packages, and audited 102 packages in 1s
+2025-05-18T08:18:40.28414202Z 
+2025-05-18T08:18:40.284163341Z 15 packages are looking for funding
+2025-05-18T08:18:40.284165601Z   run `npm fund` for details
+2025-05-18T08:18:40.285223667Z 
+2025-05-18T08:18:40.285239157Z found 0 vulnerabilities
+2025-05-18T08:18:40.350700489Z === Build erfolgreich abgeschlossen ===
+2025-05-18T08:18:41.447173863Z ==> Uploading build...
+2025-05-18T08:18:52.700815155Z ==> Uploaded in 10.1s. Compression took 1.2s
+2025-05-18T08:18:52.755668963Z ==> Build successful 🎉
+2025-05-18T08:18:54.654040581Z ==> Deploying...
+2025-05-18T08:19:06.956540647Z ==> Running 'npm start'
+2025-05-18T08:19:07.187896531Z 
+2025-05-18T08:19:07.187925103Z > rest-express@1.0.0 start
+2025-05-18T08:19:07.187931113Z > NODE_ENV=production node dist/index.js
+2025-05-18T08:19:07.187934103Z 
+2025-05-18T08:19:07.472033499Z Umgebungsvariablen (ohne Werte): { DATABASE_URL_EXISTS: true, NODE_ENV: 'production' }
+2025-05-18T08:19:07.472249814Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-18T08:19:07.481947653Z Server läuft auf Port 10000
+2025-05-18T08:19:07.907242535Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-18T08:19:07.879Z }
+2025-05-18T08:19:07.961986741Z Tabelle locations existiert: true
+2025-05-18T08:19:07.962042555Z Datenbankverbindung Status: true
+2025-05-18T08:19:16.085802511Z ==> Your service is live 🎉
+2025-05-18T08:19:30.477379614Z Login-Versuch mit Code: ******
+2025-05-18T08:19:30.477551736Z Neue Session erstellt: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:30.714046804Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:30.714268699Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:19:30.714277679Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:31.125744145Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:31.125771006Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:19:31.125779467Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:31.125875173Z Rufe alle Orte ab
+2025-05-18T08:19:31.559181872Z 5 Orte abgerufen
+2025-05-18T08:19:34.53111712Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:34.531147533Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:19:34.531157283Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:34.58427467Z Bild nicht gefunden, sende Fallback
+2025-05-18T08:19:44.923390154Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:44.923503831Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:19:44.923557475Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:45.302068503Z Bild für Ort 9 nicht gefunden
+2025-05-18T08:19:53.058446782Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:53.058598932Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:19:53.058634845Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:57.532992659Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:57.53301554Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:19:57.533024771Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:57.80164487Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:57.801677323Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:19:57.801688033Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:19:57.801692633Z Rufe alle Orte ab
+2025-05-18T08:19:58.172660177Z 5 Orte abgerufen
+2025-05-18T08:20:00.937353076Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:20:00.937372267Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:20:00.937389139Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:20:00.986778556Z Bild für Ort 9 nicht gefunden
+2025-05-18T08:20:08.190599079Z Auth-Check mit SessionID: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:20:08.190633591Z Prüfe Session: ff74bcf00e2742f008acf1015d3c0e44 Existiert: true
+2025-05-18T08:20:08.190646252Z Session verlängert: ff74bcf00e2742f008acf1015d3c0e44
+2025-05-18T08:20:08.240743347Z Bild für Ort 9 nicht gefunden
