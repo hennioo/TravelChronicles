@@ -1,39 +1,16 @@
 #!/bin/bash
+echo "Erstelle einfachen Bild-Test-Server für Render..."
 
-# Build-Skript für den reinen Bildupload-Test
-echo "Starte Build für Bildupload-Test..."
+# Datenbank-URL ausgeben (ohne Inhalt)
+if [ -n "$DATABASE_URL" ]; then
+  echo "Datenbankverbindung ist konfiguriert."
+else
+  echo "WARNUNG: DATABASE_URL ist nicht gesetzt!"
+fi
 
-# NPM-Pakete installieren
-npm install express multer
+# Node-Version prüfen
+echo "Node.js Version: $(node -v)"
 
-# Verzeichnisstruktur erstellen
-echo "Erstelle Verzeichnisstruktur..."
-mkdir -p dist/uploads
-
-# Server-Code erstellen
-echo "Erstelle Server-Code..."
-cp image-test.js dist/index.js
-
-# package.json erstellen
-echo "Erstelle package.json..."
-cat > dist/package.json << EOL
-{
-  "name": "image-upload-test",
-  "version": "1.0.0",
-  "description": "Simple Image Upload Test",
-  "main": "index.js",
-  "type": "commonjs",
-  "scripts": {
-    "start": "NODE_ENV=production node index.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
-}
-EOL
-
-echo "=== Build erfolgreich abgeschlossen ==="
+# Server starten
+echo "Starte Image-Test-Server..."
+node simple-image-test.js
