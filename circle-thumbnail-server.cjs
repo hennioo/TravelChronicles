@@ -1,42 +1,75 @@
-// Verbesserte Susibert-Karten-App mit Admin-Funktionen, verbesserter UI, und Kreis-Thumbnail Pin-Markern
 const express = require('express');
 const { Pool } = require('pg');
-const path = require('path');
 const multer = require('multer');
-const cookieParser = require('cookie-parser');
-const crypto = require('crypto');
 const sharp = require('sharp');
-const fs = require('fs');
+const cookieParser = require('cookie-parser');
+const path = require('path');
+
+const app = express();
+app.use(cookieParser());
+app.use(express.json());
+
+// Verbesserte Datenbank-Konfiguration
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  },
+  // Verbindungsversuche begrenzen
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+
+// Datenbankverbindung testen
+async function testDatabaseConnection() {
+  try {
+    const client = await pool.connect();
+    console.log('✅ Datenbankverbindung erfolgreich hergestellt');
+    client.release();
+    return true;
+  } catch (err) {
+    console.error('❌ Datenbankfehler:', err.message);
+    return false;
+  }
+}
+
+// Multer für Datei-Uploads konfigurieren
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB Limit
+  }
+});
+
+// Statische Dateien bereitstellen
+app.use(express.static('public'));
+app.use('/uploads', express.static('uploads'));
+
+// Basis-Route
+app.get('/', (req, res) => {
+  res.send('Server läuft');
+});
+
+// API-Endpunkte
+app.get('/api/locations', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM locations');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Fehler beim Abrufen der Locations:', err);
+    res.status(500).json({ error: 'Datenbankfehler' });
+  }
+});
 
 // Zugangscode - Ohne Fallback für mehr Sicherheit
 const ACCESS_CODE = process.env.ACCESS_CODE || 'BITTE_UMGEBUNGSVARIABLE_SETZEN';
 
 // Server erstellen
-const app = express();
 const port = process.env.PORT || 10000;
-
-// Uploads konfigurieren
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 15 * 1024 * 1024 } // 15MB Limit
-});
-
-// Grundlegende Konfiguration
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 // Sessions speichern
 const sessions = new Map();
-
-// Datenbank-Verbindung
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false // Für Render/Supabase nötig
-  }
-});
 
 // Session-Funktionen
 function createSession() {
@@ -1195,7 +1228,7 @@ app.get('/', requireAuth, (req, res) => {
               if (monthIndex !== -1) {
                 // Monat mit führender Null (01-12)
                 const monthNumber = (monthIndex + 1).toString().padStart(2, '0');
-                return \`\${year}-\${monthNumber}\`;
+                return `${year}-${monthNumber}`;
               }
             }
             
@@ -1205,7 +1238,7 @@ app.get('/', requireAuth, (req, res) => {
               const year = date.getFullYear();
               // Monat mit führender Null (01-12)
               const month = (date.getMonth() + 1).toString().padStart(2, '0');
-              return \`\${year}-\${month}\`;
+              return `${year}-${month}`;
             }
             
             return '';
@@ -1220,7 +1253,7 @@ app.get('/', requireAuth, (req, res) => {
           try {
             showLoading('Orte werden geladen...');
             
-            const response = await fetch(\`/api/locations?sessionId=\${sessionId}\`);
+            const response = await fetch(`/api/locations?sessionId=${sessionId}`);
             
             if (!response.ok) {
               throw new Error('Fehler beim Laden der Orte');
@@ -1279,17 +1312,17 @@ app.get('/', requireAuth, (req, res) => {
         // Ort zur Karte hinzufügen
         function addLocationToMap(location) {
           // Verbesserter Pin mit kreisförmigem Thumbnail
-          const markerHtml = \`
+          const markerHtml = `
             <div class="pin-container">
               <div class="pin-body"></div>
               <div class="pin-circle">
-                <img src="/marker-thumbnail/\${location.id}?sessionId=\${sessionId}&t=\${Date.now()}" 
-                     alt="\${location.title}" 
+                <img src="/marker-thumbnail/${location.id}?sessionId=${sessionId}&t=${Date.now()}" 
+                     alt="${location.title}" 
                      onerror="this.parentNode.innerHTML = '<div style=\\'color:#333; font-weight:bold;\\'>📍</div>'">
               </div>
               <div class="pin-pointer"></div>
             </div>
-          \`;
+          `;
           
           // Custom Icon mit verbessertem Pin
           const customIcon = L.divIcon({
@@ -1325,16 +1358,16 @@ app.get('/', requireAuth, (req, res) => {
           
           let dateDisplay = '';
           if (location.date) {
-            dateDisplay = \`<div class="location-date">\${formatDate(location.date)}</div>\`;
+            dateDisplay = `<div class="location-date">${formatDate(location.date)}</div>`;
           }
           
-          locationItem.innerHTML = \`
-            <img src="/direct-image/\${location.id}?sessionId=\${sessionId}" alt="\${location.title}" class="location-thumbnail">
+          locationItem.innerHTML = `
+            <img src="/direct-image/${location.id}?sessionId=${sessionId}" alt="${location.title}" class="location-thumbnail">
             <div class="location-info">
-              <h3 class="location-title">\${location.title}</h3>
-              \${dateDisplay}
+              <h3 class="location-title">${location.title}</h3>
+              ${dateDisplay}
             </div>
-          \`;
+          `;
           
           locationItem.addEventListener('click', () => {
             showLocationDetail(location.id);
@@ -1350,7 +1383,7 @@ app.get('/', requireAuth, (req, res) => {
           try {
             showLoading('Details werden geladen...');
             
-            const response = await fetch(\`/api/locations/\${id}?sessionId=\${sessionId}\`);
+            const response = await fetch(`/api/locations/${id}?sessionId=${sessionId}`);
             
             if (!response.ok) {
               throw new Error('Fehler beim Laden der Ort-Details');
@@ -1371,7 +1404,7 @@ app.get('/', requireAuth, (req, res) => {
               dateElement.style.display = 'none';
             }
             
-            document.getElementById('detail-image').src = \`/direct-image/\${id}?sessionId=\${sessionId}&t=\${Date.now()}\`;
+            document.getElementById('detail-image').src = `/direct-image/${id}?sessionId=${sessionId}&t=${Date.now()}`;
             document.getElementById('detail-description').textContent = location.description || 'Keine Beschreibung vorhanden';
             
             // Karte auf den Ort zentrieren
@@ -1447,7 +1480,7 @@ app.get('/', requireAuth, (req, res) => {
           try {
             showLoading('Daten werden geladen...');
             
-            const response = await fetch(\`/api/locations/\${id}?sessionId=\${sessionId}\`);
+            const response = await fetch(`/api/locations/${id}?sessionId=${sessionId}`);
             
             if (!response.ok) {
               throw new Error('Fehler beim Laden der Ort-Daten');
@@ -1496,7 +1529,7 @@ app.get('/', requireAuth, (req, res) => {
           try {
             showLoading('Ort wird gelöscht...');
             
-            const response = await fetch(\`/api/locations/\${id}?sessionId=\${sessionId}\`, {
+            const response = await fetch(`/api/locations/${id}?sessionId=${sessionId}`, {
               method: 'DELETE'
             });
             
@@ -1640,11 +1673,11 @@ app.get('/', requireAuth, (req, res) => {
               
               if (locationId) {
                 // Ort bearbeiten
-                url = \`/api/locations/\${locationId}?sessionId=\${sessionId}\`;
+                url = `/api/locations/${locationId}?sessionId=${sessionId}`;
                 method = 'PUT';
               } else {
                 // Neuen Ort erstellen
-                url = \`/api/locations?sessionId=\${sessionId}\`;
+                url = `/api/locations?sessionId=${sessionId}`;
                 method = 'POST';
               }
               
@@ -2098,7 +2131,7 @@ app.get('/admin', requireAuth, (req, res) => {
             // Reset durchführen
             showLoading('Datenbank wird zurückgesetzt...');
             
-            fetch(\`/api/admin/reset-database?sessionId=\${sessionId}\`, {
+            fetch(`/api/admin/reset-database?sessionId=${sessionId}`, {
               method: 'POST'
             })
               .then(response => response.json())
@@ -2132,7 +2165,7 @@ app.get('/admin', requireAuth, (req, res) => {
             
             showLoading('Bilder werden optimiert...');
             
-            fetch(\`/api/admin/optimize-images?sessionId=\${sessionId}\`, {
+            fetch(`/api/admin/optimize-images?sessionId=${sessionId}`, {
               method: 'POST'
             })
               .then(response => response.json())
@@ -2143,7 +2176,7 @@ app.get('/admin', requireAuth, (req, res) => {
                   // Statistiken neu laden
                   loadStats();
                   
-                  alert(\`Bildoptimierung abgeschlossen: \${data.optimizedCount} Bilder optimiert.\`);
+                  alert(`Bildoptimierung abgeschlossen: ${data.optimizedCount} Bilder optimiert.`);
                 } else {
                   throw new Error(data.message || 'Unbekannter Fehler');
                 }
@@ -2163,7 +2196,7 @@ app.get('/admin', requireAuth, (req, res) => {
             
             showLoading('Thumbnails werden generiert...');
             
-            fetch(\`/api/admin/generate-thumbnails?sessionId=\${sessionId}\`, {
+            fetch(`/api/admin/generate-thumbnails?sessionId=${sessionId}`, {
               method: 'POST'
             })
               .then(response => response.json())
@@ -2171,7 +2204,7 @@ app.get('/admin', requireAuth, (req, res) => {
                 hideLoading();
                 
                 if (data.success) {
-                  alert(\`Thumbnail-Generierung abgeschlossen: \${data.generatedCount} Thumbnails erstellt.\`);
+                  alert(`Thumbnail-Generierung abgeschlossen: ${data.generatedCount} Thumbnails erstellt.`);
                 } else {
                   throw new Error(data.message || 'Unbekannter Fehler');
                 }
@@ -2191,7 +2224,7 @@ app.get('/admin', requireAuth, (req, res) => {
             
             showLoading('Datenbank wird repariert...');
             
-            fetch(\`/api/admin/fix-database?sessionId=\${sessionId}\`, {
+            fetch(`/api/admin/fix-database?sessionId=${sessionId}`, {
               method: 'POST'
             })
               .then(response => response.json())
@@ -2203,9 +2236,9 @@ app.get('/admin', requireAuth, (req, res) => {
                   loadStats();
                   
                   let message = 'Datenbank erfolgreich repariert.\\n\\n';
-                  if (data.fixedColumns > 0) message += \`- \${data.fixedColumns} fehlende Spalten hinzugefügt\\n\`;
-                  if (data.fixedImageTypes > 0) message += \`- \${data.fixedImageTypes} Bildtypen korrigiert\\n\`;
-                  if (data.missingThumbnails > 0) message += \`- \${data.missingThumbnails} fehlende Thumbnails gefunden\`;
+                  if (data.fixedColumns > 0) message += `- ${data.fixedColumns} fehlende Spalten hinzugefügt\\n`;
+                  if (data.fixedImageTypes > 0) message += `- ${data.fixedImageTypes} Bildtypen korrigiert\\n`;
+                  if (data.missingThumbnails > 0) message += `- ${data.missingThumbnails} fehlende Thumbnails gefunden`;
                   
                   alert(message);
                 } else {
@@ -2228,7 +2261,7 @@ app.get('/admin', requireAuth, (req, res) => {
             showLoading('Pärchenbild wird hochgeladen...');
             
             try {
-              const response = await fetch(\`/api/admin/couple-image?sessionId=\${sessionId}\`, {
+              const response = await fetch(`/api/admin/couple-image?sessionId=${sessionId}`, {
                 method: 'POST',
                 body: formData
               });
@@ -2261,7 +2294,7 @@ app.get('/admin', requireAuth, (req, res) => {
           try {
             showLoading('Statistiken werden geladen...');
             
-            const response = await fetch(\`/api/admin/stats?sessionId=\${sessionId}\`);
+            const response = await fetch(`/api/admin/stats?sessionId=${sessionId}`);
             
             hideLoading();
             
@@ -2888,10 +2921,17 @@ app.post('/api/admin/couple-image', requireAuth, upload.single('image'), async (
 async function startServer() {
   try {
     // Verbindung zur Datenbank testen
-    const client = await pool.connect();
-    console.log('✅ Datenbank-Verbindung erfolgreich');
-    
+    const dbConnected = await testDatabaseConnection();
+
+    if (!dbConnected) {
+      console.log('⚠️ Server startet trotz Datenbankfehler...');
+    }
+    else{
+       console.log('✅ Server startet nach erfolgreicher Datenbankverbindung...');
+    }
+
     // Tabellen-Existenz prüfen
+    const client = await pool.connect();
     const tableCheck = await client.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
@@ -2948,7 +2988,7 @@ async function startServer() {
     client.release();
     
     // Server starten
-    app.listen(port, () => {
+    app.listen(port, '0.0.0.0', () => {
       console.log(`
       ===================================
       🌍 Susibert - Mit kreisrunden Fotothumbnails läuft auf Port ${port}
@@ -2962,4 +3002,7 @@ async function startServer() {
 }
 
 // Server starten
-startServer();
+startServer().catch(err => {
+  console.error('❌ Fehler beim Starten des Servers:', err);
+  process.exit(1);
+});
