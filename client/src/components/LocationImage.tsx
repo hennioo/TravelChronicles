@@ -61,48 +61,60 @@ export default function LocationImage({ locationId, locationName }: LocationImag
     
     console.log(`LocationImage verwendet SessionID: ${sessionId}`);
     
-    // Das tatsächliche Bild direkt als Bild-URL laden
+    // Das Bild als JSON mit Base64-Daten abrufen
     const imgUrl = `/api/locations/${locationId}/image?sessionId=${sessionId}&nocache=${Date.now()}`;
-    console.log(`Lade Bild direkt von URL: ${imgUrl}`);
+    console.log(`Lade Bild als JSON: ${imgUrl}`);
     
-    // Testen mit einem Bild-Element
-    const testImg = new Image();
-    testImg.onload = () => {
-      console.log(`Bild für ID ${locationId} erfolgreich geladen`);
-      setImageData(imgUrl);
-      setIsLoading(false);
-    };
-    
-    testImg.onerror = (e) => {
-      console.error(`Fehler beim Laden des Bildes für ID ${locationId}:`, e);
-      setError("Bild konnte nicht geladen werden");
-      setIsLoading(false);
-      
-      // Direkter Test mit alternativer Methode
-      console.log("Versuche alternativ direkte Einbindung...");
-      
-      // Fallback: Hole das Bild direkt vom Server und verarbeite manuell
-      console.log("Versuche Fallback-Methode mit direktem Bild-Tag...");
-      
-      // Alternative Bild-URL generieren mit fest eingebauter Session-ID
-      const alternativeUrl = `/api/locations/${locationId}/image?sessionId=b4d1af6eb79ad71edc843b34aeeba3d6&nocache=${Date.now()}`;
-      const fallbackImg = new Image();
-      fallbackImg.onload = () => {
-        console.log("Fallback-Bild erfolgreich geladen!");
-        setImageData(alternativeUrl);
+    // JSON-Anfrage mit Fetch
+    fetch(imgUrl)
+      .then(response => {
+        console.log(`Bild-Antwort Status für ID ${locationId}:`, response.status);
+        console.log("Content-Type:", response.headers.get('content-type'));
+        
+        if (!response.ok) {
+          throw new Error(`Fehler beim Laden des Bildes: ${response.status}`);
+        }
+        
+        // Versuche als JSON zu parsen
+        if (response.headers.get('content-type')?.includes('application/json')) {
+          return response.json();
+        } else {
+          // Falls keine JSON-Antwort, dann ist es wahrscheinlich HTML (Login-Seite)
+          throw new Error('Keine JSON-Antwort vom Server - möglicherweise Session abgelaufen');
+        }
+      })
+      .then(data => {
+        console.log(`Bild-Daten für ID ${locationId}:`, {
+          success: data.success,
+          hasImageData: !!data.imageData,
+          imageType: data.imageType,
+          imageDataLength: data.imageData?.length || 0
+        });
+        
+        if (data.success && data.imageData) {
+          try {
+            // Bild aus Base64-Daten anzeigen
+            const fullImageUrl = `data:${data.imageType || 'image/jpeg'};base64,${data.imageData}`;
+            setImageData(fullImageUrl);
+            console.log(`Bild erfolgreich geladen für ID ${locationId}`);
+            setIsLoading(false);
+          } catch (parseError) {
+            console.error('Fehler beim Verarbeiten der Bilddaten:', parseError);
+            setError('Fehler beim Verarbeiten der Bilddaten');
+            setIsLoading(false);
+          }
+        } else {
+          setError("Keine Bilddaten in der Antwort");
+          setIsLoading(false);
+        }
+      })
+      .catch(err => {
+        console.error(`Bildfehler für Ort ${locationId}:`, err);
+        
+        // Alternatives Base64-Test-Bild als Fallback für Diagnose
+        setError(`Fehler: ${err.message}`);
         setIsLoading(false);
-      };
-      
-      fallbackImg.onerror = () => {
-        console.error("Auch Fallback-Methode fehlgeschlagen");
-        setError("Bild konnte mit keiner Methode geladen werden");
-        setIsLoading(false);
-      };
-      
-      fallbackImg.src = alternativeUrl;
-    };
-    
-    testImg.src = imgUrl;
+      });
       
     // Fallback: Wenn nach 5 Sekunden noch kein Bild geladen wurde, setze Fehler
     const timeout = setTimeout(() => {
