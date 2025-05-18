@@ -1428,7 +1428,7 @@ app.get('/', requireAuth, (req, res) => {
           const today = new Date();
           const year = today.getFullYear();
           const month = String(today.getMonth() + 1).padStart(2, '0');
-          document.getElementById('form-date').value = `${year}-${month}`;
+          document.getElementById('form-date').value = year + '-' + month;
         
           // Titel anpassen
           document.getElementById('form-heading').textContent = 'Ort hinzufügen';
