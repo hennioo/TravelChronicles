@@ -181,12 +181,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Base64-Daten zurückgeben
-      return res.status(200).json({ 
-        success: true,
-        imageData: result.rows[0].image,
-        imageType: result.rows[0].image_type || 'image/jpeg'
-      });
+      // Direktes Senden des Bildes als binäre Daten
+      try {
+        const imageBase64 = result.rows[0].image;
+        const imageType = result.rows[0].image_type || 'image/jpeg';
+        
+        // Den Cache verhindern
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        
+        // Extrem wichtig: Content-Type setzen
+        res.setHeader('Content-Type', imageType);
+        
+        // Base64 in binäre Daten konvertieren
+        const imageBuffer = Buffer.from(imageBase64, 'base64');
+        
+        // Binärdaten direkt senden
+        console.log(`Sende Base64-Bild für Ort ${id} mit Typ ${imageType} als Binärdaten`);
+        return res.send(imageBuffer);
+      } catch (imageError) {
+        console.error(`Fehler beim Verarbeiten des Bildes für Ort ${id}:`, imageError);
+        return res.status(500).json({ 
+          message: "Fehler beim Verarbeiten des Bildes" 
+        });
+      }
     } catch (error) {
       console.error("Error getting image:", error);
       return res.status(500).json({ 

@@ -5,8 +5,12 @@ interface LocationImageProps {
   locationName: string;
 }
 
-// Globale Session-ID für Diagnose
-const HARDCODED_SESSION_ID = "b4d1af6eb79ad71edc843b34aeeba3d6";
+// Aktuelle Session-ID aus der URL extrahieren
+function getSessionId(): string {
+  const url = window.location.href;
+  const matches = url.match(/sessionId[-=]([^\/&?#]+)/i);
+  return matches && matches[1] ? matches[1] : "b52f1161d574b33cc7d8d68bbc7cdece";
+}
 
 export default function LocationImage({ locationId, locationName }: LocationImageProps) {
   const [imageData, setImageData] = useState<string | null>(null);
@@ -14,44 +18,34 @@ export default function LocationImage({ locationId, locationName }: LocationImag
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log(`LocationImage lädt Bild für ID: ${locationId}`);
+    // Die aktuelle Session-ID aus der URL holen
+    const sessionId = getSessionId();
+    console.log(`LocationImage lädt Bild für ID: ${locationId} mit Session: ${sessionId}`);
     
-    // Einfache Version mit hartcodierter Session-ID für maximale Zuverlässigkeit
-    const imageUrl = `/api/locations/${locationId}/image?sessionId=${HARDCODED_SESSION_ID}&nocache=${Date.now()}`;
+    // Bild wird jetzt direkt (nicht als JSON) geladen und als <img> Element angezeigt
+    const imageUrl = `/api/locations/${locationId}/image?sessionId=${sessionId}&nocache=${Date.now()}`;
     
-    fetch(imageUrl)
-      .then(response => {
-        console.log(`Bild-Status für ID ${locationId}:`, response.status);
-        if (!response.ok) {
-          throw new Error(`Server-Fehler: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success && data.imageData) {
-          // Bild aus Base64-Daten erstellen
-          try {
-            const imgUrl = `data:${data.imageType || 'image/jpeg'};base64,${data.imageData}`;
-            console.log(`Bild für ID ${locationId} erfolgreich geladen`);
-            setImageData(imgUrl);
-          } catch (err) {
-            console.error("Fehler beim Verarbeiten der Bilddaten:", err);
-            setError("Fehler beim Verarbeiten der Bilddaten");
-          }
-        } else {
-          console.error("Keine Bilddaten in der Server-Antwort");
-          setError("Keine Bilddaten verfügbar");
-        }
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error(`Fehler beim Laden des Bildes (${locationId}):`, err);
-        setError(`Fehler: ${err.message}`);
-        setIsLoading(false);
-      });
-      
+    // Einfach das Image-Element erstellen und den Pfad direkt setzen
+    const img = new Image();
+    
+    img.onload = () => {
+      console.log(`Bild für ID ${locationId} erfolgreich geladen`);
+      setImageData(imageUrl);
+      setIsLoading(false);
+    };
+    
+    img.onerror = (err) => {
+      console.error(`Fehler beim Laden des Bildes (${locationId}):`, err);
+      setError(`Bild konnte nicht geladen werden`);
+      setIsLoading(false);
+    };
+    
+    // Starte den Ladevorgang
+    img.src = imageUrl;
+    
     return () => {
-      // Cleanup bei Unmount
+      // Laden abbrechen wenn Komponente unmounted
+      img.src = "";
     };
   }, [locationId]); // Nur bei Änderung der ID neu laden
 
@@ -80,6 +74,12 @@ export default function LocationImage({ locationId, locationName }: LocationImag
   }
 
   return (
-    <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${imageData})` }} />
+    <div className="w-full h-full">
+      <img 
+        src={imageData}
+        alt={`Bild von ${locationName}`}
+        className="w-full h-full object-cover rounded-md"
+      />
+    </div>
   );
 }
