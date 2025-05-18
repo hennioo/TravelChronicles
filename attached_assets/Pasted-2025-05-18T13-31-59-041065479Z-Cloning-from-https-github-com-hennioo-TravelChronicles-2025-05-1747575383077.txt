@@ -1,0 +1,38 @@
+2025-05-18T13:31:59.041065479Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T13:32:07.01181918Z ==> Checking out commit a6b80571228d5293e4c09bc8fd1b5790faa03feb in branch main
+2025-05-18T13:32:08.633099355Z ==> Downloading cache...
+2025-05-18T13:32:21.083380531Z ==> Transferred 234MB in 8s. Extraction took 4s.
+2025-05-18T13:32:26.379404331Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T13:32:26.406328592Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T13:32:26.557905122Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T13:32:26.557922772Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T13:32:26.604471349Z ==> Running build command 'npm install express pg sharp'...
+2025-05-18T13:32:28.196639192Z 
+2025-05-18T13:32:28.196661712Z up to date, audited 634 packages in 2s
+2025-05-18T13:32:28.196670392Z 
+2025-05-18T13:32:28.196683562Z 183 packages are looking for funding
+2025-05-18T13:32:28.196687063Z   run `npm fund` for details
+2025-05-18T13:32:28.212249526Z 
+2025-05-18T13:32:28.212269646Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-18T13:32:28.212272156Z 
+2025-05-18T13:32:28.212274816Z To address issues that do not require attention, run:
+2025-05-18T13:32:28.212277256Z   npm audit fix
+2025-05-18T13:32:28.212279307Z 
+2025-05-18T13:32:28.212281447Z To address all issues (including breaking changes), run:
+2025-05-18T13:32:28.212284127Z   npm audit fix --force
+2025-05-18T13:32:28.212286157Z 
+2025-05-18T13:32:28.212288877Z Run `npm audit` for details.
+2025-05-18T13:32:29.218457771Z ==> Uploading build...
+2025-05-18T13:32:50.610930186Z ==> Uploaded in 18.0s. Compression took 3.4s
+2025-05-18T13:32:50.722893497Z ==> Build successful 🎉
+2025-05-18T13:32:52.640266048Z ==> Deploying...
+2025-05-18T13:33:14.954853105Z ==> Running 'node final-image-fix.cjs'
+2025-05-18T13:33:16.079344047Z ✅ Datenbank-Verbindung erfolgreich
+2025-05-18T13:33:16.273718748Z Tabelle 'locations' existiert: true
+2025-05-18T13:33:16.357688379Z Anzahl Einträge in locations: 5
+2025-05-18T13:33:16.358369185Z 
+2025-05-18T13:33:16.358387416Z       ===================================
+2025-05-18T13:33:16.358391096Z       🖼️  Bildfix-Server läuft auf Port 10000
+2025-05-18T13:33:16.358393486Z       ===================================
+2025-05-18T13:33:16.358395926Z       
+2025-05-18T13:33:23.753759354Z ==> Your service is live 🎉
