@@ -11,9 +11,8 @@ export default function LocationImage({ locationId, locationName }: LocationImag
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Standardmäßig das Test-Image verwenden
-    // Im echten Betrieb würden wir hier `/api/locations/${locationId}/image/optimized` verwenden
-    fetch(`/api/test-image?nocache=${Date.now()}`)
+    // Das tatsächliche Bild vom Server laden
+    fetch(`/api/locations/${locationId}/image?nocache=${Date.now()}`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`Fehler beim Laden des Bildes: ${response.status}`);

@@ -1,0 +1,50 @@
+2025-05-18T11:21:39.055975842Z   run `npm fund` for details
+2025-05-18T11:21:39.056860125Z 
+2025-05-18T11:21:39.056876236Z found 0 vulnerabilities
+2025-05-18T11:21:39.113963161Z === Build erfolgreich abgeschlossen ===
+2025-05-18T11:21:40.484686164Z ==> Uploading build...
+2025-05-18T11:21:50.789144624Z ==> Uploaded in 8.8s. Compression took 1.5s
+2025-05-18T11:21:50.891394766Z ==> Build successful 🎉
+2025-05-18T11:21:52.693006441Z ==> Deploying...
+2025-05-18T11:22:06.860091668Z ==> Running 'npm start'
+2025-05-18T11:22:07.151441752Z 
+2025-05-18T11:22:07.151474253Z > rest-express@1.0.0 start
+2025-05-18T11:22:07.151480003Z > NODE_ENV=production node dist/index.js
+2025-05-18T11:22:07.151482563Z 
+2025-05-18T11:22:07.444497073Z Umgebungsvariablen (ohne Werte): { DATABASE_URL_EXISTS: true, NODE_ENV: 'production' }
+2025-05-18T11:22:07.444734889Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-18T11:22:07.454906051Z Server läuft auf Port 10000
+2025-05-18T11:22:08.311717286Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-18T11:22:08.265Z }
+2025-05-18T11:22:08.474970353Z Tabelle locations existiert: true
+2025-05-18T11:22:08.475023884Z Datenbankverbindung Status: true
+2025-05-18T11:22:14.290821878Z ==> Your service is live 🎉
+2025-05-18T11:22:37.004453736Z Login-Versuch mit Code: ******
+2025-05-18T11:22:37.00461121Z Neue Session erstellt: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:37.252596014Z Auth-Check mit SessionID: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:37.252747077Z Prüfe Session: d10ce56f6244e39e574b38c62be9f0c1 Existiert: true
+2025-05-18T11:22:37.252772438Z Session verlängert: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:37.629645256Z Auth-Check mit SessionID: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:37.629675936Z Prüfe Session: d10ce56f6244e39e574b38c62be9f0c1 Existiert: true
+2025-05-18T11:22:37.629680426Z Session verlängert: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:37.629808379Z Rufe alle Orte ab
+2025-05-18T11:22:38.007542776Z 2 Orte abgerufen
+2025-05-18T11:22:39.489321925Z Auth-Check mit SessionID: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:39.489366655Z Prüfe Session: d10ce56f6244e39e574b38c62be9f0c1 Existiert: true
+2025-05-18T11:22:39.489391956Z Session verlängert: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:39.48956994Z Bild für Ort 26 angefordert
+2025-05-18T11:22:39.542611462Z Sende Base64-Bild für Ort 26 mit Typ image/jpeg
+2025-05-18T11:22:39.777813546Z Auth-Check mit SessionID: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:39.77798133Z Prüfe Session: d10ce56f6244e39e574b38c62be9f0c1 Existiert: true
+2025-05-18T11:22:39.7779935Z Session verlängert: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:39.7780064Z Bild für Ort 26 angefordert
+2025-05-18T11:22:39.827217029Z Sende Base64-Bild für Ort 26 mit Typ image/jpeg
+2025-05-18T11:22:40.046240448Z Auth-Check mit SessionID: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:40.046292749Z Prüfe Session: d10ce56f6244e39e574b38c62be9f0c1 Existiert: true
+2025-05-18T11:22:40.04633797Z Session verlängert: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:40.04634567Z Bild für Ort 26 angefordert
+2025-05-18T11:22:40.095359274Z Sende Base64-Bild für Ort 26 mit Typ image/jpeg
+2025-05-18T11:22:40.330473146Z Auth-Check mit SessionID: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:40.330500226Z Prüfe Session: d10ce56f6244e39e574b38c62be9f0c1 Existiert: true
+2025-05-18T11:22:40.330521657Z Session verlängert: d10ce56f6244e39e574b38c62be9f0c1
+2025-05-18T11:22:40.330550498Z Bild für Ort 26 angefordert
+2025-05-18T11:22:40.379531981Z Sende Base64-Bild für Ort 26 mit Typ image/jpeg
