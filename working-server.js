@@ -1368,7 +1368,33 @@ app.get('/map', requireAuth, function(req, res) {
       deleteButton.style.marginTop = '10px';
       deleteButton.onclick = function() {
         if (confirm('Ort wirklich löschen?')) {
-          window.location.href = '/delete-location?id=' + location.id + '&sessionId=' + sessionId;
+          // API-Löschanfrage
+          fetch('/api/locations/' + location.id + '?sessionId=' + sessionId, {
+            method: 'DELETE'
+          })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('Fehler beim Löschen');
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            // Detailansicht schließen
+            detailView.remove();
+            // Marker entfernen
+            if (markers[location.id]) {
+              map.removeLayer(markers[location.id].marker);
+              map.removeLayer(markers[location.id].circle);
+              delete markers[location.id];
+            }
+            // Orte neu laden
+            loadLocations();
+            showSuccess('Ort erfolgreich gelöscht');
+          })
+          .catch(function(error) {
+            console.error('Fehler:', error);
+            showError('Fehler beim Löschen: ' + error.message);
+          });
         }
       };
       
