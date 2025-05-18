@@ -1,4 +1,4 @@
-import express, { type Express, type Request, type Response } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { pool } from "./db";
@@ -28,7 +28,7 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Bild-Optimierungsrouten hinzufügen
   app.use('/api', imageFixRouter);
-  
+
   // Health Check Endpoint für Replit Deployments
   app.get("/health", (req, res) => {
     res.status(200).json({ status: "ok" });
@@ -40,21 +40,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // API Routen
-  
+
   // Zugriffscode validieren
   app.post("/api/access-codes/validate", async (req, res) => {
     try {
       const result = validateAccessCodeSchema.safeParse(req.body);
-      
+
       if (!result.success) {
         return res.status(400).json({ 
           message: "Invalid request", 
           errors: result.error.errors 
         });
       }
-      
+
       const isValid = await storage.validateAccessCode(result.data.code);
-      
+
       if (isValid) {
         return res.status(200).json({ 
           valid: true, 
@@ -99,13 +99,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/locations/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      
+
       if (isNaN(id)) {
         return res.status(400).json({ 
           message: "Invalid location ID" 
         });
       }
-      
+
       // Direkter Datenbankzugriff für bessere Kontrolle
       const result = await pool.query(`
         SELECT id, name, description, date, highlight, latitude, longitude, countryCode,
@@ -113,13 +113,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         FROM locations
         WHERE id = $1
       `, [id]);
-      
+
       if (result.rows.length === 0) {
         return res.status(404).json({ 
           message: "Location not found" 
         });
       }
-      
+
       return res.status(200).json(result.rows[0]);
     } catch (error) {
       console.error("Error getting location:", error);
@@ -128,20 +128,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Funktion zur Überprüfung der Authentifizierung
   function requireAuth(req: Request, res: Response, next: Function) {
     // Session-ID aus der URL oder dem Request-Body erhalten
     const sessionId = req.query.sessionId || req.body?.sessionId;
-    
+
     console.log('Auth-Check mit SessionID:', sessionId);
-    
+
     // Hier würde normalerweise eine echte Session-Überprüfung stattfinden
     // Da wir keinen direkten Zugriff auf dein Session-Management haben,
     // prüfen wir nur ob die Session-ID existiert
     if (!sessionId) {
       console.log('Keine SessionID gefunden');
-      
+
       // Bei API-Endpunkten 401 zurückgeben
       if (req.path.startsWith('/api/')) {
         return res.status(401).json({ 
@@ -149,50 +149,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: 'Bitte melde dich an, um diese Funktion zu nutzen.' 
         });
       }
-      
+
       // Ansonsten zur Login-Seite umleiten
       return res.redirect('/?error=Bitte+melde+dich+an');
     }
-    
+
     // Session ist gültig
     next();
   }
-  
+
   // Einfache Testbild-Route ohne Authentifizierung (für Diagnose)
   app.get("/test-image-direct", async (req, res) => {
     try {
       // Nehmen wir an, wir wollen ein einfaches Bild aus der Datenbank holen (z.B. ID 26)
       const locationId = 26;
       console.log(`TEST-ROUTE: Lade Bild für Ort ${locationId}`);
-      
+
       const result = await pool.query(`
         SELECT image, image_type
         FROM locations
         WHERE id = $1 AND image IS NOT NULL
       `, [locationId]);
-      
+
       if (result.rows.length === 0 || !result.rows[0].image) {
         return res.status(404).send('Bild nicht gefunden');
       }
-      
+
       const imageBase64 = result.rows[0].image;
       const imageType = result.rows[0].image_type || 'image/jpeg';
-      
+
       // Strikte Header-Kontrolle
       res.removeHeader('X-Powered-By');
       res.removeHeader('ETag');
-      
+
       // Anti-Cache-Header
       res.setHeader('Cache-Control', 'no-store, private, no-cache, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
-      
+
       // Content-Type MUSS korrekt sein
       res.setHeader('Content-Type', imageType);
-      
+
       // Base64 zu Binär konvertieren
       const imageBuffer = Buffer.from(imageBase64, 'base64');
       console.log(`TEST-ROUTE: Sende Bild mit Typ ${imageType} und Größe ${imageBuffer.length} Bytes`);
-      
+
       // Binärdaten zurücksenden
       return res.end(imageBuffer);
     } catch (error) {
@@ -207,15 +207,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       console.log(`Bild für Ort ${id} angefordert`);
-      
+
       if (isNaN(id)) {
         return res.status(400).json({ message: "Ungültige Orts-ID" });
       }
-      
+
       // Mit Einzelclient für bessere Fehlerbehandlung
       const client = await pool.connect();
       console.log(`DB-Verbindung für Bild ${id} hergestellt`);
-      
+
       try {
         // Bild aus der Datenbank holen
         const result = await client.query(`
@@ -223,79 +223,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
           FROM locations
           WHERE id = $1
         `, [id]);
-        
+
         console.log(`Abfrageergebnis für Bild ${id}: ${result.rowCount} Zeilen gefunden`);
-        
+
         if (result.rows.length === 0) {
           client.release();
           console.log(`Bild ${id} nicht gefunden (keine Zeile in DB)`);
           return res.status(404).json({ message: "Bild nicht gefunden" });
         }
-        
+
         if (!result.rows[0].image) {
           client.release();
           console.log(`Bild ${id} ist NULL in der Datenbank`);
           return res.status(404).json({ message: "Leeres Bild in Datenbank" });
         }
-        
+
         // Bild-Informationen auslesen
         const imageBase64 = result.rows[0].image;
         const imageType = result.rows[0].image_type || 'image/jpeg';
         console.log(`Bild ${id} gefunden: Typ ${imageType}, Base64-Länge: ${imageBase64.length}`);
-        
+
         // Header zurücksetzen und korrekt setzen
         res.setHeader('Content-Type', imageType);
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
-        
+
         // Base64 in binäre Daten konvertieren
         const imageBuffer = Buffer.from(imageBase64, 'base64');
         console.log(`Bild ${id} in Buffer konvertiert: ${imageBuffer.length} Bytes`);
-        
+
         // Verbindung freigeben
         client.release();
-        
+
         // Binärdaten direkt senden
         res.end(imageBuffer);
-        
+
         const endTime = Date.now();
         console.log(`✅ Bild ${id} erfolgreich gesendet (${endTime - startTime}ms)`);
-        
+
       } catch (queryError: any) {
         client.release();
         console.error(`Fehler bei der Datenbankabfrage für Bild ${id}:`, queryError);
         return res.status(500).json({ message: "Datenbankfehler: " + (queryError.message || 'Unbekannter Fehler') });
       }
-      
+
     } catch (error: any) {
       console.error(`Allgemeiner Fehler beim Abrufen des Bildes ${req.params.id}:`, error);
       return res.status(500).json({ message: "Serverfehler: " + (error.message || 'Unbekannter Fehler') });
     }
   });
-  
+
   // Ort löschen
   app.delete("/api/locations/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      
+
       if (isNaN(id)) {
         return res.status(400).json({ 
           message: "Invalid location ID" 
         });
       }
-      
+
       // Überprüfen, ob der Ort existiert
       const result = await pool.query('SELECT id FROM locations WHERE id = $1', [id]);
-      
+
       if (result.rows.length === 0) {
         return res.status(404).json({ 
           message: "Location not found" 
         });
       }
-      
+
       // Ort löschen
       await pool.query('DELETE FROM locations WHERE id = $1', [id]);
-      
+
       return res.status(200).json({ 
         success: true, 
         message: "Location deleted successfully" 
@@ -307,32 +307,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Code wurde nach oben verschoben
-  
+
   // Neuen Ort hinzufügen (mit optimiertem Bild-Upload)
   app.post("/api/locations", upload.single('image'), async (req: Request, res: Response) => {
     try {
       let imageBase64 = null;
       let imageType = null;
-      
+
       // Wenn ein Bild hochgeladen wurde, verarbeiten und komprimieren
       if (req.file) {
         console.log(`Bild hochgeladen: ${req.file.originalname}, ${formatBytes(req.file.size)}, ${req.file.mimetype}`);
-        
+
         try {
           // Bild komprimieren für optimale Speicherung
           const processedImage = await compressImage(req.file.buffer, req.file.mimetype);
-          
+
           // Komprimiertes Bild in Base64 konvertieren für die Datenbank
           imageBase64 = processedImage.buffer.toString('base64');
           imageType = processedImage.mimeType;
-          
+
           console.log(`Bild verarbeitet: ${formatBytes(processedImage.originalSize)} → ${formatBytes(processedImage.compressedSize)}`);
           console.log(`Base64-Länge: ${imageBase64.length} Zeichen`);
         } catch (imageError) {
           console.error("Fehler bei der Bildverarbeitung:", imageError);
-          
+
           // Fallback: Unverarbeitetes Bild verwenden wenn Kompression fehlschlägt
           console.log("Verwende unkomprimiertes Originalbild als Fallback");
           imageBase64 = req.file.buffer.toString('base64');
@@ -344,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Ein Bild wird benötigt"
         });
       }
-      
+
       // Extrahiere Daten aus dem Request
       const locationData = {
         name: req.body.name,
@@ -359,7 +359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validiere die Daten mit zod
       const validationResult = insertLocationSchema.safeParse(locationData);
-      
+
       if (!validationResult.success) {
         return res.status(400).json({ 
           message: "Ungültige Daten", 
@@ -369,7 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Verbindung für bessere Fehlerbehandlung und Transaktionssicherheit
       const client = await pool.connect();
-      
+
       try {
         // Speichere den neuen Ort direkt in der Datenbank
         const result = await client.query(`
@@ -388,12 +388,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           imageBase64,
           imageType
         ]);
-        
+
         client.release();
-        
+
         const newLocation = result.rows[0];
         newLocation.has_image = true;
-        
+
         console.log(`✅ Neuer Ort mit ID ${newLocation.id} erfolgreich gespeichert`);
         return res.status(201).json(newLocation);
       } catch (dbError) {
@@ -411,3 +411,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   return httpServer;
 }
+
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+
+  // Ensure we're sending JSON
+  res.setHeader('Content-Type', 'application/json');
+  res.status(status).json({ 
+    error: true,
+    message: message 
+  });
+});
