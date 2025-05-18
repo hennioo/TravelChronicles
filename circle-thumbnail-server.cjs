@@ -996,7 +996,7 @@ app.get('/', requireAuth, (req, res) => {
       
       <!-- Overlay für Bearbeitungsmodus -->
       <div class="edit-mode-overlay" id="edit-mode-indicator">
-        Bearbeitungsmodus aktiv - Klicke auf die Karte, um einen Ort hinzuzufügen
+        Bearbeitungsmodus
       </div>
       
       <!-- Formular zum Hinzufügen/Bearbeiten eines Ortes -->
@@ -1533,7 +1533,7 @@ app.get('/', requireAuth, (req, res) => {
             editMode = !editMode;
             
             if (editMode) {
-              this.textContent = 'Fertig';
+              this.textContent = 'X';
               this.classList.add('primary');
               document.getElementById('edit-mode-indicator').style.display = 'block';
             } else {
