@@ -1,0 +1,73 @@
+2025-05-18T08:10:38.81607807Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T08:10:41.415580733Z ==> Checking out commit 55e2aa78409ca9f2bf403f0cd7dc26f0503b2d58 in branch main
+2025-05-18T08:10:42.818374217Z ==> Downloading cache...
+2025-05-18T08:10:51.865093516Z ==> Transferred 55MB in 7s. Extraction took 2s.
+2025-05-18T08:10:53.047253742Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T08:10:53.074607831Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T08:10:53.223879565Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T08:10:53.223900325Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T08:10:53.272687899Z ==> Running build command './build-working-server.sh'...
+2025-05-18T08:10:53.278882928Z Erstelle Build mit vereinfachtem Server...
+2025-05-18T08:10:53.278899138Z Erstelle Verzeichnisstruktur...
+2025-05-18T08:10:53.281014422Z Kopiere Server-Code...
+2025-05-18T08:10:53.283097856Z Kopiere Uploads...
+2025-05-18T08:10:53.302346256Z Erstelle package.json...
+2025-05-18T08:10:53.305509491Z Installiere Abhängigkeiten...
+2025-05-18T08:10:54.487877203Z 
+2025-05-18T08:10:54.487906733Z added 101 packages, and audited 102 packages in 1s
+2025-05-18T08:10:54.487920293Z 
+2025-05-18T08:10:54.487926744Z 15 packages are looking for funding
+2025-05-18T08:10:54.487942584Z   run `npm fund` for details
+2025-05-18T08:10:54.488922434Z 
+2025-05-18T08:10:54.488941465Z found 0 vulnerabilities
+2025-05-18T08:10:54.5459683Z === Build erfolgreich abgeschlossen ===
+2025-05-18T08:10:55.010733363Z ==> Uploading build...
+2025-05-18T08:11:03.72406305Z ==> Uploaded in 7.6s. Compression took 1.1s
+2025-05-18T08:11:03.790063362Z ==> Build successful 🎉
+2025-05-18T08:11:05.373600839Z ==> Deploying...
+2025-05-18T08:11:18.697619763Z ==> Running 'npm start'
+2025-05-18T08:11:19.002865451Z 
+2025-05-18T08:11:19.002885241Z > rest-express@1.0.0 start
+2025-05-18T08:11:19.002889101Z > NODE_ENV=production node dist/index.js
+2025-05-18T08:11:19.002891611Z 
+2025-05-18T08:11:19.315496803Z Umgebungsvariablen (ohne Werte): { DATABASE_URL_EXISTS: true, NODE_ENV: 'production' }
+2025-05-18T08:11:19.315819062Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-18T08:11:19.38258229Z Server läuft auf Port 10000
+2025-05-18T08:11:20.20510602Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-18T08:11:20.163Z }
+2025-05-18T08:11:20.327699318Z Tabelle locations existiert: true
+2025-05-18T08:11:20.327795201Z Datenbankverbindung Status: true
+2025-05-18T08:11:26.183521482Z ==> Your service is live 🎉
+2025-05-18T08:13:38.598772306Z Login-Versuch mit Code: ******
+2025-05-18T08:13:38.598987721Z Neue Session erstellt: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:38.820527994Z Auth-Check mit SessionID: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:38.820554124Z Prüfe Session: 31621e0caae059b734b041fc25839972 Existiert: true
+2025-05-18T08:13:38.820558844Z Session verlängert: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:39.11287741Z Auth-Check mit SessionID: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:39.11290658Z Prüfe Session: 31621e0caae059b734b041fc25839972 Existiert: true
+2025-05-18T08:13:39.112925941Z Session verlängert: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:39.113077885Z Rufe alle Orte ab
+2025-05-18T08:13:41.945695599Z 5 Orte abgerufen
+2025-05-18T08:13:45.019589132Z Auth-Check mit SessionID: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:45.019626113Z Prüfe Session: 31621e0caae059b734b041fc25839972 Existiert: true
+2025-05-18T08:13:45.019638564Z Session verlängert: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:45.085500869Z Bild nicht gefunden, sende Fallback
+2025-05-18T08:13:45.085993731Z Fehler beim Abrufen des Bildes: TypeError: path must be absolute or specify root to res.sendFile
+2025-05-18T08:13:45.086181516Z     at ServerResponse.sendFile (/opt/render/project/src/dist/node_modules/express/lib/response.js:441:11)
+2025-05-18T08:13:45.086185676Z     at /opt/render/project/src/dist/index.js:1477:9
+2025-05-18T08:13:45.086189687Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-18T08:13:47.315035929Z Auth-Check mit SessionID: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:47.31507832Z Prüfe Session: 31621e0caae059b734b041fc25839972 Existiert: true
+2025-05-18T08:13:47.315101511Z Session verlängert: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:47.362933534Z Bild nicht gefunden, sende Fallback
+2025-05-18T08:13:47.363110568Z Fehler beim Abrufen des Bildes: TypeError: path must be absolute or specify root to res.sendFile
+2025-05-18T08:13:47.363117679Z     at ServerResponse.sendFile (/opt/render/project/src/dist/node_modules/express/lib/response.js:441:11)
+2025-05-18T08:13:47.363121568Z     at /opt/render/project/src/dist/index.js:1477:9
+2025-05-18T08:13:47.363124499Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-18T08:13:50.02222629Z Auth-Check mit SessionID: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:50.022258511Z Prüfe Session: 31621e0caae059b734b041fc25839972 Existiert: true
+2025-05-18T08:13:50.022287231Z Session verlängert: 31621e0caae059b734b041fc25839972
+2025-05-18T08:13:50.070201626Z Bild nicht gefunden, sende Fallback
+2025-05-18T08:13:50.07033276Z Fehler beim Abrufen des Bildes: TypeError: path must be absolute or specify root to res.sendFile
+2025-05-18T08:13:50.07034261Z     at ServerResponse.sendFile (/opt/render/project/src/dist/node_modules/express/lib/response.js:441:11)
+2025-05-18T08:13:50.070364801Z     at /opt/render/project/src/dist/index.js:1477:9
+2025-05-18T08:13:50.070368061Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)

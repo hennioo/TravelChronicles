@@ -1452,9 +1452,12 @@ app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
     
     const result = await pool.query('SELECT image, image_type FROM locations WHERE id = $1', [id]);
     
+    // Absoluter Pfad zum Uploads-Verzeichnis
+    const absoluteUploadsDir = path.resolve(uploadsDir);
+    
     if (result.rows.length === 0 || !result.rows[0].image) {
       console.log(`Bild für Ort ${id} nicht gefunden`);
-      return res.sendFile(path.join(uploadsDir, 'couple.jpg'));
+      return res.sendFile(path.join(absoluteUploadsDir, 'couple.jpg'));
     }
     
     const { image, image_type } = result.rows[0];
@@ -1462,11 +1465,11 @@ app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
     // Wenn der Pfad absolut ist
     if (image && fs.existsSync(image)) {
       console.log(`Sende Bild: ${image}`);
-      return res.sendFile(image);
+      return res.sendFile(path.resolve(image));
     }
     
     // Wenn der Pfad relativ ist
-    const relativePath = path.join(uploadsDir, path.basename(image));
+    const relativePath = path.join(absoluteUploadsDir, path.basename(image));
     if (fs.existsSync(relativePath)) {
       console.log(`Sende Bild (relativ): ${relativePath}`);
       return res.sendFile(relativePath);
@@ -1474,7 +1477,7 @@ app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
     
     // Fallback zum Pärchenbild
     console.log('Bild nicht gefunden, sende Fallback');
-    res.sendFile(path.join(uploadsDir, 'couple.jpg'));
+    return res.sendFile(path.join(absoluteUploadsDir, 'couple.jpg'));
   } catch (error) {
     console.error('Fehler beim Abrufen des Bildes:', error);
     res.status(500).send('Fehler beim Abrufen des Bildes');
