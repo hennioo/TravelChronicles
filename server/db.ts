@@ -1,3 +1,4 @@
+
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
@@ -10,7 +11,9 @@ if (!DATABASE_URL) {
 
 export const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: true,
+  ssl: {
+    rejectUnauthorized: false
+  },
   max: 3,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
