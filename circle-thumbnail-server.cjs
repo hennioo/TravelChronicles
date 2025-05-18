@@ -159,7 +159,7 @@ app.get('/login', (req, res) => {
     <body>
       <div class="container">
         <div class="login-box">
-          <h1>SUSIBERT</h1>
+          <h1>SUSIO</h1>
           <img src="/couple-image" alt="Pärchenbild" class="couple-image" onerror="this.src='/couple-image'">
           <form id="login-form">
             <input type="password" id="access-code" placeholder="Zugangscode eingeben" required>
