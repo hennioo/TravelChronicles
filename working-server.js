@@ -1610,7 +1610,7 @@ app.post('/api/locations', requireAuth, upload.single('image'), async (req, res)
   }
 });
 
-// Bild eines Ortes abrufen
+// Bild eines Ortes abrufen - verbesserte Version
 app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
   try {
     const id = req.params.id;
@@ -1635,13 +1635,27 @@ app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
     const { image_data, image_type } = result.rows[0];
     
     try {
-      // Content-Type setzen (mit Fallback zu JPEG)
-      res.setHeader('Content-Type', image_type || 'image/jpeg');
-      
-      // Als Base64-Bild direkt senden
+      // HTML mit eingebettetem Data-URI Bild senden (besser für große Bilder)
       console.log(`Sende Base64-Bild für Ort ${id} mit Typ ${image_type || 'image/jpeg'}`);
-      const buffer = Buffer.from(image_data, 'base64');
-      return res.send(buffer);
+      
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; }
+            img { width: 100%; height: 100%; object-fit: contain; }
+          </style>
+        </head>
+        <body>
+          <img src="data:${image_type || 'image/jpeg'};base64,${image_data}" alt="Bild">
+        </body>
+        </html>
+      `;
+      
+      res.setHeader('Content-Type', 'text/html');
+      return res.send(html);
     } catch (imageError) {
       console.error('Fehler beim Verarbeiten des Bildes:', imageError);
       return res.sendFile(path.join(absoluteUploadsDir, 'couple.jpg'));
@@ -1651,6 +1665,39 @@ app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
     // Im Fehlerfall senden wir das Standard-Bild
     const absoluteUploadsDir = path.resolve(uploadsDir);
     return res.sendFile(path.join(absoluteUploadsDir, 'couple.jpg'));
+  }
+});
+
+// Bild eines Ortes als Base64 im JSON-Format abrufen
+app.get('/api/locations/:id/image/base64', requireAuth, async (req, res) => {
+  try {
+    const id = req.params.id;
+    console.log(`Bild für Ort ${id} als Base64 angefordert`);
+    
+    // Cache-Control Header setzen
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
+    // Direkter und vereinfachter Abruf der Bilddaten aus der Datenbank
+    const result = await pool.query('SELECT image_data, image_type FROM locations WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0 || !result.rows[0].image_data) {
+      console.log(`Ort ${id} nicht gefunden oder hat keine Bilddaten`);
+      return res.status(404).json({ success: false, message: 'Bild nicht gefunden' });
+    }
+    
+    const { image_data, image_type } = result.rows[0];
+    
+    // Als JSON mit Base64-String zurückgeben
+    return res.json({
+      success: true,
+      imageData: image_data,
+      imageType: image_type || 'image/jpeg'
+    });
+  } catch (error) {
+    console.error('Fehler beim Abrufen des Bildes:', error);
+    return res.status(500).json({ success: false, message: 'Serverfehler beim Abrufen des Bildes' });
   }
 });
 
