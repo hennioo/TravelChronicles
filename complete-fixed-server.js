@@ -1409,10 +1409,8 @@ app.get('/map', requireAuth, function(req, res) {
           <div class="location-title">\${location.title || 'Unbenannter Ort'}</div>
         \`;
         
-        item.addEventListener('click', () => {
-          showLocationDetail(location);
-          sidebar.classList.remove('open');
-        });
+        // Direkt im HTML definierter onclick-Handler
+        item.setAttribute('onclick', `showLocationDetail(${location.id}); document.getElementById('sidebar').classList.remove('open');`);
         
         locationsContainer.appendChild(item);
       });
@@ -1432,9 +1430,20 @@ app.get('/map', requireAuth, function(req, res) {
       locations.forEach(location => {
         const marker = L.marker([location.latitude, location.longitude]).addTo(map);
         
-        marker.on('click', () => {
+        // Klick auf Marker zeigt Detailansicht
+        marker.on('click', function() {
+          debug("Marker geklickt:", location.id);
           showLocationDetail(location);
         });
+        
+        // Popup-Inhalt mit Klick-Handler für "Details anzeigen"
+        marker.bindPopup(
+          '<div style="font-weight: bold; color: #f59a0c;">' + 
+          (location.title || 'Unbenannter Ort') + 
+          '</div>' +
+          '<a href="#" onclick="showLocationDetail(' + location.id + '); return false;" ' +
+          'style="color: #f59a0c;">Details anzeigen</a>'
+        );
         
         // Radius um den Marker
         const circle = L.circle([location.latitude, location.longitude], {
@@ -1450,6 +1459,9 @@ app.get('/map', requireAuth, function(req, res) {
     
     // WICHTIG: Verbesserte Detailansicht-Funktion
     function showLocationDetail(location) {
+      debug("Zeige Detailansicht für:", location);
+      
+      // Wenn eine ID übergeben wurde, finde den Ort in der Liste
       if (typeof location === 'number') {
         location = locations.find(loc => loc.id === location);
         if (!location) {
@@ -1458,6 +1470,19 @@ app.get('/map', requireAuth, function(req, res) {
         }
       }
       
+      // Wenn der Ort ein DOM-Element ist (z.B. ein angeklicktes li-Element)
+      if (location.tagName) {
+        const locationId = parseInt(location.dataset.id, 10);
+        location = locations.find(loc => loc.id === locationId);
+        if (!location) {
+          showError('Ort nicht gefunden');
+          return;
+        }
+      }
+      
+      debug("Details für Ort:", location);
+      
+      // Setze aktive ID
       activeLocationId = location.id;
       
       // Details setzen
@@ -1476,13 +1501,10 @@ app.get('/map', requireAuth, function(req, res) {
       // Detail-Container anzeigen
       locationDetail.style.display = 'block';
       
-      // Karte auf den Ort zentrieren
-      map.setView([location.latitude, location.longitude], 10);
+      // Karte nur leicht auf den Ort zentrieren, ohne Zoom zu ändern
+      map.panTo([location.latitude, location.longitude]);
       
-      // Marker hervorheben
-      if (markers[location.id]) {
-        markers[location.id].marker.openPopup();
-      }
+      debug("Detailansicht eingeblendet");
     }
     
     // Verbesserte Funktion zum Schließen der Detailansicht
