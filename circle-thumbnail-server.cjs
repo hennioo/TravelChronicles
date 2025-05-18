@@ -815,10 +815,13 @@ app.get('/', requireAuth, (req, res) => {
         }
         
         .pin-circle img {
-          width: 100%;
-          height: 100%;
+          width: 120%;
+          height: 120%;
           object-fit: cover;
+          object-position: center center;
+          transform: translateX(-5%);
         }
+
         
         /* Pin-Spitze */
         .pin-pointer {
