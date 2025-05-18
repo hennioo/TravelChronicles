@@ -11,30 +11,62 @@ export default function LocationImage({ locationId, locationName }: LocationImag
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Debug-Informationen zur Fehlersuche
+    console.log(`LocationImage wird geladen für ID: ${locationId}`);
+    
     // Das tatsächliche Bild vom Server laden
     fetch(`/api/locations/${locationId}/image?nocache=${Date.now()}`)
       .then(response => {
+        console.log(`Bild-Antwort Status für ID ${locationId}:`, response.status);
         if (!response.ok) {
           throw new Error(`Fehler beim Laden des Bildes: ${response.status}`);
         }
         return response.json();
       })
       .then(data => {
+        console.log(`Bild-Daten für ID ${locationId}:`, {
+          success: data.success,
+          hasImageData: !!data.imageData,
+          imageType: data.imageType,
+          imageDataLength: data.imageData?.length || 0
+        });
+        
         if (data.success && data.imageData) {
-          const fullImageUrl = `data:${data.imageType || 'image/jpeg'};base64,${data.imageData}`;
-          setImageData(fullImageUrl);
-          setIsLoading(false);
+          try {
+            // Zusätzliche Validierung der Base64-Daten
+            if (typeof data.imageData !== 'string' || data.imageData.length < 10) {
+              throw new Error('Ungültige Bilddaten erhalten');
+            }
+            
+            const fullImageUrl = `data:${data.imageType || 'image/jpeg'};base64,${data.imageData}`;
+            setImageData(fullImageUrl);
+            console.log(`Bild erfolgreich geladen für ID ${locationId}`);
+          } catch (parseError) {
+            console.error('Fehler beim Verarbeiten der Bilddaten:', parseError);
+            setError('Fehler beim Verarbeiten der Bilddaten');
+          }
         } else {
           setError("Keine Bilddaten in der Antwort");
-          setIsLoading(false);
         }
+        setIsLoading(false);
       })
       .catch(err => {
         console.error(`Bildfehler für Ort ${locationId}:`, err);
         setError(err.message);
         setIsLoading(false);
       });
-  }, [locationId]);
+      
+    // Fallback: Wenn nach 5 Sekunden noch kein Bild geladen wurde, setze Fehler
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        console.warn(`Timeout beim Laden des Bildes für ID ${locationId}`);
+        setError('Zeitüberschreitung beim Laden des Bildes');
+        setIsLoading(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeout);
+  }, [locationId, isLoading]);
 
   if (isLoading) {
     return (

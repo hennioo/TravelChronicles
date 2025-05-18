@@ -1,0 +1,64 @@
+2025-05-18T11:25:32.977078803Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T11:25:38.627227828Z ==> Checking out commit a430b279f999a109b67237e860acec30ca46b246 in branch main
+2025-05-18T11:25:40.032600214Z ==> Downloading cache...
+2025-05-18T11:25:50.265014501Z ==> Transferred 64MB in 7s. Extraction took 1s.
+2025-05-18T11:25:52.157896469Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T11:25:52.183280276Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T11:25:52.317647945Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T11:25:52.317664125Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T11:25:52.366165956Z ==> Running build command './build-compression-fix.sh'...
+2025-05-18T11:25:52.371871525Z Erstelle Build mit Bild-Kompression...
+2025-05-18T11:25:53.955778402Z 
+2025-05-18T11:25:53.955797662Z added 119 packages, and audited 120 packages in 1s
+2025-05-18T11:25:53.955808243Z 
+2025-05-18T11:25:53.955842563Z 18 packages are looking for funding
+2025-05-18T11:25:53.955848613Z   run `npm fund` for details
+2025-05-18T11:25:53.956703353Z 
+2025-05-18T11:25:53.956707793Z found 0 vulnerabilities
+2025-05-18T11:25:54.028701717Z === Build erfolgreich abgeschlossen ===
+2025-05-18T11:25:55.261108116Z ==> Uploading build...
+2025-05-18T11:26:07.128547427Z ==> Uploaded in 10.0s. Compression took 1.9s
+2025-05-18T11:26:07.194398541Z ==> Build successful 🎉
+2025-05-18T11:26:09.403218825Z ==> Deploying...
+2025-05-18T11:26:25.138373222Z ==> Running 'npm start'
+2025-05-18T11:26:25.425874647Z 
+2025-05-18T11:26:25.425903067Z > rest-express@1.0.0 start
+2025-05-18T11:26:25.425906687Z > NODE_ENV=production node dist/index.js
+2025-05-18T11:26:25.425908367Z 
+2025-05-18T11:26:25.662909719Z Umgebungsvariablen (ohne Werte): { DATABASE_URL_EXISTS: true, NODE_ENV: 'production' }
+2025-05-18T11:26:25.663144915Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-18T11:26:25.727227469Z Server läuft auf Port 10000
+2025-05-18T11:26:26.680595591Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-18T11:26:26.639Z }
+2025-05-18T11:26:26.814904966Z Tabelle locations existiert: true
+2025-05-18T11:26:26.814958667Z Datenbankverbindung Status: true
+2025-05-18T11:26:30.395252871Z ==> Your service is live 🎉
+2025-05-18T11:27:04.63538002Z Login-Versuch mit Code: ******
+2025-05-18T11:27:04.635561114Z Neue Session erstellt: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:04.878951357Z Auth-Check mit SessionID: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:04.879165122Z Prüfe Session: c2bcee36a9fbe9c391bc8cee3929459f Existiert: true
+2025-05-18T11:27:04.879186582Z Session verlängert: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:05.503104548Z Auth-Check mit SessionID: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:05.503124209Z Prüfe Session: c2bcee36a9fbe9c391bc8cee3929459f Existiert: true
+2025-05-18T11:27:05.503134819Z Session verlängert: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:05.503289113Z Rufe alle Orte ab
+2025-05-18T11:27:05.896408544Z 2 Orte abgerufen
+2025-05-18T11:27:06.941175087Z Auth-Check mit SessionID: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:06.941202707Z Prüfe Session: c2bcee36a9fbe9c391bc8cee3929459f Existiert: true
+2025-05-18T11:27:06.941213827Z Session verlängert: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:06.94132967Z Bild für Ort 26 angefordert
+2025-05-18T11:27:06.995982452Z Sende Base64-Bild für Ort 26 mit Typ image/jpeg
+2025-05-18T11:27:07.226222113Z Auth-Check mit SessionID: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:07.226344886Z Prüfe Session: c2bcee36a9fbe9c391bc8cee3929459f Existiert: true
+2025-05-18T11:27:07.226354996Z Session verlängert: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:07.226373447Z Bild für Ort 26 angefordert
+2025-05-18T11:27:07.276230945Z Sende Base64-Bild für Ort 26 mit Typ image/jpeg
+2025-05-18T11:27:07.492937577Z Auth-Check mit SessionID: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:07.494208907Z Prüfe Session: c2bcee36a9fbe9c391bc8cee3929459f Existiert: true
+2025-05-18T11:27:07.494223038Z Session verlängert: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:07.494228838Z Bild für Ort 26 angefordert
+2025-05-18T11:27:07.544969477Z Sende Base64-Bild für Ort 26 mit Typ image/jpeg
+2025-05-18T11:27:07.763295766Z Auth-Check mit SessionID: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:07.763318187Z Prüfe Session: c2bcee36a9fbe9c391bc8cee3929459f Existiert: true
+2025-05-18T11:27:07.763331757Z Session verlängert: c2bcee36a9fbe9c391bc8cee3929459f
+2025-05-18T11:27:07.763344858Z Bild für Ort 26 angefordert
+2025-05-18T11:27:07.812026298Z Sende Base64-Bild für Ort 26 mit Typ image/jpeg
