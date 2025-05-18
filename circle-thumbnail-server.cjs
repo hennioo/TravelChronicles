@@ -417,7 +417,25 @@ app.get('/', requireAuth, (req, res) => {
           font-weight: bold;
           color: #f2960c;
           margin: 0;
+          position: relative;
+          top: -2px;
         }
+
+        .plus-button {
+          background-color: #f2960c;
+          color: white;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          font-size: 1.5rem;
+          font-weight: bold;
+          transition: background-color 0.3s;
+        }
+
+.plus-button:hover {
+  background-color: #e08800;
+}
+
         
         /* Header-Aktionen */
         .header-actions {
@@ -915,7 +933,7 @@ app.get('/', requireAuth, (req, res) => {
           </div>
           
           <div class="header-actions">
-            <button id="edit-mode-toggle" class="menu-button" style="font-size: 2rem; color: #f2960c;">+</button>
+            <button id="edit-mode-toggle" class="menu-button plus-button">+</button>
             <button id="menu-toggle" class="menu-button">☰</button>
           </div>
         </header>
