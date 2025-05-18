@@ -1,4 +1,4 @@
-// Komplette Lösung mit eingebautem Upload- und Detailansicht-Fix
+// Einfacher funktionierender Server ohne Template-String-Probleme
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
@@ -23,49 +23,16 @@ let pool;
 let dbConnected = false;
 const sessions = {};
 
-// Verschiedene mögliche Uploads-Verzeichnisse einrichten für unterschiedliche Umgebungen
-const uploadsDirectories = [
-  path.join(__dirname, 'uploads'),  // Standard
-  path.join(__dirname, 'dist', 'uploads'),  // Für Render
-  path.join(__dirname, 'dist', 'public', 'uploads'),  // Alternative für Render
-  path.join(__dirname, '..', 'uploads'),  // Für relative Pfade
-  path.join(__dirname, '..', 'dist', 'uploads'),  // Weitere Alternative
-  '/opt/render/project/src/uploads',  // Absoluter Pfad für Render
-  '/opt/render/project/src/dist/uploads'  // Weitere Render-Option
-];
-
-let uploadsDir = '';
-
-// Versuche alle möglichen Verzeichnisse
-for (const dir of uploadsDirectories) {
-  try {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-      console.log('Uploads-Verzeichnis erstellt: ' + dir);
-    } else {
-      console.log('Uploads-Verzeichnis existiert: ' + dir);
-      
-      // Überprüfe, ob das couple.jpg hier existiert
-      const couplePath = path.join(dir, 'couple.jpg');
-      if (fs.existsSync(couplePath)) {
-        console.log('Pärchenbild gefunden in: ' + couplePath);
-        uploadsDir = dir;
-        break;
-      }
-    }
-    
-    // Wenn Verzeichnis existiert aber kein couple.jpg, trotzdem merken für später
-    if (uploadsDir === '') {
-      uploadsDir = dir;
-    }
-  } catch (error) {
-    console.error('Fehler beim Erstellen des Verzeichnisses ' + dir + ': ' + error.message);
-  }
+// Uploads-Verzeichnis
+const uploadsDir = 'uploads';
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-console.log('Verwende Uploads-Verzeichnis: ' + uploadsDir);
+// Statische Dateien
+app.use('/uploads', express.static(uploadsDir));
 
-// Multer Storage für Uploads - WICHTIG: Höheres Limit (15MB)
+// Multer Storage für Uploads
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
     cb(null, uploadsDir);
@@ -78,37 +45,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: MAX_FILE_SIZE }, // 15MB Limit (definiert oben)
-  fileFilter: function(req, file, cb) {
-    // Erlaubte Dateitypen
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/heic'];
-    
-    if (allowedMimeTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Ungültiger Dateityp. Erlaubt sind nur JPG, PNG und HEIC.'));
-    }
-  }
+  limits: { fileSize: MAX_FILE_SIZE }
 });
-
-// Statisches Verzeichnis
-app.use('/uploads', express.static(uploadsDir));
 
 // Datenbank-Verbindung
 async function connectToDatabase() {
   try {
-    // Debugging-Info
     console.log('Umgebungsvariablen (ohne Werte):', {
       DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
-      SUPABASE_URL_EXISTS: !!process.env.SUPABASE_URL,
-      SUPABASE_PASSWORD_EXISTS: !!process.env.SUPABASE_PASSWORD,
       NODE_ENV: process.env.NODE_ENV
     });
     
-    // Direkter Zugriff auf DATABASE_URL, da diese auf Render konfiguriert ist
     let connectionString = process.env.DATABASE_URL;
     
-    // Sicherheitsprüfung für Datenbankkonfiguration
     if (!connectionString) {
       console.error('Fehler: DATABASE_URL ist nicht konfiguriert');
       return false;
@@ -195,14 +144,12 @@ function createSession() {
 
 // Prüfen, ob eine Session gültig ist
 function isValidSession(sessionId) {
-  // Für Debugging
   console.log('Prüfe Session:', sessionId, 'Existiert:', !!sessions[sessionId]);
   
   if (!sessionId || !sessions[sessionId]) {
     return false;
   }
   
-  // Session-Timeout (24 Stunden)
   const sessionTimeout = 24 * 60 * 60 * 1000;
   const now = Date.now();
   const sessionAge = now - sessions[sessionId].created;
@@ -217,13 +164,11 @@ function isValidSession(sessionId) {
 
 // Auth-Middleware (verbessert)
 function requireAuth(req, res, next) {
-  // Session-ID kann in URL oder Formular-Daten sein
   const sessionId = req.query.sessionId || (req.body && req.body.sessionId);
   
   console.log('Auth-Check mit SessionID:', sessionId);
   
   if (isValidSession(sessionId)) {
-    // Session verlängern
     if (sessions[sessionId]) {
       sessions[sessionId].created = Date.now();
       console.log('Session verlängert:', sessionId);
@@ -233,7 +178,6 @@ function requireAuth(req, res, next) {
   
   console.log('Ungültige Session:', sessionId);
   
-  // Wenn API-Request, dann 401
   if (req.path.startsWith('/api/')) {
     return res.status(401).json({ 
       error: 'Nicht authentifiziert',
@@ -241,21 +185,18 @@ function requireAuth(req, res, next) {
     });
   }
   
-  // Andernfalls zur Login-Seite umleiten
   res.redirect('/?error=' + encodeURIComponent('Bitte melde dich an, um diese Seite zu sehen.'));
 }
 
 // Lösch-Funktion für Orte
 async function deleteLocation(id, res, redirectUrl = null) {
   try {
-    // Lösche den Ort aus der Datenbank
     const deleteResult = await pool.query('DELETE FROM locations WHERE id = $1 RETURNING id, image', [id]);
     
     if (deleteResult.rows.length > 0) {
       const { id, image } = deleteResult.rows[0];
       console.log(`Ort mit ID ${id} gelöscht`);
       
-      // Wenn ein Bild-Pfad existiert, lösche das Bild
       if (image && image.startsWith('/')) {
         try {
           fs.unlinkSync(image);
@@ -265,7 +206,6 @@ async function deleteLocation(id, res, redirectUrl = null) {
         }
       }
       
-      // Umleiten oder JSON-Antwort senden
       if (redirectUrl) {
         return res.redirect(redirectUrl);
       }
@@ -450,119 +390,17 @@ app.get('/logout', function(req, res) {
   res.redirect('/');
 });
 
-// Geschützte Kartenansicht mit Leaflet und eingebautem JavaScript-Fix
+// Geschützte Kartenansicht
 app.get('/map', requireAuth, function(req, res) {
-  // Prüfe, ob die Datenbankverbindung aktiv ist
   if (!dbConnected) {
-    return res.send(`<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Susibert - Datenbankfehler</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background-color: #1a1a1a;
-      color: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    
-    .header {
-      background-color: #222;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #f59a0c;
-      text-decoration: none;
-    }
-    
-    .logo-circle {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 2px solid #f59a0c;
-    }
-    
-    .logo-circle img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .logo-text {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    
-    .error-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-      text-align: center;
-    }
-    
-    .error-message {
-      background-color: #ff5252;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-      max-width: 600px;
-    }
-    
-    .btn {
-      background-color: #f59a0c;
-      color: black;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      margin-top: 1rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <a href="/" class="logo">
-      <div class="logo-circle">
-        <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.src='/uploads/couple.png'">
-      </div>
-      <span class="logo-text">Susibert</span>
-    </a>
-  </div>
-  
-  <div class="error-container">
-    <div class="error-message">
-      <h2>Datenbankverbindung nicht verfügbar</h2>
-      <p>Die Verbindung zur Datenbank konnte nicht hergestellt werden. Bitte versuche es später erneut.</p>
-    </div>
-    <a href="/" class="btn">Zurück zur Anmeldung</a>
-  </div>
-</body>
-</html>`);
+    return res.send(`
+      <h1>Datenbankverbindung nicht verfügbar</h1>
+      <a href="/">Zurück zur Anmeldung</a>
+    `);
   }
 
   const sessionId = req.query.sessionId;
   
-  // Kartenansicht mit eingebautem JavaScript-Fix
   res.send(`
 <!DOCTYPE html>
 <html>
@@ -993,8 +831,8 @@ app.get('/map', requireAuth, function(req, res) {
       <span>Susibert</span>
     </a>
     <div class="buttons">
-      <a href="/admin?sessionId=' + sessionId + '" class="admin">Admin</a>
-      <a href="/logout?sessionId=' + sessionId + '" class="logout">Abmelden</a>
+      <a href="/admin?sessionId=${sessionId}" class="admin">Admin</a>
+      <a href="/logout?sessionId=${sessionId}" class="logout">Abmelden</a>
     </div>
   </div>
   
@@ -1080,30 +918,34 @@ app.get('/map', requireAuth, function(req, res) {
   </div>
   
   <script>
-    // Hilfs-Debugging-Funktionen
-    function debug(message, data = null) {
+    // Debugging-Funktionen
+    function debug(message, data) {
       const timestamp = new Date().toISOString();
       
       if (data) {
-        console.log(\`[DEBUG \${timestamp}] \${message}\`, data);
+        console.log("[DEBUG " + timestamp + "] " + message, data);
       } else {
-        console.log(\`[DEBUG \${timestamp}] \${message}\`);
+        console.log("[DEBUG " + timestamp + "] " + message);
       }
     }
     
-    function showError(message, duration = 5000) {
+    function showError(message, duration) {
+      duration = duration || 5000;
+      
       const errorMsg = document.getElementById('errorMsg');
       errorMsg.textContent = message;
       errorMsg.style.display = 'block';
       
       debug('FEHLER ANGEZEIGT: ' + message);
       
-      setTimeout(() => {
+      setTimeout(function() {
         errorMsg.style.display = 'none';
       }, duration);
     }
     
-    function showLoading(text = "Wird hochgeladen...") {
+    function showLoading(text) {
+      text = text || "Wird hochgeladen...";
+      
       const loadingText = document.getElementById('loadingText');
       loadingText.textContent = text;
       
@@ -1140,12 +982,14 @@ app.get('/map', requireAuth, function(req, res) {
     const detailClose = document.getElementById('detailClose');
     const detailDelete = document.getElementById('detailDelete');
     
-    // Aktuelle Session-ID aus URL lesen
-    const sessionId = new URLSearchParams(window.location.search).get('sessionId');
+    // Session-ID aus URL lesen
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('sessionId');
+    
     if (!sessionId) {
       showError('Keine Session-ID in der URL gefunden');
     } else {
-      debug('Session-ID gefunden:', sessionId);
+      debug('Session-ID gefunden: ' + sessionId);
     }
     
     // Variablen
@@ -1160,33 +1004,15 @@ app.get('/map', requireAuth, function(req, res) {
     addLocationBtn.addEventListener('click', startAddLocation);
     editModeBtn.addEventListener('click', toggleEditMode);
     cancelBtn.addEventListener('click', hideAddLocationForm);
-    
-    // Stelle sicher, dass der Schließen-Button funktioniert
-    if (detailClose) {
-      detailClose.addEventListener('click', function() {
-        hideLocationDetail();
-      });
-    }
-    
+    detailClose.addEventListener('click', hideLocationDetail);
     detailDelete.addEventListener('click', deleteLocation);
     addHereBtn.addEventListener('click', addLocationHere);
     
-    // Klick außerhalb schließt das Detail-Fenster
-    document.addEventListener('click', function(e) {
-      if (locationDetail.style.display === 'block') {
-        // Prüfe, ob der Klick außerhalb des Detail-Fensters war
-        if (!locationDetail.contains(e.target) && e.target !== locationDetail) {
-          hideLocationDetail();
-        }
-      }
-    });
-    
-    // WICHTIG: Upload-Handler verbessern
+    // Upload-Handler für das Formular
     locationForm.addEventListener('submit', function(e) {
       e.preventDefault();
       debug('Formular wird abgesendet');
       
-      // Formular-Werte prüfen
       const title = locationTitle.value;
       const lat = locationLat.value;
       const lng = locationLng.value;
@@ -1198,12 +1024,8 @@ app.get('/map', requireAuth, function(req, res) {
       }
       
       const file = locationImage.files[0];
-      debug('Alle Eingaben validiert, bereite FormData vor', { 
-        title, lat, lng, 
-        fileSize: file ? file.size / (1024 * 1024) + ' MB' : 'keine Datei'
-      });
       
-      // FormData erstellen und Session-ID hinzufügen
+      // FormData erstellen
       const formData = new FormData();
       formData.append('title', title);
       formData.append('latitude', lat);
@@ -1215,23 +1037,21 @@ app.get('/map', requireAuth, function(req, res) {
       debug('Sende Daten an /api/locations');
       showLoading();
       
-      // Anfrage senden MIT Session-ID in der URL
+      // Anfrage senden
       fetch('/api/locations?sessionId=' + sessionId, {
         method: 'POST',
         body: formData
       })
-      .then(response => {
-        debug('Antwort erhalten, Status:', response.status);
+      .then(function(response) {
+        debug('Antwort erhalten, Status: ' + response.status);
         
-        // Wenn die Antwort kein JSON ist, prüfe auf Session-Fehler
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.indexOf('application/json') !== -1) {
           return response.json();
         } else {
-          return response.text().then(text => {
-            debug('Fehler beim Parsen der Antwort (ok):', text);
+          return response.text().then(function(text) {
+            debug('Fehler beim Parsen der Antwort: ' + text.substring(0, 200));
             
-            // Wenn es die Login-Seite ist
             if (text.includes('<title>Susibert</title>') || text.includes('loginForm')) {
               window.location.href = '/';
               throw new Error('Nicht eingeloggt');
@@ -1241,7 +1061,7 @@ app.get('/map', requireAuth, function(req, res) {
           });
         }
       })
-      .then(data => {
+      .then(function(data) {
         hideLoading();
         debug('Erfolgreiche Antwort:', data);
         
@@ -1265,7 +1085,7 @@ app.get('/map', requireAuth, function(req, res) {
           toggleEditMode();
         }
       })
-      .catch(error => {
+      .catch(function(error) {
         hideLoading();
         debug('Fehler beim Absenden:', error);
         
@@ -1334,7 +1154,8 @@ app.get('/map', requireAuth, function(req, res) {
     }
     
     function handleMapClick(e) {
-      const { lat, lng } = e.latlng;
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
       
       locationLat.value = lat;
       locationLng.value = lng;
@@ -1367,7 +1188,7 @@ app.get('/map', requireAuth, function(req, res) {
       locationsContainer.innerHTML = '<div style="text-align: center; color: #999;">Lade Orte...</div>';
       
       fetch('/api/locations?sessionId=' + sessionId)
-        .then(response => {
+        .then(function(response) {
           if (!response.ok) {
             if (response.status === 401) {
               window.location.href = '/';
@@ -1377,8 +1198,8 @@ app.get('/map', requireAuth, function(req, res) {
           }
           return response.json();
         })
-        .then(data => {
-          debug('Orte geladen:', data.length);
+        .then(function(data) {
+          debug('Orte geladen: ' + data.length);
           locations = data;
           
           if (locations.length === 0) {
@@ -1389,8 +1210,8 @@ app.get('/map', requireAuth, function(req, res) {
           renderLocations();
           renderMapMarkers();
         })
-        .catch(error => {
-          debug('Fehler beim Laden der Orte:', error);
+        .catch(function(error) {
+          debug('Fehler beim Laden der Orte: ' + error);
           
           if (error.message !== 'Nicht authentifiziert') {
             locationsContainer.innerHTML = '<div style="text-align: center; color: #999;">Fehler beim Laden der Orte.</div>';
@@ -1401,24 +1222,24 @@ app.get('/map', requireAuth, function(req, res) {
     function renderLocations() {
       locationsContainer.innerHTML = '';
       
-      locations.forEach(location => {
+      locations.forEach(function(location) {
         const item = document.createElement('div');
         item.className = 'location-item';
-        item.dataset.id = location.id; // ID als data-attribute speichern
-        item.innerHTML = \`
-          <div class="location-title">\${location.title || 'Unbenannter Ort'}</div>
-        \`;
+        item.dataset.id = location.id;
+        item.innerHTML = '<div class="location-title">' + (location.title || 'Unbenannter Ort') + '</div>';
         
-        // Direkt im HTML definierter onclick-Handler
-        item.setAttribute('onclick', 'showLocationDetail(' + location.id + '); document.getElementById(\'sidebar\').classList.remove(\'open\');');
+        item.addEventListener('click', function() {
+          showLocationDetail(location);
+          sidebar.classList.remove('open');
+        });
         
         locationsContainer.appendChild(item);
       });
     }
     
     function renderMapMarkers() {
-      // Bestehende Marker entfernen
-      Object.values(markers).forEach(marker => {
+      // Marker entfernen
+      Object.values(markers).forEach(function(marker) {
         map.removeLayer(marker.marker);
         if (marker.circle) {
           map.removeLayer(marker.circle);
@@ -1426,26 +1247,15 @@ app.get('/map', requireAuth, function(req, res) {
       });
       markers = {};
       
-      // Neue Marker erstellen
-      locations.forEach(location => {
+      // Neue Marker hinzufügen
+      locations.forEach(function(location) {
         const marker = L.marker([location.latitude, location.longitude]).addTo(map);
         
-        // Klick auf Marker zeigt Detailansicht
         marker.on('click', function() {
-          debug("Marker geklickt:", location.id);
           showLocationDetail(location);
         });
         
-        // Popup-Inhalt mit Klick-Handler für "Details anzeigen"
-        marker.bindPopup(
-          '<div style="font-weight: bold; color: #f59a0c;">' + 
-          (location.title || 'Unbenannter Ort') + 
-          '</div>' +
-          '<a href="#" onclick="showLocationDetail(' + location.id + '); return false;" ' +
-          'style="color: #f59a0c;">Details anzeigen</a>'
-        );
-        
-        // Radius um den Marker
+        // Kreis um den Ort
         const circle = L.circle([location.latitude, location.longitude], {
           color: '#f59a0c',
           fillColor: '#f59a0c',
@@ -1457,85 +1267,70 @@ app.get('/map', requireAuth, function(req, res) {
       });
     }
     
-    // WICHTIG: Verbesserte Detailansicht-Funktion
+    // Detailansicht zeigen
     function showLocationDetail(location) {
-      debug("Zeige Detailansicht für:", location);
+      debug('Detailansicht für Ort: ' + (location.id || 'unbekannt'));
       
-      // Wenn eine ID übergeben wurde, finde den Ort in der Liste
+      // Mit ID suchen, falls ID übergeben wurde
       if (typeof location === 'number') {
-        location = locations.find(loc => loc.id === location);
+        location = locations.find(function(loc) { 
+          return loc.id === location; 
+        });
+        
         if (!location) {
           showError('Ort nicht gefunden');
           return;
         }
       }
-      
-      // Wenn der Ort ein DOM-Element ist (z.B. ein angeklicktes li-Element)
-      if (location.tagName) {
-        const locationId = parseInt(location.dataset.id, 10);
-        location = locations.find(loc => loc.id === locationId);
-        if (!location) {
-          showError('Ort nicht gefunden');
-          return;
-        }
-      }
-      
-      debug("Details für Ort:", location);
-      
-      // Setze aktive ID
-      activeLocationId = location.id;
       
       // Details setzen
+      activeLocationId = location.id;
       detailTitle.textContent = location.title || 'Unbenannter Ort';
       detailDescription.textContent = location.description || 'Keine Beschreibung vorhanden.';
       
       // Bild mit Session-ID Parameter laden
-      detailImage.src = \`/api/locations/\${location.id}/image?sessionId=\${sessionId}&t=\${new Date().getTime()}\`;
-      detailImage.onerror = () => {
+      detailImage.src = '/api/locations/' + location.id + '/image?sessionId=' + sessionId + '&t=' + new Date().getTime();
+      detailImage.onerror = function() {
         detailImage.src = '/uploads/couple.jpg';
-        detailImage.onerror = () => {
-          detailImage.src = '/uploads/couple.png';
-        };
       };
       
       // Detail-Container anzeigen
       locationDetail.style.display = 'block';
       
-      // Karte nur leicht auf den Ort zentrieren, ohne Zoom zu ändern
+      // Karte nur zentrieren, ohne Zoom zu ändern
       map.panTo([location.latitude, location.longitude]);
-      
-      debug("Detailansicht eingeblendet");
     }
     
-    // Verbesserte Funktion zum Schließen der Detailansicht
+    // Detailansicht schließen
     function hideLocationDetail() {
-      document.getElementById('locationDetail').style.display = 'none';
+      locationDetail.style.display = 'none';
       activeLocationId = null;
     }
     
-    // Globale Funktion für den onclick-Handler
+    // Globale Funktion
     window.hideLocationDetail = hideLocationDetail;
     
+    // Ort löschen
     function deleteLocation() {
       if (!activeLocationId) return;
       
       if (confirm('Möchtest du diesen Ort wirklich löschen?')) {
-        fetch(\`/api/locations/\${activeLocationId}?sessionId=\${sessionId}\`, {
+        fetch('/api/locations/' + activeLocationId + '?sessionId=' + sessionId, {
           method: 'DELETE'
         })
-        .then(response => {
+        .then(function(response) {
           if (!response.ok) {
             if (response.status === 401) {
               window.location.href = '/';
               throw new Error('Nicht authentifiziert');
             }
-            return response.json().then(err => {
+            return response.json().then(function(err) {
               throw new Error(err.error || 'Unbekannter Fehler');
             });
           }
           return response.json();
         })
-        .then(data => {
+        .then(function(data) {
           if (data.error) {
             showError('Fehler: ' + data.error);
             return;
@@ -1544,8 +1339,8 @@ app.get('/map', requireAuth, function(req, res) {
           hideLocationDetail();
           loadLocations();
         })
-        .catch(error => {
-          debug('Fehler beim Löschen:', error);
+        .catch(function(error) {
+          debug('Fehler beim Löschen: ' + error);
           
           if (error.message !== 'Nicht authentifiziert') {
             showError('Fehler beim Löschen des Ortes: ' + error.message);
@@ -1554,14 +1349,21 @@ app.get('/map', requireAuth, function(req, res) {
       }
     }
     
-    // Globale showLocationDetail-Funktion für Popup-Links
-    window.showLocationDetail = showLocationDetail;
+    // Klick außerhalb schließt das Detail-Fenster
+    document.addEventListener('click', function(e) {
+      if (locationDetail.style.display === 'block') {
+        // Prüfe, ob der Klick außerhalb war
+        if (!locationDetail.contains(e.target) && e.target !== locationDetail) {
+          hideLocationDetail();
+        }
+      }
+    });
     
     // Map-Events
     map.on('move', updateFixedMarkerPosition);
     
-    // Löse ein Resize-Event aus, damit Leaflet die Karte korrekt rendert
-    setTimeout(() => {
+    // Resize-Event auslösen
+    setTimeout(function() {
       window.dispatchEvent(new Event('resize'));
     }, 500);
     
@@ -1577,171 +1379,11 @@ app.get('/map', requireAuth, function(req, res) {
 // Admin-Bereich
 app.get('/admin', requireAuth, function(req, res) {
   const sessionId = req.query.sessionId;
-  
   res.send(`
-    <!DOCTYPE html>
-    <html lang="de">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Susibert - Admin</title>
-      <style>
-        body {
-          font-family: system-ui, -apple-system, sans-serif;
-          background-color: #1a1a1a;
-          color: #f5f5f5;
-          margin: 0;
-          padding: 0;
-        }
-        
-        .header {
-          background-color: #222;
-          padding: 20px;
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-        
-        .header img {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          object-fit: cover;
-          border: 2px solid #f59a0c;
-        }
-        
-        .header h1 {
-          color: #f59a0c;
-          margin: 0;
-        }
-        
-        .container {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        
-        h2 {
-          color: #f59a0c;
-          margin-top: 40px;
-        }
-        
-        .card {
-          background-color: #222;
-          border-radius: 8px;
-          padding: 20px;
-          margin-bottom: 20px;
-        }
-        
-        .warning {
-          background-color: rgba(229, 57, 53, 0.2);
-          border: 1px solid #e53935;
-          padding: 15px;
-          border-radius: 4px;
-          margin-bottom: 20px;
-        }
-        
-        .button {
-          display: inline-block;
-          background-color: #f59a0c;
-          color: black;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 4px;
-          cursor: pointer;
-          text-decoration: none;
-          font-weight: bold;
-          margin-right: 10px;
-          margin-bottom: 10px;
-        }
-        
-        .button.red {
-          background-color: #e53935;
-          color: white;
-        }
-        
-        .button.blue {
-          background-color: #2196f3;
-          color: white;
-        }
-        
-        .back-link {
-          display: inline-block;
-          color: #f59a0c;
-          margin-top: 20px;
-          text-decoration: none;
-        }
-        
-        .back-link:hover {
-          text-decoration: underline;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <img src="/uploads/couple.jpg" alt="Pärchenbild" onerror="this.src='/uploads/couple.png'">
-        <h1>Susibert - Admin</h1>
-      </div>
-      
-      <div class="container">
-        <div class="card">
-          <h2>Info</h2>
-          <p>Hier kannst du die Datenbank und Einstellungen verwalten.</p>
-          
-          <div class="warning">
-            <h3>Warnung: Gefährliche Aktionen</h3>
-            <p>Die folgenden Aktionen können nicht rückgängig gemacht werden:</p>
-          </div>
-          
-          <div>
-            <a href="/reset-database?sessionId=${sessionId}" class="button red" onclick="return confirm('Willst du wirklich ALLE Daten löschen? Dies kann NICHT rückgängig gemacht werden!')">Datenbank zurücksetzen</a>
-          </div>
-        </div>
-        
-        <div class="card">
-          <h2>Einstellungen</h2>
-          <p>Zugangscode: ${ACCESS_CODE}</p>
-          <p>Max. Bildgröße: ${MAX_FILE_SIZE / (1024 * 1024)} MB</p>
-        </div>
-        
-        <a href="/map?sessionId=${sessionId}" class="back-link">← Zurück zur Karte</a>
-      </div>
-    </body>
-    </html>
+    <h1>Admin-Bereich</h1>
+    <p>Hier könnte der Admin-Bereich sein.</p>
+    <a href="/map?sessionId=${sessionId}">Zurück zur Karte</a>
   `);
-});
-
-// Datenbank-Reset für Admin
-app.get('/reset-database', requireAuth, async (req, res) => {
-  const sessionId = req.query.sessionId;
-  
-  try {
-    console.log('Datenbank-Reset angefordert');
-    
-    // Alle Orte abrufen, um Bilder zu löschen
-    const locations = await pool.query('SELECT id, image FROM locations');
-    
-    // Bilder löschen
-    for (const location of locations.rows) {
-      if (location.image && fs.existsSync(location.image)) {
-        try {
-          fs.unlinkSync(location.image);
-          console.log(`Bild ${location.image} gelöscht`);
-        } catch (err) {
-          console.warn(`Konnte Bild nicht löschen: ${err.message}`);
-        }
-      }
-    }
-    
-    // Tabelle löschen und neu erstellen
-    await pool.query('DROP TABLE IF EXISTS locations CASCADE');
-    await createTables();
-    
-    res.redirect('/admin?sessionId=' + sessionId + '&message=Datenbank erfolgreich zurückgesetzt');
-  } catch (error) {
-    console.error('Fehler beim Zurücksetzen der Datenbank:', error);
-    res.redirect('/admin?sessionId=' + sessionId + '&error=' + encodeURIComponent('Fehler beim Zurücksetzen: ' + error.message));
-  }
 });
 
 // API-Routen
@@ -1761,7 +1403,7 @@ app.get('/api/locations', requireAuth, async (req, res) => {
   }
 });
 
-// Neuen Ort hinzufügen (verbessert mit Session-Handhabung)
+// Neuen Ort hinzufügen
 app.post('/api/locations', requireAuth, upload.single('image'), async (req, res) => {
   try {
     console.log('Neuer Ort wird hinzugefügt');
@@ -1849,11 +1491,6 @@ app.delete('/api/locations/:id', requireAuth, async (req, res) => {
     console.error('Fehler beim Löschen des Ortes:', error);
     res.status(500).json({ error: error.message });
   }
-});
-
-// Health-Check Route
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
 });
 
 // Server starten

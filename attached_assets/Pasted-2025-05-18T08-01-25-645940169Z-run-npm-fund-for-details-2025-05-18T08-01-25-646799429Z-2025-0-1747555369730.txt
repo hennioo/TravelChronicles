@@ -1,0 +1,50 @@
+2025-05-18T08:01:25.645940169Z   run `npm fund` for details
+2025-05-18T08:01:25.646799429Z 
+2025-05-18T08:01:25.646809679Z found 0 vulnerabilities
+2025-05-18T08:01:25.702670147Z === Build komplett abgeschlossen ===
+2025-05-18T08:01:26.839408632Z ==> Uploading build...
+2025-05-18T08:01:35.714184628Z ==> Uploaded in 7.7s. Compression took 1.2s
+2025-05-18T08:01:35.775669194Z ==> Build successful 🎉
+2025-05-18T08:01:38.047585156Z ==> Deploying...
+2025-05-18T08:01:50.655161392Z ==> Running 'npm start'
+2025-05-18T08:01:50.885465391Z 
+2025-05-18T08:01:50.885489522Z > rest-express@1.0.0 start
+2025-05-18T08:01:50.885494802Z > NODE_ENV=production node dist/index.js
+2025-05-18T08:01:50.885497312Z 
+2025-05-18T08:01:50.963377171Z /opt/render/project/src/dist/index.js:997
+2025-05-18T08:01:50.963399312Z       <a href="/logout?sessionId=${sessionId}" class="logout">Abmelden</a>
+2025-05-18T08:01:50.963402992Z 
+2025-05-18T08:01:50.963406982Z SyntaxError: missing ) after argument list
+2025-05-18T08:01:50.963410932Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-18T08:01:50.963414152Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-18T08:01:50.963417852Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-18T08:01:50.963421492Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-18T08:01:50.963424682Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-18T08:01:50.963426812Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-18T08:01:50.963428892Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-18T08:01:50.963431432Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-18T08:01:50.963435203Z     at node:internal/main/run_main_module:36:49
+2025-05-18T08:01:50.963437223Z 
+2025-05-18T08:01:50.963439303Z Node.js v22.14.0
+2025-05-18T08:01:54.429925122Z ==> Exited with status 1
+2025-05-18T08:01:54.448525939Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-18T08:01:56.046321782Z ==> Running 'npm start'
+2025-05-18T08:01:56.267472802Z 
+2025-05-18T08:01:56.267493923Z > rest-express@1.0.0 start
+2025-05-18T08:01:56.267498593Z > NODE_ENV=production node dist/index.js
+2025-05-18T08:01:56.267500843Z 
+2025-05-18T08:01:56.34611547Z /opt/render/project/src/dist/index.js:997
+2025-05-18T08:01:56.34613214Z       <a href="/logout?sessionId=${sessionId}" class="logout">Abmelden</a>
+2025-05-18T08:01:56.34613465Z 
+2025-05-18T08:01:56.3461391Z SyntaxError: missing ) after argument list
+2025-05-18T08:01:56.346142081Z     at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+2025-05-18T08:01:56.346144421Z     at Module._compile (node:internal/modules/cjs/loader:1528:20)
+2025-05-18T08:01:56.346146521Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-05-18T08:01:56.346148961Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-05-18T08:01:56.346151051Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-05-18T08:01:56.346153101Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-18T08:01:56.346155181Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-18T08:01:56.346158411Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-18T08:01:56.346162021Z     at node:internal/main/run_main_module:36:49
+2025-05-18T08:01:56.346164031Z 
+2025-05-18T08:01:56.346166091Z Node.js v22.14.0
