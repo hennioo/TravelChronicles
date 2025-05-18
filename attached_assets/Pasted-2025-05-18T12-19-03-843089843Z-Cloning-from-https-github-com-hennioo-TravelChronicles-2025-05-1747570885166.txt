@@ -1,0 +1,27 @@
+2025-05-18T12:19:03.843089843Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T12:19:10.32417974Z ==> Checking out commit ccceb08f4c5951013e5f8c136b99a81082a69a70 in branch main
+2025-05-18T12:19:11.720775768Z ==> Downloading cache...
+2025-05-18T12:19:21.013480529Z ==> Transferred 64MB in 7s. Extraction took 2s.
+2025-05-18T12:19:23.094101307Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T12:19:23.119768444Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T12:19:23.270809629Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T12:19:23.270829109Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T12:19:23.317934722Z ==> Running build command 'chmod +x build-image-test.sh && ./build-image-test.sh'...
+2025-05-18T12:19:23.325283938Z Erstelle einfachen Bild-Test-Server für Render...
+2025-05-18T12:19:23.325297059Z Datenbankverbindung ist konfiguriert.
+2025-05-18T12:19:23.330482289Z Node.js Version: v22.14.0
+2025-05-18T12:19:23.330497089Z Starte Image-Test-Server...
+2025-05-18T12:19:23.357025994Z file:///opt/render/project/src/simple-image-test.js:1
+2025-05-18T12:19:23.357049135Z const express = require('express');
+2025-05-18T12:19:23.357053585Z                 ^
+2025-05-18T12:19:23.357056005Z 
+2025-05-18T12:19:23.357059595Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-05-18T12:19:23.357065625Z This file is being treated as an ES module because it has a '.js' file extension and '/opt/render/project/src/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-05-18T12:19:23.357069815Z     at file:///opt/render/project/src/simple-image-test.js:1:17
+2025-05-18T12:19:23.357072795Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-05-18T12:19:23.357075555Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)
+2025-05-18T12:19:23.357078735Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+2025-05-18T12:19:23.357081435Z 
+2025-05-18T12:19:23.357083265Z Node.js v22.14.0
+2025-05-18T12:19:23.36105721Z ==> Build failed 😞
+2025-05-18T12:19:23.36108485Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
