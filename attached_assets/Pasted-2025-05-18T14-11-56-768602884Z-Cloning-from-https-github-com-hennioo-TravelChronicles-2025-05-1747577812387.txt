@@ -1,0 +1,81 @@
+2025-05-18T14:11:56.768602884Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T14:12:04.839137675Z ==> Checking out commit 2db7892df5beceb7aca190b77be50348e1556b2b in branch main
+2025-05-18T14:12:06.634322119Z ==> Downloading cache...
+2025-05-18T14:12:20.888600248Z ==> Transferred 234MB in 8s. Extraction took 6s.
+2025-05-18T14:12:35.330293168Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T14:12:35.357298804Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T14:12:35.497289448Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T14:12:35.497316048Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T14:12:35.54692513Z ==> Running build command 'npm install express pg multer sharp cookie-parser'...
+2025-05-18T14:12:37.493627534Z 
+2025-05-18T14:12:37.493651975Z up to date, audited 634 packages in 2s
+2025-05-18T14:12:37.493664975Z 
+2025-05-18T14:12:37.493693995Z 183 packages are looking for funding
+2025-05-18T14:12:37.493753856Z   run `npm fund` for details
+2025-05-18T14:12:37.514276318Z 
+2025-05-18T14:12:37.514301018Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-18T14:12:37.514303718Z 
+2025-05-18T14:12:37.514308028Z To address issues that do not require attention, run:
+2025-05-18T14:12:37.514310389Z   npm audit fix
+2025-05-18T14:12:37.514312389Z 
+2025-05-18T14:12:37.514314549Z To address all issues (including breaking changes), run:
+2025-05-18T14:12:37.514317738Z   npm audit fix --force
+2025-05-18T14:12:37.514319939Z 
+2025-05-18T14:12:37.514322759Z Run `npm audit` for details.
+2025-05-18T14:12:38.201871955Z ==> Uploading build...
+2025-05-18T14:12:55.65045718Z ==> Uploaded in 13.4s. Compression took 4.1s
+2025-05-18T14:12:55.766982254Z ==> Build successful 🎉
+2025-05-18T14:12:57.516861664Z ==> Deploying...
+2025-05-18T14:13:38.325378996Z ==> Running 'node map-server.cjs'
+2025-05-18T14:13:38.650862957Z Zugangscode: suuuu
+2025-05-18T14:13:39.441137204Z ✅ Datenbank-Verbindung erfolgreich
+2025-05-18T14:13:39.580228884Z Tabelle 'locations' existiert: true
+2025-05-18T14:13:39.581871831Z 
+2025-05-18T14:13:39.581887661Z       ===================================
+2025-05-18T14:13:39.581891381Z       🌍 Susibert Karten-Server läuft auf Port 10000
+2025-05-18T14:13:39.581894342Z       ===================================
+2025-05-18T14:13:39.581896862Z       
+2025-05-18T14:13:48.331642377Z ==> Your service is live 🎉
+2025-05-18T14:14:16.224831314Z Zugangscode-Versuch: suuuu
+2025-05-18T14:14:16.224943016Z Zugangscode korrekt, Session authentifiziert: a6e2f72e9e5bfc094dab7909cb22694e
+2025-05-18T14:14:17.209425468Z Bild mit ID 27 angefordert
+2025-05-18T14:14:17.210667396Z Bild mit ID 26 angefordert
+2025-05-18T14:14:17.21305533Z Bild mit ID 30 angefordert
+2025-05-18T14:14:17.214518303Z Bild mit ID 29 angefordert
+2025-05-18T14:14:17.227777812Z Bild mit ID 28 angefordert
+2025-05-18T14:15:30.535692029Z POST /api/locations aufgerufen
+2025-05-18T14:15:30.537364817Z Request Body: [Object: null prototype] {
+2025-05-18T14:15:30.537377647Z   id: '',
+2025-05-18T14:15:30.537382197Z   latitude: '33.703764944586254',
+2025-05-18T14:15:30.537387107Z   longitude: '58.71093750000001',
+2025-05-18T14:15:30.537391298Z   sessionId: 'a6e2f72e9e5bfc094dab7909cb22694e',
+2025-05-18T14:15:30.537396738Z   title: 'halloooo',
+2025-05-18T14:15:30.537400938Z   description: ''
+2025-05-18T14:15:30.537405338Z }
+2025-05-18T14:15:30.537409398Z File: Vorhanden (650636 Bytes, image/jpeg)
+2025-05-18T14:15:30.537422128Z Titel: halloooo, Lat: 33.703764944586254, Lng: 58.71093750000001, Beschreibung: 
+2025-05-18T14:15:30.537426908Z Originalbild: 650636 Bytes, Typ: image/jpeg
+2025-05-18T14:15:30.537545911Z Komprimiere Bild (650636 Bytes, Typ: image/jpeg)
+2025-05-18T14:15:30.564670073Z JPEG komprimiert von 650636 auf 519643 Bytes
+2025-05-18T14:15:37.555164086Z Fehler beim Erstellen der Location: error: column "thumbnail" of relation "locations" does not exist
+2025-05-18T14:15:37.555188467Z     at /opt/render/project/src/node_modules/pg/lib/client.js:545:17
+2025-05-18T14:15:37.555193977Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-18T14:15:37.555198667Z     at async /opt/render/project/src/map-server.cjs:1235:20 {
+2025-05-18T14:15:37.555202717Z   length: 131,
+2025-05-18T14:15:37.555207557Z   severity: 'ERROR',
+2025-05-18T14:15:37.555211447Z   code: '42703',
+2025-05-18T14:15:37.555215647Z   detail: undefined,
+2025-05-18T14:15:37.555219477Z   hint: undefined,
+2025-05-18T14:15:37.555223367Z   position: '72',
+2025-05-18T14:15:37.555227828Z   internalPosition: undefined,
+2025-05-18T14:15:37.555231697Z   internalQuery: undefined,
+2025-05-18T14:15:37.555235508Z   where: undefined,
+2025-05-18T14:15:37.555239388Z   schema: undefined,
+2025-05-18T14:15:37.555243048Z   table: undefined,
+2025-05-18T14:15:37.555246758Z   column: undefined,
+2025-05-18T14:15:37.555250458Z   dataType: undefined,
+2025-05-18T14:15:37.555254148Z   constraint: undefined,
+2025-05-18T14:15:37.555257838Z   file: 'parse_target.c',
+2025-05-18T14:15:37.555261508Z   line: '1066',
+2025-05-18T14:15:37.555265278Z   routine: 'checkInsertTargets'
+2025-05-18T14:15:37.555268968Z }
