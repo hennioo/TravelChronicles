@@ -1,4 +1,3 @@
-
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
@@ -17,11 +16,12 @@ console.log('Attempting to connect to database:',
 export const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false
+    rejectUnauthorized: true
   },
   max: 3,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
+  keepAlive: true,
 });
 
 pool.on('error', (err) => {
