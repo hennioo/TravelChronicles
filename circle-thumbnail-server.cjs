@@ -1127,7 +1127,7 @@ app.get('/', requireAuth, (req, res) => {
       
       <script>
         // Globale Variablen
-        const sessionId = '${sessionId}';
+        const sessionId = `${sessionId}`;
         let map, editMode = false;
         let markers = [];
         let tempMarker;
