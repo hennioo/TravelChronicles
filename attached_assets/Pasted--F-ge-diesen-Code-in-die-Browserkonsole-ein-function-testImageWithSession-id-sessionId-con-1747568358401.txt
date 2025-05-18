@@ -1,0 +1,57 @@
+// Füge diesen Code in die Browserkonsole ein
+function testImageWithSession(id, sessionId) {
+  console.log(`Test für Bild ID: ${id} mit SessionID: ${sessionId}`);
+  
+  // URL mit der bekannten Session-ID
+  const imageUrl = `/api/locations/${id}/image?sessionId=${sessionId}&nocache=${Date.now()}`;
+  
+  // Bild abrufen
+  fetch(imageUrl)
+    .then(res => {
+      console.log("Status:", res.status);
+      if (!res.ok) throw new Error(`HTTP Fehler: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log("Antwort erhalten:", {
+        erfolg: data.success,
+        bildtyp: data.imageType,
+        bildDataVorhanden: !!data.imageData,
+        bildgröße: data.imageData?.length || 0
+      });
+      
+      if (data.success && data.imageData) {
+        // Test-Container erstellen
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.top = '10px';
+        container.style.right = '10px';
+        container.style.width = '200px';
+        container.style.height = '150px';
+        container.style.border = '3px solid blue';
+        container.style.zIndex = '9999';
+        container.style.backgroundColor = '#333';
+        
+        // Als Hintergrund (CSS) testen
+        const bgDiv = document.createElement('div');
+        bgDiv.style.width = '100%';
+        bgDiv.style.height = '100%';
+        bgDiv.style.backgroundImage = `url(data:${data.imageType || 'image/jpeg'};base64,${data.imageData})`;
+        bgDiv.style.backgroundSize = 'cover';
+        bgDiv.style.backgroundPosition = 'center';
+        
+        container.appendChild(bgDiv);
+        document.body.appendChild(container);
+        
+        console.log("Testbild in der oberen rechten Ecke hinzugefügt (blauer Rahmen)");
+      } else {
+        console.error("Keine Bilddaten in der Antwort");
+      }
+    })
+    .catch(err => {
+      console.error("Fehler beim Testen:", err);
+    });
+}
+
+// Führe den Test mit der ID 26 und der bekannten Session-ID aus
+testImageWithSession(26, "b4d1af6eb79ad71edc843b34aeeba3d6");

@@ -14,6 +14,9 @@ export default function LocationImage({ locationId, locationName }: LocationImag
     // Debug-Informationen zur Fehlersuche
     console.log(`LocationImage wird geladen für ID: ${locationId}`);
     
+    // Hardcoded Session-ID für Test
+    const hardcodedSessionId = "b4d1af6eb79ad71edc843b34aeeba3d6";
+    
     // SessionID aus der URL extrahieren
     const pathname = window.location.pathname;
     const search = window.location.search;
@@ -23,74 +26,83 @@ export default function LocationImage({ locationId, locationName }: LocationImag
     let sessionId = '';
     
     // Methode 1: Aus dem Pathname (für URL-Format /map/sessionId-xyz/)
-    const sessionIdFromPath = pathname.match(/sessionId[-=]([^\/&?#]+)/i);
-    if (sessionIdFromPath) {
-      sessionId = sessionIdFromPath[1];
-      console.log("SessionID aus URL-Pfad gefunden:", sessionId);
+    if (pathname.includes('sessionId')) {
+      const matches = pathname.match(/sessionId[-=]([^\/&?#]+)/i);
+      if (matches && matches[1]) {
+        sessionId = matches[1];
+        console.log("SessionID aus URL-Pfad gefunden:", sessionId);
+      }
     }
     
     // Methode 2: Aus der URL-Suche (für URL-Format ?sessionId=xyz)
-    if (!sessionId) {
-      const searchParams = new URLSearchParams(search);
-      const sessionIdFromSearch = searchParams.get('sessionId');
-      if (sessionIdFromSearch) {
-        sessionId = sessionIdFromSearch;
-        console.log("SessionID aus URL-Query gefunden:", sessionId);
+    if (!sessionId && search) {
+      const params = new URLSearchParams(search);
+      const paramSessionId = params.get('sessionId');
+      if (paramSessionId) {
+        sessionId = paramSessionId;
+        console.log("SessionID aus URL-Parametern gefunden:", sessionId);
       }
     }
     
     // Methode 3: Direkt aus der vollständigen URL
-    if (!sessionId) {
-      const directMatch = fullUrl.match(/sessionId[-=]([^\/&?#]+)/i);
-      if (directMatch) {
-        sessionId = directMatch[1];
+    if (!sessionId && fullUrl.includes('sessionId')) {
+      const urlMatches = fullUrl.match(/sessionId[-=]([^\/&?#]+)/i);
+      if (urlMatches && urlMatches[1]) {
+        sessionId = urlMatches[1];
         console.log("SessionID direkt aus URL gefunden:", sessionId);
       }
     }
     
-    console.log(`LocationImage verwendet SessionID: ${sessionId || 'keine'}`);
+    // Fallback auf hartcodierte Session-ID, wenn keine gefunden wurde
+    if (!sessionId) {
+      sessionId = hardcodedSessionId;
+      console.log("Keine SessionID gefunden, verwende Fallback:", sessionId);
+    }
     
-    // Das tatsächliche Bild vom Server laden
-    fetch(`/api/locations/${locationId}/image?sessionId=${sessionId}&nocache=${Date.now()}`)
-      .then(response => {
-        console.log(`Bild-Antwort Status für ID ${locationId}:`, response.status);
-        if (!response.ok) {
-          throw new Error(`Fehler beim Laden des Bildes: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log(`Bild-Daten für ID ${locationId}:`, {
-          success: data.success,
-          hasImageData: !!data.imageData,
-          imageType: data.imageType,
-          imageDataLength: data.imageData?.length || 0
-        });
-        
-        if (data.success && data.imageData) {
-          try {
-            // Zusätzliche Validierung der Base64-Daten
-            if (typeof data.imageData !== 'string' || data.imageData.length < 10) {
-              throw new Error('Ungültige Bilddaten erhalten');
-            }
-            
-            const fullImageUrl = `data:${data.imageType || 'image/jpeg'};base64,${data.imageData}`;
-            setImageData(fullImageUrl);
-            console.log(`Bild erfolgreich geladen für ID ${locationId}`);
-          } catch (parseError) {
-            console.error('Fehler beim Verarbeiten der Bilddaten:', parseError);
-            setError('Fehler beim Verarbeiten der Bilddaten');
-          }
-        } else {
-          setError("Keine Bilddaten in der Antwort");
-        }
+    console.log(`LocationImage verwendet SessionID: ${sessionId}`);
+    
+    // Das tatsächliche Bild direkt als Bild-URL laden
+    const imgUrl = `/api/locations/${locationId}/image?sessionId=${sessionId}&nocache=${Date.now()}`;
+    console.log(`Lade Bild direkt von URL: ${imgUrl}`);
+    
+    // Testen mit einem Bild-Element
+    const testImg = new Image();
+    testImg.onload = () => {
+      console.log(`Bild für ID ${locationId} erfolgreich geladen`);
+      setImageData(imgUrl);
+      setIsLoading(false);
+    };
+    
+    testImg.onerror = (e) => {
+      console.error(`Fehler beim Laden des Bildes für ID ${locationId}:`, e);
+      setError("Bild konnte nicht geladen werden");
+      setIsLoading(false);
+      
+      // Direkter Test mit alternativer Methode
+      console.log("Versuche alternativ direkte Einbindung...");
+      
+      // Fallback: Hole das Bild direkt vom Server und verarbeite manuell
+      console.log("Versuche Fallback-Methode mit direktem Bild-Tag...");
+      
+      // Alternative Bild-URL generieren mit fest eingebauter Session-ID
+      const alternativeUrl = `/api/locations/${locationId}/image?sessionId=b4d1af6eb79ad71edc843b34aeeba3d6&nocache=${Date.now()}`;
+      const fallbackImg = new Image();
+      fallbackImg.onload = () => {
+        console.log("Fallback-Bild erfolgreich geladen!");
+        setImageData(alternativeUrl);
         setIsLoading(false);
-      })
-      .catch(err => {
-        console.error(`Bildfehler für Ort ${locationId}:`, err);
-        setError(err.message);
+      };
+      
+      fallbackImg.onerror = () => {
+        console.error("Auch Fallback-Methode fehlgeschlagen");
+        setError("Bild konnte mit keiner Methode geladen werden");
         setIsLoading(false);
-      });
+      };
+      
+      fallbackImg.src = alternativeUrl;
+    };
+    
+    testImg.src = imgUrl;
       
     // Fallback: Wenn nach 5 Sekunden noch kein Bild geladen wurde, setze Fehler
     const timeout = setTimeout(() => {
@@ -129,11 +141,17 @@ export default function LocationImage({ locationId, locationName }: LocationImag
   }
 
   return (
-    <div 
-      className="w-full h-full bg-cover bg-center" 
-      style={{ backgroundImage: `url(${imageData})` }}
-      role="img"
-      aria-label={`Bild von ${locationName}`}
-    />
+    <div className="w-full h-full relative">
+      <img 
+        src={imageData}
+        alt={`Bild von ${locationName}`}
+        className="w-full h-full object-cover rounded-md"
+        onError={(e) => {
+          console.error("Fehler beim Anzeigen des Bildes im DOM");
+          e.currentTarget.style.display = "none";
+          setError("Fehler beim Anzeigen des Bildes");
+        }}
+      />
+    </div>
   );
 }
