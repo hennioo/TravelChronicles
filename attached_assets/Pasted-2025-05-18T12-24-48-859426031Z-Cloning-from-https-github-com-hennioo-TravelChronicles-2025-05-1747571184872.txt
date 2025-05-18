@@ -1,0 +1,37 @@
+2025-05-18T12:24:48.859426031Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T12:24:55.195469039Z ==> Checking out commit 0d8cf8bff5e26bfeb895efc5857381bbba525e4d in branch main
+2025-05-18T12:24:56.322547916Z ==> Downloading cache...
+2025-05-18T12:25:05.285477453Z ==> Transferred 64MB in 7s. Extraction took 1s.
+2025-05-18T12:25:07.022544674Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T12:25:07.048791544Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T12:25:07.185382566Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T12:25:07.185401947Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T12:25:07.231895879Z ==> Running build command 'chmod +x build-super-simple.sh && ./build-super-simple.sh'...
+2025-05-18T12:25:07.23893342Z === Starte super simple Bild-Test ===
+2025-05-18T12:25:07.244235942Z Node.js Version: v22.14.0
+2025-05-18T12:25:07.244261632Z Installiere benötigte Abhängigkeiten...
+2025-05-18T12:25:14.836245438Z 
+2025-05-18T12:25:14.836268698Z added 627 packages, and audited 628 packages in 8s
+2025-05-18T12:25:14.836277319Z 
+2025-05-18T12:25:14.836280609Z 180 packages are looking for funding
+2025-05-18T12:25:14.836283849Z   run `npm fund` for details
+2025-05-18T12:25:14.850246598Z 
+2025-05-18T12:25:14.850266538Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-18T12:25:14.850268719Z 
+2025-05-18T12:25:14.850271349Z To address issues that do not require attention, run:
+2025-05-18T12:25:14.850273199Z   npm audit fix
+2025-05-18T12:25:14.850274799Z 
+2025-05-18T12:25:14.850276549Z To address all issues (including breaking changes), run:
+2025-05-18T12:25:14.850279229Z   npm audit fix --force
+2025-05-18T12:25:14.850280909Z 
+2025-05-18T12:25:14.850283329Z Run `npm audit` for details.
+2025-05-18T12:25:14.920574326Z Starte Test-Server...
+2025-05-18T12:25:22.804193412Z ✅ Datenbank-Verbindung erfolgreich!
+2025-05-18T12:25:22.955092062Z ⚠️ Tabelle test_images existiert nicht, wird erstellt...
+2025-05-18T12:25:23.095267396Z ✅ Tabelle test_images erstellt!
+2025-05-18T12:25:23.097793024Z 
+2025-05-18T12:25:23.097815354Z       ===========================================
+2025-05-18T12:25:23.097820934Z       🖼️  Susibert Bild-Test läuft auf Port 10000
+2025-05-18T12:25:23.097825464Z       ===========================================
+2025-05-18T12:25:23.097830684Z       Öffne http://localhost:10000 im Browser
+2025-05-18T12:25:23.097835214Z       
