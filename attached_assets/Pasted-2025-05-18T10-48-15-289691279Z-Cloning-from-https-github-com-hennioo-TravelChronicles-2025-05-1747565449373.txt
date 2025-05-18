@@ -1,0 +1,105 @@
+2025-05-18T10:48:15.289691279Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T10:48:20.122126687Z ==> Checking out commit 258f5148172a49d55025944d0272f5859319563f in branch main
+2025-05-18T10:48:21.334026581Z ==> Downloading cache...
+2025-05-18T10:48:30.42051941Z ==> Transferred 62MB in 7s. Extraction took 1s.
+2025-05-18T10:48:33.674295255Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T10:48:33.702027819Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T10:48:33.847606005Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T10:48:33.847633116Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T10:48:33.898756137Z ==> Running build command './build-final-fix.sh'...
+2025-05-18T10:48:33.904967934Z Erstelle Build mit finalen Fixes...
+2025-05-18T10:48:33.904986604Z Erstelle Verzeichnisstruktur...
+2025-05-18T10:48:33.906972297Z Kopiere Server-Code...
+2025-05-18T10:48:33.90893822Z Kopiere Uploads...
+2025-05-18T10:48:33.934809424Z Stelle couple.jpg sicher...
+2025-05-18T10:48:33.934835425Z Erstelle package.json...
+2025-05-18T10:48:33.939480249Z Installiere Abhängigkeiten...
+2025-05-18T10:48:38.822495505Z 
+2025-05-18T10:48:38.822523186Z added 114 packages, and audited 115 packages in 5s
+2025-05-18T10:48:38.822534906Z 
+2025-05-18T10:48:38.822540806Z 18 packages are looking for funding
+2025-05-18T10:48:38.822559267Z   run `npm fund` for details
+2025-05-18T10:48:38.82343851Z 
+2025-05-18T10:48:38.82344748Z found 0 vulnerabilities
+2025-05-18T10:48:38.882034172Z === Build erfolgreich abgeschlossen ===
+2025-05-18T10:48:39.646359978Z ==> Uploading build...
+2025-05-18T10:48:55.509405765Z ==> Uploaded in 14.1s. Compression took 1.7s
+2025-05-18T10:48:55.587074959Z ==> Build successful 🎉
+2025-05-18T10:48:57.904496494Z ==> Deploying...
+2025-05-18T10:49:11.796001023Z ==> Running 'npm start'
+2025-05-18T10:49:12.025534198Z 
+2025-05-18T10:49:12.025566219Z > rest-express@1.0.0 start
+2025-05-18T10:49:12.025571789Z > NODE_ENV=production node dist/index.js
+2025-05-18T10:49:12.02557425Z 
+2025-05-18T10:49:12.321125687Z Umgebungsvariablen (ohne Werte): { DATABASE_URL_EXISTS: true, NODE_ENV: 'production' }
+2025-05-18T10:49:12.321365893Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-18T10:49:12.386110161Z Server läuft auf Port 10000
+2025-05-18T10:49:13.170190587Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-18T10:49:13.131Z }
+2025-05-18T10:49:13.296817688Z Tabelle locations existiert: true
+2025-05-18T10:49:13.296852389Z Datenbankverbindung Status: true
+2025-05-18T10:49:19.133649576Z ==> Your service is live 🎉
+2025-05-18T10:49:47.729752115Z Login-Versuch mit Code: ******
+2025-05-18T10:49:47.730036353Z Neue Session erstellt: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:47.948944318Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:47.949131223Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:49:47.949157973Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:48.330383001Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:48.330426562Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:49:48.330437632Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:48.330649708Z Rufe alle Orte ab
+2025-05-18T10:49:48.700520626Z 1 Orte abgerufen
+2025-05-18T10:49:50.167723953Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:50.167750454Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:49:50.167762834Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:50.167924088Z Bild für Ort 22 angefordert
+2025-05-18T10:49:51.487524242Z Sende Base64-Bild für Ort 22 mit Typ image/jpeg
+2025-05-18T10:49:52.834505368Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:52.83461039Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:49:52.834626081Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:52.834636841Z Bild für Ort 22 angefordert
+2025-05-18T10:49:52.840028783Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:52.840120886Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:49:52.840174467Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:53.243896728Z Ort mit ID 22 gelöscht
+2025-05-18T10:49:53.48770161Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:53.487727111Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:49:53.487731471Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:53.487742251Z Rufe alle Orte ab
+2025-05-18T10:49:53.535566713Z 0 Orte abgerufen
+2025-05-18T10:49:53.641511328Z Sende Base64-Bild für Ort 22 mit Typ image/jpeg
+2025-05-18T10:49:53.971269038Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:53.971293778Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:49:53.971304749Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:49:53.971309219Z Bild für Ort 22 angefordert
+2025-05-18T10:49:54.019015827Z Ort 22 nicht gefunden oder hat keine Bilddaten
+2025-05-18T10:50:13.86360963Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:13.86363397Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:50:13.863647151Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:14.541064212Z Neuer Ort wird hinzugefügt
+2025-05-18T10:50:14.541089253Z Bild hochgeladen: animal-eye-staring-close-up-watch-nature-generative-ai.jpg, 7024987 Bytes, image/jpeg
+2025-05-18T10:50:15.780782508Z Ort mit ID 23 erstellt
+2025-05-18T10:50:19.323809028Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:19.323839969Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:50:19.323914151Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:19.323928171Z Rufe alle Orte ab
+2025-05-18T10:50:19.377133164Z 1 Orte abgerufen
+2025-05-18T10:50:26.94141378Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:26.941439931Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:50:26.941451181Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:26.941497572Z Bild für Ort 23 angefordert
+2025-05-18T10:50:27.917736127Z Sende Base64-Bild für Ort 23 mit Typ image/jpeg
+2025-05-18T10:50:28.312385838Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:28.312412259Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:50:28.312419089Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:28.312431459Z Bild für Ort 23 angefordert
+2025-05-18T10:50:28.953303276Z Sende Base64-Bild für Ort 23 mit Typ image/jpeg
+2025-05-18T10:50:29.264099286Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:29.264133407Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:50:29.264140287Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:29.264146007Z Bild für Ort 23 angefordert
+2025-05-18T10:50:29.92722817Z Sende Base64-Bild für Ort 23 mit Typ image/jpeg
+2025-05-18T10:50:30.273506455Z Auth-Check mit SessionID: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:30.273540006Z Prüfe Session: 0581c8c6cec0360ce54b3036c6e4059c Existiert: true
+2025-05-18T10:50:30.273561317Z Session verlängert: 0581c8c6cec0360ce54b3036c6e4059c
+2025-05-18T10:50:30.273580917Z Bild für Ort 23 angefordert
+2025-05-18T10:50:30.986245998Z Sende Base64-Bild für Ort 23 mit Typ image/jpeg
