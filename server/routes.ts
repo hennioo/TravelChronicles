@@ -200,66 +200,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Nur das Bild eines Ortes abrufen (überarbeitete Version)
+  // Optimierter Bild-Abruf-Endpunkt mit SSL-Support
   app.get("/api/locations/:id/image", requireAuth, async (req, res) => {
+    const startTime = Date.now();
     try {
       const id = parseInt(req.params.id);
+      console.log(`Bild für Ort ${id} angefordert`);
       
       if (isNaN(id)) {
-        return res.status(400).json({ 
-          message: "Invalid location ID" 
-        });
+        return res.status(400).json({ message: "Ungültige Orts-ID" });
       }
       
-      // Bild aus der Datenbank holen
-      const result = await pool.query(`
-        SELECT image, image_type
-        FROM locations
-        WHERE id = $1 AND image IS NOT NULL
-      `, [id]);
+      // Mit Einzelclient für bessere Fehlerbehandlung
+      const client = await pool.connect();
+      console.log(`DB-Verbindung für Bild ${id} hergestellt`);
       
-      if (result.rows.length === 0 || !result.rows[0].image) {
-        return res.status(404).json({ 
-          message: "Image not found" 
-        });
-      }
-      
-      // Direktes Senden des Bildes als binäre Daten
       try {
+        // Bild aus der Datenbank holen
+        const result = await client.query(`
+          SELECT image, image_type
+          FROM locations
+          WHERE id = $1
+        `, [id]);
+        
+        console.log(`Abfrageergebnis für Bild ${id}: ${result.rowCount} Zeilen gefunden`);
+        
+        if (result.rows.length === 0) {
+          client.release();
+          console.log(`Bild ${id} nicht gefunden (keine Zeile in DB)`);
+          return res.status(404).json({ message: "Bild nicht gefunden" });
+        }
+        
+        if (!result.rows[0].image) {
+          client.release();
+          console.log(`Bild ${id} ist NULL in der Datenbank`);
+          return res.status(404).json({ message: "Leeres Bild in Datenbank" });
+        }
+        
+        // Bild-Informationen auslesen
         const imageBase64 = result.rows[0].image;
         const imageType = result.rows[0].image_type || 'image/jpeg';
+        console.log(`Bild ${id} gefunden: Typ ${imageType}, Base64-Länge: ${imageBase64.length}`);
         
-        // Lösche alle vorherigen Header
-        res.removeHeader('X-Powered-By');
-        res.removeHeader('ETag');
-        
-        // Den Cache verhindern
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        
-        // Extrem wichtig: Content-Type setzen
+        // Header zurücksetzen und korrekt setzen
         res.setHeader('Content-Type', imageType);
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
         
         // Base64 in binäre Daten konvertieren
         const imageBuffer = Buffer.from(imageBase64, 'base64');
+        console.log(`Bild ${id} in Buffer konvertiert: ${imageBuffer.length} Bytes`);
+        
+        // Verbindung freigeben
+        client.release();
         
         // Binärdaten direkt senden
-        console.log(`Sende Bild für Ort ${id} mit Typ ${imageType} und Größe ${imageBuffer.length} Bytes direkt`);
+        res.end(imageBuffer);
         
-        // Verwende res.end statt res.send für maximale Kontrolle
-        return res.end(imageBuffer);
-      } catch (imageError) {
-        console.error(`Fehler beim Verarbeiten des Bildes für Ort ${id}:`, imageError);
-        return res.status(500).json({ 
-          message: "Fehler beim Verarbeiten des Bildes" 
-        });
+        const endTime = Date.now();
+        console.log(`✅ Bild ${id} erfolgreich gesendet (${endTime - startTime}ms)`);
+        
+      } catch (queryError) {
+        client.release();
+        console.error(`Fehler bei der Datenbankabfrage für Bild ${id}:`, queryError);
+        return res.status(500).json({ message: "Datenbankfehler: " + queryError.message });
       }
+      
     } catch (error) {
-      console.error("Error getting image:", error);
-      return res.status(500).json({ 
-        message: "Internal server error" 
-      });
+      console.error(`Allgemeiner Fehler beim Abrufen des Bildes ${req.params.id}:`, error);
+      return res.status(500).json({ message: "Serverfehler: " + error.message });
     }
   });
   
