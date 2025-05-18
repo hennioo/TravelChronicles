@@ -10,9 +10,7 @@ if (!DATABASE_URL) {
 
 export const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  },
+  ssl: true,
   max: 3,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
