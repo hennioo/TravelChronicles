@@ -84,6 +84,17 @@ app.get('/login', (req, res) => {
           background-color: #000;
           color: white;
         }
+        .button-stack {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .button.full-width {
+          width: 100%;
+          box-sizing: border-box;
+        }
+
         .container {
           display: flex;
           flex-direction: column;
@@ -1968,11 +1979,14 @@ app.get('/admin', requireAuth, (req, res) => {
         
         <div class="card">
           <h2 class="card-title">Datenbank-Operationen</h2>
-          <button id="reset-db-button" class="button danger">Datenbank zurücksetzen</button>
-          <button id="optimize-images-button" class="button primary">Bilder optimieren</button>
-          <button id="generate-thumbnails-button" class="button primary">Thumbnails generieren</button>
-          <button id="fix-database-button" class="button primary">Datenbank reparieren</button>
+          <div class="button-stack">
+            <button id="reset-db-button" class="button danger full-width">Datenbank zurücksetzen</button>
+            <button id="optimize-images-button" class="button primary full-width">Bilder optimieren</button>
+            <button id="generate-thumbnails-button" class="button primary full-width">Thumbnails generieren</button>
+            <button id="fix-database-button" class="button primary full-width">Datenbank reparieren</button>
+          </div>
         </div>
+
         
         <div class="card">
           <h2 class="card-title">Pärchenbild ändern</h2>
