@@ -910,11 +910,11 @@ app.get('/', requireAuth, (req, res) => {
         <header class="header">
           <div class="title-container">
             <img src="/couple-image" alt="Pärchenbild" class="couple-image">
-            <h1 class="app-title">Susibert</h1>
+            <h1 class="app-title" style="text-transform: lowercase; font-weight: 900;">susio</h1>
           </div>
           
           <div class="header-actions">
-            <button id="edit-mode-toggle" class="button">Bearbeiten</button>
+            <button id="edit-mode-toggle" class="menu-button" style="font-size: 2rem; color: #f2960c;">+</button>
             <button id="menu-toggle" class="menu-button">☰</button>
           </div>
         </header>
