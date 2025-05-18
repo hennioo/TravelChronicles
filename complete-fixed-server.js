@@ -1065,7 +1065,7 @@ app.get('/map', requireAuth, function(req, res) {
       <div class="location-detail" id="locationDetail">
         <div class="detail-header">
           <h3 class="detail-title" id="detailTitle"></h3>
-          <button class="detail-close" id="detailClose">&times;</button>
+          <button class="detail-close" id="detailClose" onclick="hideLocationDetail()">&times;</button>
         </div>
         
         <img class="detail-image" id="detailImage" src="" alt="Ortsbild">
@@ -1160,9 +1160,26 @@ app.get('/map', requireAuth, function(req, res) {
     addLocationBtn.addEventListener('click', startAddLocation);
     editModeBtn.addEventListener('click', toggleEditMode);
     cancelBtn.addEventListener('click', hideAddLocationForm);
-    detailClose.addEventListener('click', hideLocationDetail);
+    
+    // Stelle sicher, dass der Schließen-Button funktioniert
+    if (detailClose) {
+      detailClose.addEventListener('click', function() {
+        hideLocationDetail();
+      });
+    }
+    
     detailDelete.addEventListener('click', deleteLocation);
     addHereBtn.addEventListener('click', addLocationHere);
+    
+    // Klick außerhalb schließt das Detail-Fenster
+    document.addEventListener('click', function(e) {
+      if (locationDetail.style.display === 'block') {
+        // Prüfe, ob der Klick außerhalb des Detail-Fensters war
+        if (!locationDetail.contains(e.target) && e.target !== locationDetail) {
+          hideLocationDetail();
+        }
+      }
+    });
     
     // WICHTIG: Upload-Handler verbessern
     locationForm.addEventListener('submit', function(e) {
@@ -1468,10 +1485,14 @@ app.get('/map', requireAuth, function(req, res) {
       }
     }
     
+    // Verbesserte Funktion zum Schließen der Detailansicht
     function hideLocationDetail() {
-      locationDetail.style.display = 'none';
+      document.getElementById('locationDetail').style.display = 'none';
       activeLocationId = null;
     }
+    
+    // Globale Funktion für den onclick-Handler
+    window.hideLocationDetail = hideLocationDetail;
     
     function deleteLocation() {
       if (!activeLocationId) return;
