@@ -3,6 +3,7 @@ import { X, Heart, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
+import LocationImage from "./LocationImage";
 
 interface LocationDetailsProps {
   location: LocationData;
@@ -40,32 +41,7 @@ export default function LocationDetails({
       <Card className="w-full overflow-hidden flex flex-col">
         <div className="relative">
           <div className="w-full h-48 bg-orange-500 relative">
-            {location.image ? (
-              <img 
-                src={location.image} 
-                alt={`View of ${location.name}`}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.onerror = null;
-                  // Verstecke das fehlerhafte Bild
-                  target.style.display = 'none';
-                  // Zeige den Fallback-Container
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.classList.add('flex', 'items-center', 'justify-center');
-                    const fallbackText = document.createElement('div');
-                    fallbackText.className = 'text-white text-xl font-bold';
-                    fallbackText.textContent = 'Bild nicht verfügbar';
-                    parent.appendChild(fallbackText);
-                  }
-                }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-white text-xl font-bold">Bild nicht verfügbar</span>
-              </div>
-            )}
+            <LocationImage locationId={location.id} locationName={location.name} />
           </div>
           <Button
             size="icon"
