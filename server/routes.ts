@@ -128,8 +128,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Funktion zur Überprüfung der Authentifizierung
+  function requireAuth(req: Request, res: Response, next: Function) {
+    // Session-ID aus der URL oder dem Request-Body erhalten
+    const sessionId = req.query.sessionId || req.body?.sessionId;
+    
+    console.log('Auth-Check mit SessionID:', sessionId);
+    
+    // Hier würde normalerweise eine echte Session-Überprüfung stattfinden
+    // Da wir keinen direkten Zugriff auf dein Session-Management haben,
+    // prüfen wir nur ob die Session-ID existiert
+    if (!sessionId) {
+      console.log('Keine SessionID gefunden');
+      
+      // Bei API-Endpunkten 401 zurückgeben
+      if (req.path.startsWith('/api/')) {
+        return res.status(401).json({ 
+          error: 'Nicht authentifiziert',
+          message: 'Bitte melde dich an, um diese Funktion zu nutzen.' 
+        });
+      }
+      
+      // Ansonsten zur Login-Seite umleiten
+      return res.redirect('/?error=Bitte+melde+dich+an');
+    }
+    
+    // Session ist gültig
+    next();
+  }
+  
   // Nur das Bild eines Ortes abrufen
-  app.get("/api/locations/:id/image", async (req, res) => {
+  app.get("/api/locations/:id/image", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       

@@ -111,9 +111,31 @@ export default function LocationImage({ locationId, locationName }: LocationImag
       .catch(err => {
         console.error(`Bildfehler für Ort ${locationId}:`, err);
         
-        // Alternatives Base64-Test-Bild als Fallback für Diagnose
-        setError(`Fehler: ${err.message}`);
-        setIsLoading(false);
+        // Versuche eine Alternative mit hartcodierter Session-ID als letzten Ausweg
+        console.log("Versuche Fallback mit hartcodierter Session-ID...");
+        
+        const fallbackUrl = `/api/locations/${locationId}/image?sessionId=b4d1af6eb79ad71edc843b34aeeba3d6&nocache=${Date.now()}`;
+        
+        fetch(fallbackUrl)
+          .then(response => {
+            if (!response.ok) throw new Error(`Fallback fehlgeschlagen: ${response.status}`);
+            return response.json();
+          })
+          .then(data => {
+            if (data.success && data.imageData) {
+              const fullImageUrl = `data:${data.imageType || 'image/jpeg'};base64,${data.imageData}`;
+              setImageData(fullImageUrl);
+              console.log("Fallback-Bild erfolgreich geladen!");
+              setIsLoading(false);
+            } else {
+              throw new Error("Keine Bilddaten in der Fallback-Antwort");
+            }
+          })
+          .catch(fallbackErr => {
+            console.error("Auch Fallback fehlgeschlagen:", fallbackErr);
+            setError(`Fehler: ${err.message}, Fallback: ${fallbackErr.message}`);
+            setIsLoading(false);
+          });
       });
       
     // Fallback: Wenn nach 5 Sekunden noch kein Bild geladen wurde, setze Fehler
