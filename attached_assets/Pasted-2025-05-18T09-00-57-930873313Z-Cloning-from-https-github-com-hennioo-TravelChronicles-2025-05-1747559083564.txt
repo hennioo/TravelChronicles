@@ -1,0 +1,68 @@
+2025-05-18T09:00:57.930873313Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T09:01:01.936274518Z ==> Checking out commit cacf1b136b2c272576030c870dc71b0ae16037ad in branch main
+2025-05-18T09:01:03.335603634Z ==> Downloading cache...
+2025-05-18T09:01:12.347651791Z ==> Transferred 62MB in 7s. Extraction took 1s.
+2025-05-18T09:01:14.126978393Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T09:01:14.153127224Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T09:01:14.292076997Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T09:01:14.292094547Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T09:01:14.341432124Z ==> Running build command './build-working-server.sh'...
+2025-05-18T09:01:14.347293232Z Erstelle Build mit vereinfachtem Server...
+2025-05-18T09:01:14.347308423Z Erstelle Verzeichnisstruktur...
+2025-05-18T09:01:14.349218005Z Kopiere Server-Code...
+2025-05-18T09:01:14.351077315Z Kopiere Uploads...
+2025-05-18T09:01:14.369089668Z Erstelle package.json...
+2025-05-18T09:01:14.372590105Z Installiere Abhängigkeiten...
+2025-05-18T09:01:17.95101424Z 
+2025-05-18T09:01:17.951040891Z added 101 packages, and audited 102 packages in 4s
+2025-05-18T09:01:17.951052581Z 
+2025-05-18T09:01:17.951059101Z 15 packages are looking for funding
+2025-05-18T09:01:17.951064741Z   run `npm fund` for details
+2025-05-18T09:01:17.951969671Z 
+2025-05-18T09:01:17.951979071Z found 0 vulnerabilities
+2025-05-18T09:01:18.004257382Z === Build erfolgreich abgeschlossen ===
+2025-05-18T09:01:19.082155893Z ==> Uploading build...
+2025-05-18T09:01:29.905704469Z ==> Uploaded in 9.6s. Compression took 1.2s
+2025-05-18T09:01:30.03264785Z ==> Build successful 🎉
+2025-05-18T09:01:32.308987416Z ==> Deploying...
+2025-05-18T09:01:44.928419609Z ==> Running 'npm start'
+2025-05-18T09:01:45.210751037Z 
+2025-05-18T09:01:45.210773438Z > rest-express@1.0.0 start
+2025-05-18T09:01:45.210777087Z > NODE_ENV=production node dist/index.js
+2025-05-18T09:01:45.210778867Z 
+2025-05-18T09:01:45.503194287Z Umgebungsvariablen (ohne Werte): { DATABASE_URL_EXISTS: true, NODE_ENV: 'production' }
+2025-05-18T09:01:45.503435342Z Verbindungsstring-Länge: 112 Zeichen
+2025-05-18T09:01:45.513196196Z Server läuft auf Port 10000
+2025-05-18T09:01:48.352812516Z Datenbankverbindung erfolgreich hergestellt: { now: 2025-05-18T09:01:48.309Z }
+2025-05-18T09:01:48.48074272Z Tabelle locations existiert: true
+2025-05-18T09:01:48.480817962Z Datenbankverbindung Status: true
+2025-05-18T09:01:53.843712749Z ==> Your service is live 🎉
+2025-05-18T09:03:08.41923416Z Login-Versuch mit Code: ******
+2025-05-18T09:03:08.419415474Z Neue Session erstellt: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:08.637823401Z Auth-Check mit SessionID: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:08.638054266Z Prüfe Session: 3fbf48d64933e50f42927229449edcad Existiert: true
+2025-05-18T09:03:08.638068156Z Session verlängert: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:09.311931287Z Auth-Check mit SessionID: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:09.311968408Z Prüfe Session: 3fbf48d64933e50f42927229449edcad Existiert: true
+2025-05-18T09:03:09.311973188Z Session verlängert: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:09.312158062Z Rufe alle Orte ab
+2025-05-18T09:03:09.746582865Z 8 Orte abgerufen
+2025-05-18T09:03:13.07578828Z Auth-Check mit SessionID: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:13.075844681Z Prüfe Session: 3fbf48d64933e50f42927229449edcad Existiert: true
+2025-05-18T09:03:13.075881782Z Session verlängert: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:13.075959303Z Bild für Ort 16 angefordert
+2025-05-18T09:03:13.124656961Z Bild für Ort 16 nicht gefunden (keine Daten in DB)
+2025-05-18T09:03:18.619295471Z Auth-Check mit SessionID: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:18.619333902Z Prüfe Session: 3fbf48d64933e50f42927229449edcad Existiert: true
+2025-05-18T09:03:18.619373793Z Session verlängert: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:18.619380783Z Bild für Ort 16 angefordert
+2025-05-18T09:03:18.668645973Z Bild für Ort 16 nicht gefunden (keine Daten in DB)
+2025-05-18T09:03:21.749355671Z Auth-Check mit SessionID: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:21.749500515Z Prüfe Session: 3fbf48d64933e50f42927229449edcad Existiert: true
+2025-05-18T09:03:21.749511455Z Session verlängert: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:21.801712249Z Ort mit ID 16 gelöscht
+2025-05-18T09:03:22.023255935Z Auth-Check mit SessionID: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:22.023275276Z Prüfe Session: 3fbf48d64933e50f42927229449edcad Existiert: true
+2025-05-18T09:03:22.023286136Z Session verlängert: 3fbf48d64933e50f42927229449edcad
+2025-05-18T09:03:22.023299556Z Rufe alle Orte ab
+2025-05-18T09:03:22.074375686Z 7 Orte abgerufen

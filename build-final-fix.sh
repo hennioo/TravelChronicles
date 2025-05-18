@@ -1,50 +1,58 @@
 #!/bin/bash
 
-# Build-Skript für den finalen Login-Fix
-echo "Starte minimalen Login-Fix Build..."
-
-# NPM-Pakete installieren
-npm install express pg multer sharp dotenv cookie-parser fs-extra
+# Build-Skript für die finale Fix-Version der TravelChronicles-App
+echo "Erstelle Build mit finalen Fixes..."
 
 # Verzeichnisstruktur erstellen
 echo "Erstelle Verzeichnisstruktur..."
 mkdir -p dist/uploads
-mkdir -p dist/public/uploads
 
-# Server-Code erstellen
-echo "Erstelle Server-Code..."
-cp final-fix-db.cjs dist/index.js
+# Server-Code kopieren
+echo "Kopiere Server-Code..."
+cp working-server.js dist/index.js
 
-# Dateien kopieren
-echo "Kopiere Dateien..."
-mkdir -p dist/uploads
-cp -rv uploads/* dist/uploads/ 2>/dev/null || echo "Keine Uploads vorhanden oder Fehler beim Kopieren"
+# Uploads kopieren
+echo "Kopiere Uploads..."
+cp -r uploads/* dist/uploads/ 2>/dev/null || :
 
-# package.json für Render erstellen
+# Stelle sicher, dass der couple.jpg vorhanden ist
+echo "Stelle couple.jpg sicher..."
+if [ ! -d "dist/uploads" ]; then
+  mkdir -p dist/uploads
+fi
+
+if [ ! -f "dist/uploads/couple.jpg" ] && [ -f "uploads/couple.jpg" ]; then
+  cp uploads/couple.jpg dist/uploads/
+fi
+
+if [ ! -f "dist/uploads/couple.jpg" ]; then
+  # Fallback falls das Bild nicht existiert
+  echo "ACHTUNG: couple.jpg nicht gefunden, erstelle Platzhalterbild..."
+  convert -size 400x300 xc:#222222 -fill "#f59a0c" -pointsize 36 -gravity center -annotate +0+0 "Susibert" dist/uploads/couple.jpg 2>/dev/null || :
+fi
+
+# package.json erstellen
 echo "Erstelle package.json..."
-cat > dist/package.json << EOL
+cat > dist/package.json << EOF
 {
-  "name": "travelchronicles",
+  "name": "rest-express",
   "version": "1.0.0",
-  "description": "Travel Map Application",
-  "main": "index.js",
-  "type": "commonjs",
+  "private": true,
   "scripts": {
     "start": "NODE_ENV=production node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "pg": "^8.11.3",
-    "multer": "^1.4.5-lts.1",
-    "sharp": "^0.33.1",
-    "dotenv": "^16.3.1",
     "cookie-parser": "^1.4.6",
-    "fs-extra": "^11.2.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.3",
+    "sharp": "^0.33.2"
   }
 }
-EOL
+EOF
+
+# Installiere Abhängigkeiten
+echo "Installiere Abhängigkeiten..."
+cd dist && npm install
 
 echo "=== Build erfolgreich abgeschlossen ==="

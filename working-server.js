@@ -1389,11 +1389,45 @@ app.get('/map', requireAuth, function(req, res) {
             }
             // Orte neu laden
             loadLocations();
-            showSuccess('Ort erfolgreich gelöscht');
+            // Erfolgsmeldung
+            const successMsg = document.createElement('div');
+            successMsg.textContent = 'Ort erfolgreich gelöscht';
+            successMsg.style.position = 'fixed';
+            successMsg.style.top = '20px';
+            successMsg.style.left = '50%';
+            successMsg.style.transform = 'translateX(-50%)';
+            successMsg.style.backgroundColor = '#4CAF50';
+            successMsg.style.color = 'white';
+            successMsg.style.padding = '10px 20px';
+            successMsg.style.borderRadius = '4px';
+            successMsg.style.zIndex = '9999';
+            document.body.appendChild(successMsg);
+            setTimeout(function() {
+              successMsg.style.opacity = '0';
+              successMsg.style.transition = 'opacity 0.5s';
+              setTimeout(function() { successMsg.remove(); }, 500);
+            }, 3000);
           })
           .catch(function(error) {
             console.error('Fehler:', error);
-            showError('Fehler beim Löschen: ' + error.message);
+            // Fehlermeldung
+            const errorMsg = document.createElement('div');
+            errorMsg.textContent = 'Fehler beim Löschen: ' + error.message;
+            errorMsg.style.position = 'fixed';
+            errorMsg.style.top = '20px';
+            errorMsg.style.left = '50%';
+            errorMsg.style.transform = 'translateX(-50%)';
+            errorMsg.style.backgroundColor = '#e74c3c';
+            errorMsg.style.color = 'white';
+            errorMsg.style.padding = '10px 20px';
+            errorMsg.style.borderRadius = '4px';
+            errorMsg.style.zIndex = '9999';
+            document.body.appendChild(errorMsg);
+            setTimeout(function() {
+              errorMsg.style.opacity = '0';
+              errorMsg.style.transition = 'opacity 0.5s';
+              setTimeout(function() { errorMsg.remove(); }, 500);
+            }, 3000);
           });
         }
       };
@@ -1566,24 +1600,67 @@ app.get('/api/locations/:id/image', requireAuth, async (req, res) => {
     const id = req.params.id;
     console.log(`Bild für Ort ${id} angefordert`);
     
-    const result = await pool.query('SELECT image_data, image_type FROM locations WHERE id = $1', [id]);
+    // Da wir zwei verschiedene Schemata haben könnten (mit image oder image_data),
+    // prüfen wir beide Möglichkeiten
+    const result = await pool.query('SELECT image, image_data, image_type FROM locations WHERE id = $1', [id]);
     
     // Absoluter Pfad zum Uploads-Verzeichnis
     const absoluteUploadsDir = path.resolve(uploadsDir);
     
-    if (result.rows.length === 0 || !result.rows[0].image_data) {
-      console.log(`Bild für Ort ${id} nicht gefunden (keine Daten in DB)`);
+    if (result.rows.length === 0) {
+      console.log(`Ort ${id} nicht gefunden`);
       return res.sendFile(path.join(absoluteUploadsDir, 'couple.jpg'));
     }
     
-    const { image_data, image_type } = result.rows[0];
+    const row = result.rows[0];
     
-    // Sende Base64-Daten als Bild
-    if (image_data) {
-      console.log(`Sende Bild für Ort ${id} mit Typ ${image_type}`);
-      const buffer = Buffer.from(image_data, 'base64');
-      res.setHeader('Content-Type', image_type);
+    // Versuche zuerst image_data zu verwenden (Base64-Daten)
+    if (row.image_data) {
+      console.log(`Sende Base64-Bild für Ort ${id} mit Typ ${row.image_type}`);
+      const buffer = Buffer.from(row.image_data, 'base64');
+      res.setHeader('Content-Type', row.image_type);
       return res.send(buffer);
+    }
+    
+    // Versuche die Datei unter dem gespeicherten Pfad zu finden
+    if (row.image) {
+      if (fs.existsSync(row.image)) {
+        console.log(`Sende Bild-Datei: ${row.image}`);
+        return res.sendFile(path.resolve(row.image));
+      }
+      
+      // Versuche relativen Pfad
+      const relativePath = path.join(absoluteUploadsDir, path.basename(row.image));
+      if (fs.existsSync(relativePath)) {
+        console.log(`Sende Bild-Datei (relativ): ${relativePath}`);
+        return res.sendFile(relativePath);
+      }
+
+      // Wenn wir bis hier kommen, versuchen wir, die Daten in die DB zu migrieren
+      try {
+        console.log(`Versuche Bild von Ort ${id} zu migrieren`);
+        // Versuche, das Bild als Base64 zu lesen (falls es existiert)
+        const imagePath = row.image;
+        let imageData = null;
+        
+        if (fs.existsSync(imagePath)) {
+          console.log(`Datei gefunden: ${imagePath}, migriere in die Datenbank`);
+          imageData = fs.readFileSync(imagePath, { encoding: 'base64' });
+          
+          // In die Datenbank aktualisieren
+          await pool.query(
+            'UPDATE locations SET image_data = $1 WHERE id = $2',
+            [imageData, id]
+          );
+          
+          // Sende das gerade migrierte Bild
+          const buffer = Buffer.from(imageData, 'base64');
+          res.setHeader('Content-Type', row.image_type);
+          return res.send(buffer);
+        }
+      } catch (migrationError) {
+        console.error('Fehler bei der Migration:', migrationError);
+      }
     }
     
     // Fallback zum Pärchenbild
