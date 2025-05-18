@@ -4,46 +4,17 @@ import { storage } from "./storage";
 import { pool } from "./db";
 import { validateAccessCodeSchema, insertLocationSchema } from "@shared/schema";
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import imageFixRouter from './image-fix';
 
-// Setup für Datei-Uploads
-const uploadDir = path.join(process.cwd(), 'uploads');
-
-// Stelle sicher, dass der Upload-Ordner existiert
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Konfiguration für multer (für Bild-Uploads)
-const storage_config = multer.diskStorage({
-  destination: function (_req, _file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (_req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    
-    // Normalisiere die Dateiendung zu .jpg für alle Bildformate für bessere Kompatibilität
-    // Apple-Geräte verwenden manchmal .heic, was Probleme verursachen kann
-    let ext = path.extname(file.originalname).toLowerCase();
-    
-    // Stelle sicher, dass wir eine standardisierte Erweiterung verwenden
-    if (!['.jpg', '.jpeg', '.png', '.gif'].includes(ext)) {
-      ext = '.jpg'; // Standardmäßig .jpg für unbekannte Formate
-    }
-    
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
-});
-
+// Für Bild-Uploads nutzen wir In-Memory-Storage statt Dateisystem
+// Dies erlaubt uns, die Bilder direkt als Base64 in der Datenbank zu speichern
 const upload = multer({ 
-  storage: storage_config,
+  storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB Limit (erhöht, um iOS-Bildern genug Platz zu geben)
+    fileSize: 15 * 1024 * 1024 // 15MB Limit, da wir die Bilder ohnehin komprimieren werden
   },
   fileFilter: (_req, file, cb) => {
-    // Akzeptiere alle Bildtypen und konvertiere sie später zu jpg
-    // iOS kann .heic oder andere weniger verbreitete Formate verwenden
+    // Akzeptiere alle Bildtypen (werden beim Upload komprimiert)
     if (file.mimetype.startsWith('image/') || 
         file.originalname.match(/\.(heic|heif)$/i)) {
       cb(null, true);
@@ -54,15 +25,9 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Statischer Dateizugriff für Uploads
-  // Wichtig: Cache-Control auf no-cache setzen, damit Bilder nicht im Browser-Cache verschwinden
-  app.use('/uploads', express.static(uploadDir, {
-    maxAge: 0,
-    setHeaders: (res) => {
-      res.setHeader('Cache-Control', 'no-cache, no-store');
-    }
-  }));
-
+  // Bild-Optimierungsrouten hinzufügen
+  app.use('/api', imageFixRouter);
+  
   // Health Check Endpoint für Replit Deployments
   app.get("/health", (req, res) => {
     res.status(200).json({ status: "ok" });
@@ -73,9 +38,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(200).json({ status: "ok", message: "Susibert travel map API is running" });
   });
 
-  // API Routes
+  // API Routen
   
-  // Validate access code
+  // Zugriffscode validieren
   app.post("/api/access-codes/validate", async (req, res) => {
     try {
       const result = validateAccessCodeSchema.safeParse(req.body);
@@ -108,12 +73,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all locations
+  // Alle Orte abrufen
   app.get("/api/locations", async (req, res) => {
     try {
       // Direkter Zugriff auf die Datenbank ohne Drizzle-ORM
-      const result = await pool.query('SELECT * FROM locations ORDER BY id DESC');
-      console.log("Direct database query result:", result.rows);
+      const result = await pool.query(`
+        SELECT 
+          id, name, description, date, highlight, latitude, longitude, countryCode,
+          CASE WHEN image IS NOT NULL THEN true ELSE false END as has_image
+        FROM locations 
+        ORDER BY id DESC
+      `);
+      console.log("Locations abgerufen:", result.rows.length);
       return res.status(200).json(result.rows);
     } catch (error) {
       console.error("Error getting locations:", error);
@@ -123,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get location by ID
+  // Einen bestimmten Ort abrufen (ohne Bilddaten für bessere Performance)
   app.get("/api/locations/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -134,15 +105,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const location = await storage.getLocation(id);
+      // Direkter Datenbankzugriff für bessere Kontrolle
+      const result = await pool.query(`
+        SELECT id, name, description, date, highlight, latitude, longitude, countryCode,
+        CASE WHEN image IS NOT NULL THEN true ELSE false END as has_image
+        FROM locations
+        WHERE id = $1
+      `, [id]);
       
-      if (!location) {
+      if (result.rows.length === 0) {
         return res.status(404).json({ 
           message: "Location not found" 
         });
       }
       
-      return res.status(200).json(location);
+      return res.status(200).json(result.rows[0]);
     } catch (error) {
       console.error("Error getting location:", error);
       return res.status(500).json({ 
@@ -151,7 +128,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete location by ID
+  // Nur das Bild eines Ortes abrufen
+  app.get("/api/locations/:id/image", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ 
+          message: "Invalid location ID" 
+        });
+      }
+      
+      // Bild aus der Datenbank holen
+      const result = await pool.query(`
+        SELECT image, image_type
+        FROM locations
+        WHERE id = $1 AND image IS NOT NULL
+      `, [id]);
+      
+      if (result.rows.length === 0 || !result.rows[0].image) {
+        return res.status(404).json({ 
+          message: "Image not found" 
+        });
+      }
+      
+      // Base64-Daten zurückgeben
+      return res.status(200).json({ 
+        success: true,
+        imageData: result.rows[0].image,
+        imageType: result.rows[0].image_type || 'image/jpeg'
+      });
+    } catch (error) {
+      console.error("Error getting image:", error);
+      return res.status(500).json({ 
+        message: "Internal server error" 
+      });
+    }
+  });
+  
+  // Ort löschen
   app.delete("/api/locations/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -163,41 +178,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Überprüfen, ob der Ort existiert
-      const location = await storage.getLocation(id);
+      const result = await pool.query('SELECT id FROM locations WHERE id = $1', [id]);
       
-      if (!location) {
+      if (result.rows.length === 0) {
         return res.status(404).json({ 
           message: "Location not found" 
         });
       }
       
-      // Wenn die Location ein eigenes Bild hat (kein externes URL), lösche die Datei
-      if (location.image && location.image.startsWith('/uploads/')) {
-        try {
-          const filePath = path.join(process.cwd(), location.image.substring(1));
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        } catch (fileError) {
-          console.error("Error deleting image file:", fileError);
-          // Wir löschen den Ort trotzdem, auch wenn das Löschen des Bildes fehlschlägt
-        }
-      }
-      
       // Ort löschen
-      const success = await storage.deleteLocation(id);
+      await pool.query('DELETE FROM locations WHERE id = $1', [id]);
       
-      if (success) {
-        return res.status(200).json({ 
-          success: true, 
-          message: "Location deleted successfully" 
-        });
-      } else {
-        return res.status(500).json({ 
-          success: false, 
-          message: "Failed to delete location" 
-        });
-      }
+      return res.status(200).json({ 
+        success: true, 
+        message: "Location deleted successfully" 
+      });
     } catch (error) {
       console.error("Error deleting location:", error);
       return res.status(500).json({ 
@@ -206,43 +201,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Neuen Ort hinzufügen (mit Bild-Upload) - Robustere Implementierung
+  // Neuen Ort hinzufügen (mit Bild-Upload)
   app.post("/api/locations", upload.single('image'), async (req: Request, res: Response) => {
     try {
-      // Stelle sicher, dass der Upload-Ordner existiert
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+      let imageBase64 = null;
+      let imageType = null;
       
-      // Bild-URL festlegen
-      let imageUrl = '';
-      
-      // Wenn ein Bild hochgeladen wurde
+      // Wenn ein Bild hochgeladen wurde, als Base64 konvertieren
       if (req.file) {
-        // Pfad des hochgeladenen Bildes
-        const filePath = path.join(uploadDir, req.file.filename);
+        console.log(`Bild hochgeladen: ${req.file.originalname}, ${req.file.size} Bytes, ${req.file.mimetype}`);
         
-        // Überprüfe, ob die Datei existiert
-        if (fs.existsSync(filePath)) {
-          imageUrl = `/uploads/${req.file.filename}`;
+        try {
+          // Konvertiere zu Base64 für die Datenbank
+          imageBase64 = req.file.buffer.toString('base64');
+          imageType = req.file.mimetype;
           
-          // Zusätzliche Validierung des Bildes
-          try {
-            // Dateigröße überprüfen (für Konsistenzprüfung)
-            const stats = fs.statSync(filePath);
-            if (stats.size === 0) {
-              // Leere Datei
-              fs.unlinkSync(filePath); // Lösche die leere Datei
-              imageUrl = ''; // Setze URL zurück
-            }
-          } catch (fileError) {
-            console.error("Fehler bei der Bildvalidierung:", fileError);
-            imageUrl = ''; // Bei Fehler URL zurücksetzen
-          }
-        } else {
-          console.warn("Hochgeladene Datei existiert nicht im Dateisystem:", req.file.filename);
-          imageUrl = '';
+          console.log(`Bild in Base64 konvertiert: ${imageBase64.length} Zeichen`);
+        } catch (imageError) {
+          console.error("Fehler bei der Bildverarbeitung:", imageError);
+          return res.status(400).json({
+            message: "Fehler bei der Bildverarbeitung"
+          });
         }
+      } else {
+        console.warn("Kein Bild hochgeladen");
+        return res.status(400).json({
+          message: "Ein Bild wird benötigt"
+        });
       }
       
       // Extrahiere Daten aus dem Request
@@ -254,8 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         latitude: req.body.latitude,
         longitude: req.body.longitude,
         countryCode: req.body.countryCode || '',
-        // Bild-URL (leer, wenn kein Bild oder Fehler)
-        image: imageUrl
+        image: '' // Wird später durch Base64-Daten ersetzt
       };
 
       // Validiere die Daten mit zod
@@ -268,8 +252,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Speichere den neuen Ort in der Datenbank
-      const newLocation = await storage.createLocation(validationResult.data);
+      // Speichere den neuen Ort direkt in der Datenbank
+      const result = await pool.query(`
+        INSERT INTO locations 
+        (name, description, highlight, date, latitude, longitude, countryCode, image, image_type) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id, name, description, date, highlight, latitude, longitude, countryCode
+      `, [
+        locationData.name,
+        locationData.description,
+        locationData.highlight,
+        locationData.date,
+        locationData.latitude,
+        locationData.longitude,
+        locationData.countryCode,
+        imageBase64,
+        imageType
+      ]);
+      
+      const newLocation = result.rows[0];
+      newLocation.has_image = true;
       
       return res.status(201).json(newLocation);
     } catch (error) {
