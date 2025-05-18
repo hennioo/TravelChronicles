@@ -418,7 +418,7 @@ app.get('/', requireAuth, (req, res) => {
           color: #f2960c;
           margin: 0;
           position: relative;
-          top: -20px;
+          top: -4px;
         }
 
         .plus-button {
