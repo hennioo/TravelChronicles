@@ -1667,6 +1667,22 @@ app.get('/', requireAuth, (req, res) => {
           document.getElementById('loading-overlay').style.display = 'none';
         }
       </script>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const observer = new MutationObserver(() => {
+            document.querySelectorAll('.pin-circle img').forEach(img => {
+              img.style.width = '100%';
+              img.style.height = '100%';
+              img.style.objectFit = 'cover';
+              img.style.borderRadius = '50%';
+              img.style.transform = 'none';
+            });
+          });
+      
+          observer.observe(document.body, { childList: true, subtree: true });
+        });
+      </script>
+
     </body>
     </html>
   `);
