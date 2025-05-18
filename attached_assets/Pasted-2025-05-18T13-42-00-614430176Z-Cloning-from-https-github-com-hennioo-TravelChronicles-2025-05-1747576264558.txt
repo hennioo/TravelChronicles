@@ -1,0 +1,37 @@
+2025-05-18T13:42:00.614430176Z ==> Cloning from https://github.com/hennioo/TravelChronicles
+2025-05-18T13:42:08.616974036Z ==> Checking out commit ea279227add9f1cb99b5b84e5935f18e52c98f82 in branch main
+2025-05-18T13:42:10.166898412Z ==> Downloading cache...
+2025-05-18T13:42:22.894420995Z ==> Transferred 234MB in 7s. Extraction took 5s.
+2025-05-18T13:42:28.892078307Z ==> Using Node.js version 22.14.0 (default)
+2025-05-18T13:42:28.921568944Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-18T13:42:29.074042846Z ==> Using Bun version 1.1.0 (default)
+2025-05-18T13:42:29.074063497Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-18T13:42:29.140102552Z ==> Running build command 'npm install express pg multer sharp cookie-parser'...
+2025-05-18T13:42:31.185228476Z 
+2025-05-18T13:42:31.185254046Z up to date, audited 634 packages in 2s
+2025-05-18T13:42:31.18550207Z 
+2025-05-18T13:42:31.18551626Z 183 packages are looking for funding
+2025-05-18T13:42:31.185528491Z   run `npm fund` for details
+2025-05-18T13:42:31.208131108Z 
+2025-05-18T13:42:31.208151049Z 7 vulnerabilities (2 moderate, 5 high)
+2025-05-18T13:42:31.208153449Z 
+2025-05-18T13:42:31.208155909Z To address issues that do not require attention, run:
+2025-05-18T13:42:31.208157778Z   npm audit fix
+2025-05-18T13:42:31.208159458Z 
+2025-05-18T13:42:31.208161129Z To address all issues (including breaking changes), run:
+2025-05-18T13:42:31.208163799Z   npm audit fix --force
+2025-05-18T13:42:31.208165379Z 
+2025-05-18T13:42:31.208167789Z Run `npm audit` for details.
+2025-05-18T13:44:51.748999944Z ==> Uploading build...
+2025-05-18T13:47:27.59385191Z ==> Uploaded in 28.2s. Compression took 127.7s
+2025-05-18T13:47:27.703175811Z ==> Build successful 🎉
+2025-05-18T13:47:48.255554073Z ==> Deploying...
+2025-05-18T13:48:12.310980788Z ==> Running 'node susibert-app.cjs'
+2025-05-18T13:48:13.530994745Z ✅ Datenbank-Verbindung erfolgreich
+2025-05-18T13:48:13.658400636Z Tabelle 'locations' existiert: true
+2025-05-18T13:48:13.660008282Z 
+2025-05-18T13:48:13.660019662Z       ===================================
+2025-05-18T13:48:13.660021872Z       🌍 Susibert Server läuft auf Port 10000
+2025-05-18T13:48:13.660023682Z       ===================================
+2025-05-18T13:48:13.660025832Z       
+2025-05-18T13:48:19.524265105Z ==> Your service is live 🎉
