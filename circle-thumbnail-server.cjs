@@ -1533,7 +1533,7 @@ app.get('/', requireAuth, (req, res) => {
             editMode = !editMode;
             
             if (editMode) {
-              this.textContent = 'X';
+              this.textContent = 'x';
               this.classList.add('primary');
               document.getElementById('edit-mode-indicator').style.display = 'block';
             } else {
