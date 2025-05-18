@@ -1396,15 +1396,19 @@ app.get('/', requireAuth, (req, res) => {
           }
         
           // Temporären Marker setzen (mit Plus-Symbol)
-          const tempMarkerHtml = `
-            <div class="temp-pin-container">
-              <div class="temp-pin-body"></div>
-              <div class="temp-pin-circle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              </div>
-              <div class="temp-pin-pointer"></div>
-            </div>
-          `;
+          const tempMarkerHtml = [
+            '<div class="temp-pin-container">',
+              '<div class="temp-pin-body"></div>',
+              '<div class="temp-pin-circle">',
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+                  '<line x1="12" y1="5" x2="12" y2="19"></line>',
+                  '<line x1="5" y1="12" x2="19" y2="12"></line>',
+                '</svg>',
+              '</div>',
+              '<div class="temp-pin-pointer"></div>',
+            '</div>'
+          ].join('');
+
         
           const tempIcon = L.divIcon({
             html: tempMarkerHtml,
