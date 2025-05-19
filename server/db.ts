@@ -1,64 +1,64 @@
-
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import * as schema from "@shared/schema";
+import * as schema from '@shared/schema';
 
-const DATABASE_URL = process.env.DATABASE_URL?.trim();
+// Datenbank-URL aus Umgebungsvariablen
+const rawUrl = process.env.DATABASE_URL?.trim();
 
-if (!DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is not set!");
+if (!rawUrl) {
+  throw new Error('❌ DATABASE_URL Umgebungsvariable nicht gesetzt!');
 }
 
-console.log('Attempting to connect to database:', 
-  DATABASE_URL.replace(/:[^:]*@/, ':***@')
+// Maskierte Ausgabe für Logs
+console.log(
+  '📡 Verbindung zur Datenbank wird versucht:',
+  rawUrl.replace(/:[^:]*@/, ':***@')
 );
 
+// Pool konfigurieren
 export const pool = new Pool({
-  connectionString: DATABASE_URL,
+  connectionString: rawUrl,
   ssl: {
-    rejectUnauthorized: false,
-    sslmode: 'require'
+    rejectUnauthorized: false
   },
-  max: 20,
+  max: 5,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-  keepAlive: true
+  connectionTimeoutMillis: 5000
 });
 
+// Fehlerbehandlung
 pool.on('error', (err) => {
-  console.error('Unexpected database error:', err.message);
+  console.error('❌ Unerwarteter Pool-Fehler:', err.message);
 });
 
-export const db = drizzle(pool, { schema });
-
-const initDb = async () => {
+// Verbindung testen
+(async () => {
   try {
-    await pool.query(`
-      DROP TABLE IF EXISTS locations;
-      CREATE TABLE locations (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        date TEXT NOT NULL,
-        description TEXT NOT NULL,
-        highlight TEXT NOT NULL,
-        latitude TEXT NOT NULL,
-        longitude TEXT NOT NULL,
-        image TEXT NOT NULL,
-        image_type TEXT,
-        image_data TEXT,
-        thumbnail_data TEXT
-      );
-      
-      CREATE TABLE IF NOT EXISTS access_codes (
-        id SERIAL PRIMARY KEY,
-        code TEXT NOT NULL UNIQUE,
-        active BOOLEAN NOT NULL DEFAULT true
+    const result = await pool.query('SELECT NOW()');
+    console.log('✅ Datenbankverbindung erfolgreich:', result.rows[0]);
+  } catch (err: any) {
+    console.error('❌ Fehler bei der Datenbankverbindung:', err.message);
+    if (err.code) console.error('Fehlercode:', err.code);
+    if (err.errno) console.error('Fehlernummer:', err.errno);
+    if (err.syscall) console.error('Systemaufruf:', err.syscall);
+    if (err.hostname) console.error('Hostname:', err.hostname);
+    process.exit(1); // Sofort beenden bei Verbindungsfehler
+  }
+
+  // Prüfen, ob Tabelle "locations" existiert
+  try {
+    const check = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'locations'
       );
     `);
-    console.log('✅ Database tables initialized');
-  } catch (err) {
-    console.error('❌ Error initializing database tables:', err);
+    const exists = check.rows[0].exists;
+    console.log(`📦 Tabelle 'locations' existiert: ${exists}`);
+  } catch (err: any) {
+    console.error('❌ Fehler beim Prüfen der Tabellen:', err.message);
   }
-};
+})();
 
-initDb();
+// Drizzle ORM initialisieren
+export const db = drizzle(pool, { schema });
